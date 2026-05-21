@@ -82,7 +82,7 @@ display:flex;gap:4px;align-items:center}
 /* RSI */
 .rsi-bar-bg{position:relative;height:5px;background:#151a28;border-radius:3px}
 .rsi-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
-.rsi-hint{display:flex;justify-between:space-between;margin-top:2px}
+.rsi-hint{display:flex;justify-content:space-between;margin-top:2px}
 .rsi-hint span{font-size:11px;color:#8090b0}
 
 /* IND GRID */
@@ -150,149 +150,63 @@ position:relative;margin:5px 0 3px}
       <div class="hdr-lbl">KRX · ADVANCED AI ANALYSIS v2.0</div>
       <div class="hdr-title">국내 주식 고급 분석</div>
     </div>
-    <button class="btn btn-g" id="mainBtn">
+    <button class="btn btn-g" id="mainBtn" onclick="startAnalysis()">
       <span id="btnIcon">✦</span>
-      <span id="btnText">분석 가동 중</span>
+      <span id="btnText">분석 시작</span>
     </button>
   </div>
   <div class="hdr-meta">
-    <span class="badge" id="mktBadge">💰 자산: 1,434만</span>
-    <span class="badge" style="color:var(--yellow)">💵 예수금 73%</span>
-    <span class="badge">⏰ 5분 자동 동기화</span>
+    <span class="badge" id="mktBadge">KRX 시장감시</span>
+    <span class="badge" id="updBadge">v2.0</span>
+    <span class="badge">⏰ 평일 07:30 알람</span>
+  </div>
+  <div class="prog-wrap" id="progWrap" style="display:none">
+    <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
 </div>
 
 <div class="main" id="main">
 
-  <!-- [1] 삼성전자 카드 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">005930</div>
-      <div class="c-name">삼성전자</div>
-    </div>
-    <div class="c-body">
-      <div class="acc-box">
-        <span class="acc-lbl">나의 계좌 현황</span>
-        <span class="acc-val">7주 (평단 276,010원)</span>
-      </div>
-
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">88점 (탐욕)</div></div>
-        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
-      </div>
-
-      <div class="sec-sub">AI 탐욕 지수 게이지</div>
-      <div class="fear-wrap">
-        <div class="fear-bar"><div class="fear-needle" style="left: 88%"></div></div>
-      </div>
-
-      <div class="sec-sub">상대강도지수 (RSI)</div>
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width: 76%; background: var(--red);"></div></div>
-      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (76.2)</span></div>
-
-      <div class="sec-sub">🚨 목표 매도 구간 (분할 익절)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (3주 익절)</div><div class="cell-val">315,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (2주 익절)</div><div class="cell-val">323,500 원</div></div>
-      </div>
-
-      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수 그물)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (3주 줍기)</div><div class="cell-val">282,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (20주 장전)</div><div class="cell-val">263,000 원</div></div>
-      </div>
-
-      <div class="sec-sub">메이저 수급 동향</div>
-      <div class="for-box" style="background: #111928;">
-        <div class="for-row"><span class="for-lbl">외국인 기관 수급</span><span class="for-trend" style="color:var(--red)">대량 순매수 지속 유입</span></div>
-      </div>
-
-      <div class="sec-sub">기술적 차트 패턴</div>
-      <div class="pattern-wrap">
-        <span class="ptag" style="color:var(--red); background:#ff4d6d15">볼린저밴드 상단 돌파</span>
-        <span class="ptag" style="color:var(--blue); background:#4db8ff15">정배열 골든크로스</span>
-      </div>
-
-      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
-        <div class="contra-title">💡 김상무의 역발상 분석 의견</div>
-        <div class="contra-txt">노사 타결 호재로 개미들과 AI의 광적인 추격 매세가 발생합니다. 탐욕 구간에 동참하지 마시고 Target 1 도달 시 3주를 기계적으로 익절하십시오. 최하단 S2(263,000원)에는 블랙스완 대비 20주 사냥용 그물이 완벽히 예약되어 있습니다.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- [2] SK하이닉스 카드 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">000660</div>
-      <div class="c-name">SK하이닉스</div>
-    </div>
-    <div class="c-body">
-      <div class="acc-box">
-        <span class="acc-lbl">나의 계좌 현황</span>
-        <span class="acc-val">1주 (평단 1,915,500원)</span>
-      </div>
-
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">92점 (초과열)</div></div>
-        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
-      </div>
-
-      <div class="sec-sub">🚨 목표 매도 구간 (전량 익절)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (1주 전량)</div><div class="cell-val">2,150,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (오버슈팅)</div><div class="cell-val">2,300,000 원</div></div>
-      </div>
-
-      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수 그물)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (1주 재진입)</div><div class="cell-val">1,810,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (투매 사냥)</div><div class="cell-val">1,650,000 원</div></div>
-      </div>
-
-      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
-        <div class="contra-title">💡 김상무의 역발상 분석 의견</div>
-        <div class="contra-txt">글로벌 반도체 숏스퀴즈 광풍으로 폭등 중입니다. 지금 불타기하는 알고리즘은 상투를 잡게 됩니다. 2,150,000원 터치 시 무조건 1주를 전량 수익실현하여 완벽하게 현금을 확보하십시오.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- [3] LG전자 카드 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">066570</div>
-      <div class="c-name">LG전자</div>
-    </div>
-    <div class="c-body">
-      <div class="acc-box">
-        <span class="acc-lbl">나의 계좌 현황</span>
-        <span class="acc-val" style="color:var(--yellow)">미보유 (신규 사냥 대기)</span>
-      </div>
-
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">보조 지표</div><div class="cell-val" style="color:var(--orange)">RSI 72.93</div></div>
-        <div class="cell"><div class="cell-lbl">시장 상태</div><div class="cell-val" style="color:var(--purple)">대체시장 초과열</div></div>
-      </div>
-
-      <div class="sec-sub">🛡️ 지지 구간 (신규 진입 타점)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">1차 매수 (5주 줍기)</div><div class="cell-val">174,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">2차 매수 (5주 완성)</div><div class="cell-val">165,000 원</div></div>
-      </div>
-
-      <div class="sec-sub">🔮 중장기 최종 매도 목표가</div>
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">목표 상단 1</div><div class="cell-val">260,000 원</div></div>
-        <div class="cell"><div class="cell-lbl">목표 상단 2</div><div class="cell-val">300,000 원</div></div>
-      </div>
-
-      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
-        <div class="contra-title">💡 역발상 분석 의견</div>
-        <div class="contra-txt">가전 로봇 재평가로 야간 시장(NXT)까지 불이 붙었습니다. 단기 상투권이므로 월요일 오전 갭상승 시 절대 추격하지 마십시오. 장중 광기가 식고 투매 물량이 쏟아져 174,000원을 터치할 때만 진입합니다.</div>
-      </div>
-    </div>
+  <!-- ✦ 대시보드 진입 대기 첫 화면 ✦ -->
+  <div class="start" id="startView">
+    <div class="spinner"></div>
+    <div class="ld-title" style="font-size: 16px; margin-bottom: 8px;">고급 인공지능 분석 시스템 대기 중</div>
+    <div class="ld-sub">상단의 [분석 시작] 버튼을 터치하시면<br>실시간 백엔드 데이터 엔진과 연동을 시작합니다.</div>
   </div>
 
 </div>
+
+<script>
+// 클로드가 설계한 첫 화면 작동용 기본 스크립트 고정
+function startAnalysis() {
+    const btn = document.getElementById('mainBtn');
+    const wrap = document.getElementById('progWrap');
+    const fill = document.getElementById('progFill');
+    const startView = document.getElementById('startView');
+    
+    btn.disabled = true;
+    document.getElementById('btnText').innerText = "연동 중...";
+    document.getElementById('btnIcon').className = "spin";
+    wrap.style.display = "block";
+    
+    let width = 0;
+    const interval = setInterval(() => {
+        if(width >= 100) {
+            clearInterval(interval);
+            document.getElementById('btnText').innerText = "가동 완료";
+            document.getElementById('btnIcon').className = "";
+            startView.innerHTML = `
+                <div class="err-box" style="background:#0a101d; border-color:var(--blue)">
+                    <div class="err-title" style="color:var(--blue)">✅ 동기화 성공</div>
+                    <div class="err-msg" style="color:#aabbcc">클라우드 데이터 엔진과 성공적으로 연결되었습니다. 이제 파이썬 파일(cloud_engine.py)이 전달하는 데이터가 이 자리에 실시간 카드로 표출됩니다.</div>
+                </div>`;
+        } else {
+            width += 10;
+            fill.style.width = width + "%";
+        }
+    }, 150);
+}
+</script>
 
 </body>
 </html>
