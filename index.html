@@ -28,10 +28,23 @@ padding:14px 16px 10px;position:sticky;top:0;z-index:100}
 .btn{display:inline-flex;align-items:center;gap:5px;border-radius:11px;padding:8px 14px;
 font-size:12px;font-weight:900;cursor:pointer;border:none;transition:all .2s}
 .btn-g{background:linear-gradient(135deg,#071a0e,#0c2418);border:1px solid #00e67645;color:var(--green)}
-.prog-wrap{height:3px;background:#1e2c48;border-radius:2px;margin-top:99px;overflow:hidden}
+.btn-g:disabled{background:#0a1410;border-color:#1e3020;color:#2a4030;cursor:not-allowed}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+.prog-wrap{height:3px;background:#1e2c48;border-radius:2px;margin-top:9px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:2px;transition:width .5s ease}
 
 /* MAIN */
 .main{padding:12px}
+.start{text-align:center;padding:60px 20px;animation:up .3s ease}
+.loading{text-align:center;padding:50px 0}
+.spinner{width:44px;height:44px;border:3px solid #4a5a74;border-radius:50%;
+animation:spin .7s linear infinite;margin:0 auto 14px}
+.ld-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.ld-sub{font-size:11px;color:#7a9abc;line-height:1.9}
+.proxy-st{font-size:12px;color:#7a9abc;margin-top:5px}
+.err-box{background:#130408;border:1px solid #ff4d6d28;border-radius:12px;padding:14px;margin-bottom:12px}
+.err-title{color:var(--red);font-size:13px;font-weight:800;margin-bottom:6px}
+.err-msg{color:#a0b0c8;font-size:11px;line-height:1.7;margin-bottom:10px;white-space:pre-wrap;word-break:break-all}
 
 /* CARD */
 .card{margin-bottom:20px;animation:up .3s ease}
@@ -49,43 +62,84 @@ display:flex;gap:4px;align-items:center}
 .sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:8px 0 5px;text-transform:uppercase}
 
 /* PRICE */
+.p-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.p-big{font-size:30px;font-weight:900;font-family:monospace;letter-spacing:-2px;line-height:1}
+.p-chg{font-size:12px;font-weight:700;padding-bottom:2px}
 .grid2{display:flex;gap:7px;margin-bottom:7px}
 .grid3{display:flex;gap:6px;margin-bottom:7px}
 .cell{flex:1;background:#0a0f1c;border-radius:8px;padding:6px 8px}
 .cell-lbl{font-size:11px;color:#7a9abc;margin-bottom:2px}
 .cell-val{font-size:11px;font-weight:700;font-family:monospace}
+.src{font-size:11px;color:#7a9abc;display:flex;gap:3px;align-items:center;margin-top:6px}
 
 /* SIGNAL SCORE BAR */
 .score-wrap{margin-bottom:10px}
 .score-bar-bg{height:8px;background:#151a28;border-radius:4px;position:relative;overflow:hidden}
-.score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--purple));width:85%}
+.score-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
 .score-labels{display:flex;justify-content:space-between;margin-top:3px}
 .score-labels span{font-size:11px;color:#8090b0}
 
 /* RSI */
 .rsi-bar-bg{position:relative;height:5px;background:#151a28;border-radius:3px}
-.rsi-bar-fill{height:100%;border-radius:3px;background:var(--orange);width:72%}
-.rsi-hint{display:flex;justify-content:space-between;margin-top:2px}
+.rsi-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.rsi-hint{display:flex;justify-between:space-between;margin-top:2px}
 .rsi-hint span{font-size:11px;color:#8090b0}
+
+/* IND GRID */
+.ind-grid{display:flex;gap:6px;margin-bottom:5px}
+.ind-cell{flex:1;background:#0a0f1c;border-radius:7px;padding:7px 4px;text-align:center}
+.ind-lbl{font-size:11px;color:#8090b0;margin-bottom:2px}
+.ind-val{font-size:11px;font-weight:700;font-family:monospace}
+
+/* IROW */
+.irow{display:flex;justify-content:space-between;align-items:flex-start;
+padding:5px 0;border-bottom:1px solid #111928;gap:6px}
+.irow-lbl{font-size:12px;color:#80a0c8;min-width:90px;flex-shrink:0;padding-top:1px}
+.irow-r{text-align:right}
+.irow-val{font-size:12px;font-weight:700;font-family:monospace}
+.irow-cmt{font-size:12px;color:#7090b0;margin-top:1px;line-height:1.35}
+
+/* OPINION */
+.op-box{display:inline-flex;align-items:center;gap:12px;border-radius:11px;padding:10px 24px}
+.op-ico{font-size:26px}
+.op-txt{font-size:26px;font-weight:900;letter-spacing:3px}
+
+/* CHIPS */
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{flex:1;min-width:74px;border-radius:9px;padding:8px 6px;text-align:center}
+.chip-lbl{font-size:11px;margin-bottom:2px;opacity:.7}
+.chip-val{font-size:13px;font-weight:800;font-family:monospace}
+.chip-note{font-size:11px;color:#80a0c8;margin-top:2px}
 
 /* PATTERN TAGS */
 .pattern-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px}
-.ptag{font-size:11px;border-radius:20px;padding:2px 8px;font-weight:700;background:#ff4d6d15;color:var(--red)}
+.ptag{font-size:12px;border-radius:20px;padding:3px 9px;font-weight:700}
 
 /* CONTRARIAN BOX */
-.contra-box{border-radius:9px;padding:9px 11px;margin-bottom:8px;background:#1e2c4820;border-left:3px solid var(--blue)}
-.contra-title{font-size:12px;font-weight:800;margin-bottom:4px;color:var(--blue);display:flex;gap:5px;align-items:center}
+.contra-box{border-radius:9px;padding:9px 11px;margin-bottom:8px}
+.contra-title{font-size:12px;font-weight:800;margin-bottom:4px;display:flex;gap:5px;align-items:center}
 .contra-txt{font-size:11px;color:#a0b0c8;line-height:1.5}
 
 /* FOREIGN */
-.for-box{border-radius:7px;padding:8px 11px;margin-bottom:8px;background:#ffffff03}
+.for-box{border-radius:7px;padding:8px 11px;margin-bottom:8px}
 .for-row{display:flex;justify-content:space-between;margin-bottom:3px}
 .for-lbl{font-size:12px;color:#80a0c8}
-.for-trend{font-size:11px;font-weight:700;color:var(--red)}
+.for-trend{font-size:11px;font-weight:700}
+.for-cmt{font-size:11px;color:#8a9ab6;line-height:1.5}
 
-.acc-box { background: #0f1524; border: 1px dashed #304269; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 12px; }
-.acc-lbl { color: #8a9ab6; }
-.acc-val { font-weight: 700; color: var(--blue); }
+/* BULLETS */
+.bul{display:flex;gap:7px;margin-bottom:6px}
+.bul-dot{flex-shrink:0;line-height:1.6;font-size:11px}
+.bul-txt{font-size:11px;color:#a0b0c8;line-height:1.6}
+
+.neutral-msg{font-size:11px;color:#a0b0c0;line-height:1.7}
+.footer{text-align:center;font-size:12px;color:#4a5a74;line-height:1.9;padding:4px 0 8px;margin-top:4px}
+
+/* FEAR GAUGE */
+.fear-wrap{margin-bottom:8px}
+.fear-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#00e676,#ffd166,#ff4d6d);
+position:relative;margin:5px 0 3px}
+.fear-needle{position:absolute;top:-3px;width:2px;height:12px;background:#fff;border-radius:1px;transform:translateX(-50%)}
 </style>
 </head>
 <body>
@@ -96,17 +150,21 @@ display:flex;gap:4px;align-items:center}
       <div class="hdr-lbl">KRX · ADVANCED AI ANALYSIS v2.0</div>
       <div class="hdr-title">국내 주식 고급 분석</div>
     </div>
+    <button class="btn btn-g" id="mainBtn">
+      <span id="btnIcon">✦</span>
+      <span id="btnText">분석 가동 중</span>
+    </button>
   </div>
   <div class="hdr-meta">
-    <span class="badge">💰 총자산: 1,434만</span>
-    <span class="badge" style="color:var(--yellow)">💵 예수금 비중 73%</span>
+    <span class="badge" id="mktBadge">💰 자산: 1,434만</span>
+    <span class="badge" style="color:var(--yellow)">💵 예수금 73%</span>
     <span class="badge">⏰ 5분 자동 동기화</span>
   </div>
 </div>
 
 <div class="main" id="main">
 
-  <!-- 1. 삼성전자 -->
+  <!-- [1] 삼성전자 카드 -->
   <div class="card">
     <div class="c-hdr">
       <div class="c-code">005930</div>
@@ -119,51 +177,50 @@ display:flex;gap:4px;align-items:center}
       </div>
 
       <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">88점 (과열)</div></div>
+        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">88점 (탐욕)</div></div>
         <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
       </div>
 
-      <div class="sec-sub">AI 종합 점수 게이지</div>
-      <div class="score-wrap">
-        <div class="score-bar-bg"><div class="score-bar-fill"></div></div>
-        <div class="score-labels"><span>공포</span><span>탐욕(88)</span></div>
+      <div class="sec-sub">AI 탐욕 지수 게이지</div>
+      <div class="fear-wrap">
+        <div class="fear-bar"><div class="fear-needle" style="left: 88%"></div></div>
       </div>
 
       <div class="sec-sub">상대강도지수 (RSI)</div>
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill"></div></div>
-      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (72)</span></div>
+      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width: 76%; background: var(--red);"></div></div>
+      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (76.2)</span></div>
 
       <div class="sec-sub">🚨 목표 매도 구간 (분할 익절)</div>
       <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (3주)</div><div class="cell-val" style="font-size:13px">315,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (2주)</div><div class="cell-val" style="font-size:13px">323,500 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (3주 익절)</div><div class="cell-val">315,000 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (2주 익절)</div><div class="cell-val">323,500 원</div></div>
       </div>
 
-      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수)</div>
+      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수 그물)</div>
       <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (3주)</div><div class="cell-val" style="font-size:13px">282,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 지지선 (20주)</div><div class="cell-val" style="font-size:13px">263,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (3주 줍기)</div><div class="cell-val">282,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (20주 장전)</div><div class="cell-val">263,000 원</div></div>
       </div>
 
       <div class="sec-sub">메이저 수급 동향</div>
-      <div class="for-box">
-        <div class="for-row"><span class="for-lbl">외국인 기관 트렌드</span><span class="for-trend">대량 순매수 지속 유입</span></div>
+      <div class="for-box" style="background: #111928;">
+        <div class="for-row"><span class="for-lbl">외국인 기관 수급</span><span class="for-trend" style="color:var(--red)">대량 순매수 지속 유입</span></div>
       </div>
 
       <div class="sec-sub">기술적 차트 패턴</div>
       <div class="pattern-wrap">
-        <span class="ptag">볼린저밴드 상단 돌파</span>
+        <span class="ptag" style="color:var(--red); background:#ff4d6d15">볼린저밴드 상단 돌파</span>
         <span class="ptag" style="color:var(--blue); background:#4db8ff15">정배열 골든크로스</span>
       </div>
 
-      <div class="contra-box">
-        <div class="contra-title">💡 역발상 분석 의견</div>
-        <div class="contra-txt">노사 타결 호재로 개미들과 AI들의 추격 매세가 발생 중입니다. 탐욕 구간에 동참하지 마시고 Target 1 도달 시 3주를 분할 익절하십시오. S2 라인인 263,000원에는 대량 사냥용 그물이 예약되어 있습니다.</div>
+      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
+        <div class="contra-title">💡 김상무의 역발상 분석 의견</div>
+        <div class="contra-txt">노사 타결 호재로 개미들과 AI의 광적인 추격 매세가 발생합니다. 탐욕 구간에 동참하지 마시고 Target 1 도달 시 3주를 기계적으로 익절하십시오. 최하단 S2(263,000원)에는 블랙스완 대비 20주 사냥용 그물이 완벽히 예약되어 있습니다.</div>
       </div>
     </div>
   </div>
 
-  <!-- 2. SK하이닉스 -->
+  <!-- [2] SK하이닉스 카드 -->
   <div class="card">
     <div class="c-hdr">
       <div class="c-code">000660</div>
@@ -182,24 +239,24 @@ display:flex;gap:4px;align-items:center}
 
       <div class="sec-sub">🚨 목표 매도 구간 (전량 익절)</div>
       <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (1주)</div><div class="cell-val" style="font-size:13px">2,150,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (최고점)</div><div class="cell-val" style="font-size:13px">2,300,000 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (1주 전량)</div><div class="cell-val">2,150,000 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (오버슈팅)</div><div class="cell-val">2,300,000 원</div></div>
       </div>
 
-      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수)</div>
+      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수 그물)</div>
       <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (1주)</div><div class="cell-val" style="font-size:13px">1,810,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 지지선 (최하단)</div><div class="cell-val" style="font-size:13px">1,650,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (1주 재진입)</div><div class="cell-val">1,810,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (투매 사냥)</div><div class="cell-val">1,650,000 원</div></div>
       </div>
 
-      <div class="contra-box">
-        <div class="contra-title">💡 역발상 분석 의견</div>
+      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
+        <div class="contra-title">💡 김상무의 역발상 분석 의견</div>
         <div class="contra-txt">글로벌 반도체 숏스퀴즈 광풍으로 폭등 중입니다. 지금 불타기하는 알고리즘은 상투를 잡게 됩니다. 2,150,000원 터치 시 무조건 1주를 전량 수익실현하여 완벽하게 현금을 확보하십시오.</div>
       </div>
     </div>
   </div>
 
-  <!-- 3. LG전자 -->
+  <!-- [3] LG전자 카드 -->
   <div class="card">
     <div class="c-hdr">
       <div class="c-code">066570</div>
@@ -218,8 +275,8 @@ display:flex;gap:4px;align-items:center}
 
       <div class="sec-sub">🛡️ 지지 구간 (신규 진입 타점)</div>
       <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">1차 매수 (5주)</div><div class="cell-val" style="font-size:13px">174,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">2차 매수 (5주)</div><div class="cell-val" style="font-size:13px">165,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">1차 매수 (5주 줍기)</div><div class="cell-val">174,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">2차 매수 (5주 완성)</div><div class="cell-val">165,000 원</div></div>
       </div>
 
       <div class="sec-sub">🔮 중장기 최종 매도 목표가</div>
@@ -228,7 +285,7 @@ display:flex;gap:4px;align-items:center}
         <div class="cell"><div class="cell-lbl">목표 상단 2</div><div class="cell-val">300,000 원</div></div>
       </div>
 
-      <div class="contra-box">
+      <div class="contra-box" style="background: #111928; border-left: 3px solid var(--blue);">
         <div class="contra-title">💡 역발상 분석 의견</div>
         <div class="contra-txt">가전 로봇 재평가로 야간 시장(NXT)까지 불이 붙었습니다. 단기 상투권이므로 월요일 오전 갭상승 시 절대 추격하지 마십시오. 장중 광기가 식고 투매 물량이 쏟아져 174,000원을 터치할 때만 진입합니다.</div>
       </div>
