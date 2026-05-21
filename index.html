@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>주식 고급 분석 - 총괄대표님 최종 요새</title>
+<title>주식 고급 분석</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#050810;--c2:#080d18;--border:#1e2c48;
@@ -25,10 +25,16 @@ padding:14px 16px 10px;position:sticky;top:0;z-index:100}
 .hdr-title{font-size:19px;font-weight:900}
 .hdr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .badge{font-size:12px;background:#ffffff08;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:#aabbcc}
+.btn{display:inline-flex;align-items:center;gap:5px;border-radius:11px;padding:8px 14px;
+font-size:12px;font-weight:900;cursor:pointer;border:none;transition:all .2s}
+.btn-g{background:linear-gradient(135deg,#071a0e,#0c2418);border:1px solid #00e67645;color:var(--green)}
+.prog-wrap{height:3px;background:#1e2c48;border-radius:2px;margin-top:99px;overflow:hidden}
 
-/* MAIN & CARD */
+/* MAIN */
 .main{padding:12px}
-.card{margin-bottom:25px;animation:up .3s ease}
+
+/* CARD */
+.card{margin-bottom:20px;animation:up .3s ease}
 .c-hdr{background:linear-gradient(135deg,#0f1830,#192040);border:1px solid var(--border);
 border-bottom:none;border-radius:14px 14px 0 0;padding:12px 14px 10px}
 .c-code{font-size:11px;color:#7a9abc;font-family:monospace;margin-bottom:2px}
@@ -38,48 +44,44 @@ border-radius:0 0 14px 14px;padding:10px}
 
 /* SECTION */
 .sec{border-radius:0 10px 10px 0;padding:11px 13px;margin-bottom:9px;background:var(--c2)}
-.sec-ttl{font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px;display:flex;gap:4px;align-items:center}
-.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:12px 0 5px;text-transform:uppercase;font-weight:800}
+.sec-ttl{font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px;
+display:flex;gap:4px;align-items:center}
+.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:8px 0 5px;text-transform:uppercase}
 
-/* PRICE & GAUGES */
+/* PRICE */
 .grid2{display:flex;gap:7px;margin-bottom:7px}
+.grid3{display:flex;gap:6px;margin-bottom:7px}
 .cell{flex:1;background:#0a0f1c;border-radius:8px;padding:6px 8px}
 .cell-lbl{font-size:11px;color:#7a9abc;margin-bottom:2px}
 .cell-val{font-size:11px;font-weight:700;font-family:monospace}
 
-.score-bar-bg{height:8px;background:#151a28;border-radius:4px;position:relative;overflow:hidden;margin:5px 0}
-.score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--purple));width:75%}
-.rsi-bar-bg{position:relative;height:5px;background:#151a28;border-radius:3px;margin:5px 0}
-.rsi-bar-fill{height:100%;border-radius:3px;background:var(--orange);width:72%}
-.score-labels, .rsi-hint{display:flex;justify-content:space-between;font-size:11px;color:#8090b0}
+/* SIGNAL SCORE BAR */
+.score-wrap{margin-bottom:10px}
+.score-bar-bg{height:8px;background:#151a28;border-radius:4px;position:relative;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--purple));width:85%}
+.score-labels{display:flex;justify-content:space-between;margin-top:3px}
+.score-labels span{font-size:11px;color:#8090b0}
 
-/* CHIPS & TAGS */
+/* RSI */
+.rsi-bar-bg{position:relative;height:5px;background:#151a28;border-radius:3px}
+.rsi-bar-fill{height:100%;border-radius:3px;background:var(--orange);width:72%}
+.rsi-hint{display:flex;justify-content:space-between;margin-top:2px}
+.rsi-hint span{font-size:11px;color:#8090b0}
+
+/* PATTERN TAGS */
 .pattern-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px}
-.ptag{font-size:11px;border-radius:20px;padding:2px 8px;font-weight:700;background:#ff4d6d20;color:var(--red)}
-.contra-box{border-radius:9px;padding:9px 11px;margin-bottom:8px;background:#1e2c4830;border-left:3px solid var(--blue)}
-.contra-title{font-size:12px;font-weight:800;margin-bottom:4px;color:var(--blue)}
+.ptag{font-size:11px;border-radius:20px;padding:2px 8px;font-weight:700;background:#ff4d6d15;color:var(--red)}
+
+/* CONTRARIAN BOX */
+.contra-box{border-radius:9px;padding:9px 11px;margin-bottom:8px;background:#1e2c4820;border-left:3px solid var(--blue)}
+.contra-title{font-size:12px;font-weight:800;margin-bottom:4px;color:var(--blue);display:flex;gap:5px;align-items:center}
 .contra-txt{font-size:11px;color:#a0b0c8;line-height:1.5}
 
-.for-box{border-radius:7px;padding:8px 11px;margin-bottom:8px;background:#ffffff04}
-.for-row{display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px}
-
-/* 🚨 총괄대표님 지시사항: 지지/매도구간만 압도적으로 강조하는 네온 보드 */
-.grid-highlight { display: flex; gap: 8px; margin: 10px 0 15px 0; }
-.cell-target {
-    flex: 1; background: linear-gradient(135deg, #25050f, #0f0206);
-    border: 2px solid var(--red); border-radius: 12px; padding: 12px 8px; text-align: center;
-    box-shadow: 0 0 12px rgba(255, 77, 109, 0.3); animation: pulse 2.5s infinite;
-}
-.cell-target .c-lbl { font-size: 11px; color: #ff8599; font-weight: 800; margin-bottom: 4px; }
-.cell-target .c-val { font-size: 18px; color: #ffffff; font-weight: 900; font-family: monospace; }
-
-.cell-support {
-    flex: 1; background: linear-gradient(135deg, #031c0d, #010c05);
-    border: 2px solid var(--green); border-radius: 12px; padding: 12px 8px; text-align: center;
-    box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
-}
-.cell-support .c-lbl { font-size: 11px; color: #66ffb3; font-weight: 800; margin-bottom: 4px; }
-.cell-support .c-val { font-size: 18px; color: #ffffff; font-weight: 900; font-family: monospace; }
+/* FOREIGN */
+.for-box{border-radius:7px;padding:8px 11px;margin-bottom:8px;background:#ffffff03}
+.for-row{display:flex;justify-content:space-between;margin-bottom:3px}
+.for-lbl{font-size:12px;color:#80a0c8}
+.for-trend{font-size:11px;font-weight:700;color:var(--red)}
 
 .acc-box { background: #0f1524; border: 1px dashed #304269; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 12px; }
 .acc-lbl { color: #8a9ab6; }
@@ -91,65 +93,72 @@ border-radius:0 0 14px 14px;padding:10px}
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <div class="hdr-lbl">NEXTRADE · FULL DATA CONTRARIAN v3.0</div>
-      <div class="hdr-title">총괄대표님 종합 대시보드</div>
+      <div class="hdr-lbl">KRX · ADVANCED AI ANALYSIS v2.0</div>
+      <div class="hdr-title">국내 주식 고급 분석</div>
     </div>
   </div>
   <div class="hdr-meta">
     <span class="badge">💰 총자산: 1,434만</span>
     <span class="badge" style="color:var(--yellow)">💵 예수금 비중 73%</span>
-    <span class="badge">⏰ 5분 무인 동기화 중</span>
+    <span class="badge">⏰ 5분 자동 동기화</span>
   </div>
 </div>
 
-<div class="main">
+<div class="main" id="main">
 
   <!-- 1. 삼성전자 -->
   <div class="card">
     <div class="c-hdr">
-      <div class="c-code">005930 · KOSPI</div>
+      <div class="c-code">005930</div>
       <div class="c-name">삼성전자</div>
     </div>
     <div class="c-body">
       <div class="acc-box">
-        <span class="acc-lbl">나의 보유 계좌</span>
+        <span class="acc-lbl">나의 계좌 현황</span>
         <span class="acc-val">7주 (평단 276,010원)</span>
       </div>
 
-      <!-- 클로드 원본 데이터 무대 대폭 원상복구 -->
       <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 스코어</div><div class="cell-val" style="color:var(--purple)">88점 과열</div></div>
-        <div class="cell"><div class="cell-lbl">종합 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
-      </div>
-      
-      <div class="sec-sub">📊 실시간 시장 심리 지표</div>
-      <div class="score-bar-bg"><div class="score-bar-fill"></div></div>
-      <div class="score-labels"><span>공포</span><span>탐욕(88)</span></div>
-
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width:76%"></div></div>
-      <div class="rsi-hint"><span>RSI 과매도</span><span>과매수(76.2)</span></div>
-
-      <!-- 🚨 대표님 강조 지시: 매도/지지 네온 보드판 진입 -->
-      <div class="sec-sub" style="color:var(--red)">🚨 기계적 분할 매도 타점 (과열 탈출)</div>
-      <div class="grid-highlight">
-        <div class="cell-target"><div class="c-lbl">Target 1 (3주 익절)</div><div class="c-val">315,000 원</div></div>
-        <div class="cell-target"><div class="c-lbl">Target 2 (2주 익절)</div><div class="c-val">323,500 원</div></div>
+        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">88점 (과열)</div></div>
+        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
       </div>
 
-      <div class="sec-sub" style="color:var(--green)">🛡️ 역발상 그물망 매수 타점 (폭락 사냥)</div>
-      <div class="grid-highlight">
-        <div class="cell-support"><div class="c-lbl">S1 지지 (3주 줍기)</div><div class="c-val">282,000 원</div></div>
-        <div class="cell-support"><div class="c-lbl">S2 최하단 (20주 스나이핑)</div><div class="c-val">263,000 원</div></div>
+      <div class="sec-sub">AI 종합 점수 게이지</div>
+      <div class="score-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill"></div></div>
+        <div class="score-labels"><span>공포</span><span>탐욕(88)</span></div>
       </div>
 
-      <!-- 수급 및 패턴 데이터 복원 -->
+      <div class="sec-sub">상대강도지수 (RSI)</div>
+      <div class="rsi-bar-bg"><div class="rsi-bar-fill"></div></div>
+      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (72)</span></div>
+
+      <div class="sec-sub">🚨 목표 매도 구간 (분할 익절)</div>
+      <div class="grid2">
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (3주)</div><div class="cell-val" style="font-size:13px">315,000 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (2주)</div><div class="cell-val" style="font-size:13px">323,500 원</div></div>
+      </div>
+
+      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수)</div>
+      <div class="grid2">
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (3주)</div><div class="cell-val" style="font-size:13px">282,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 지지선 (20주)</div><div class="cell-val" style="font-size:13px">263,000 원</div></div>
+      </div>
+
+      <div class="sec-sub">메이저 수급 동향</div>
       <div class="for-box">
-        <div class="for-row"><span class="for-lbl">외국인/기관 수급</span><span class="for-trend" style="color:var(--red)">대량 순매수 유입 중</span></div>
+        <div class="for-row"><span class="for-lbl">외국인 기관 트렌드</span><span class="for-trend">대량 순매수 지속 유입</span></div>
       </div>
-      <div class="pattern-wrap"><span class="ptag">볼린저밴드 상단 돌파</span><span class="ptag" style="color:var(--blue); background:#4db8ff20">정배열 오버슈팅</span></div>
+
+      <div class="sec-sub">기술적 차트 패턴</div>
+      <div class="pattern-wrap">
+        <span class="ptag">볼린저밴드 상단 돌파</span>
+        <span class="ptag" style="color:var(--blue); background:#4db8ff15">정배열 골든크로스</span>
+      </div>
+
       <div class="contra-box">
-        <div class="contra-title">💡 김상무의 역발상 코멘트</div>
-        <div class="contra-txt">노사 타결 호재로 장 초반 AI 알고리즘의 맹목적 추격 매세가 발생합니다. 흥분하지 마시고 Target 1 도달 시 3주를 기계적으로 익절하여 현금을 챙기십시오. 남은 2주는 35만 원 최종 랠리용입니다.</div>
+        <div class="contra-title">💡 역발상 분석 의견</div>
+        <div class="contra-txt">노사 타결 호재로 개미들과 AI들의 추격 매세가 발생 중입니다. 탐욕 구간에 동참하지 마시고 Target 1 도달 시 3주를 분할 익절하십시오. S2 라인인 263,000원에는 대량 사냥용 그물이 예약되어 있습니다.</div>
       </div>
     </div>
   </div>
@@ -157,42 +166,35 @@ border-radius:0 0 14px 14px;padding:10px}
   <!-- 2. SK하이닉스 -->
   <div class="card">
     <div class="c-hdr">
-      <div class="c-code">000660 · KOSPI</div>
+      <div class="c-code">000660</div>
       <div class="c-name">SK하이닉스</div>
     </div>
     <div class="c-body">
       <div class="acc-box">
-        <span class="acc-lbl">나의 보유 계좌</span>
+        <span class="acc-lbl">나의 계좌 현황</span>
         <span class="acc-val">1주 (평단 1,915,500원)</span>
       </div>
 
       <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 스코어</div><div class="cell-val" style="color:var(--purple)">92점 초과열</div></div>
-        <div class="cell"><div class="cell-lbl">종합 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
+        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">92점 (초과열)</div></div>
+        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
       </div>
 
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width:81%; background:var(--red)"></div></div>
-      <div class="rsi-hint"><span>RSI 지표</span><span>극대 과매수(81.5)</span></div>
-
-      <!-- 🚨 대표님 강조 지시: 매도/지지 네온 보드판 진입 -->
-      <div class="sec-sub" style="color:var(--red)">🚨 기계적 분할 매도 타점 (과열 탈출)</div>
-      <div class="grid-highlight">
-        <div class="cell-target"><div class="c-lbl">Target 1 (1주 전량익절)</div><div class="c-val">2,150,000 원</div></div>
-        <div class="cell-target"><div class="c-lbl">Target 2 (오버슈팅 한계)</div><div class="c-val">2,300,000 원</div></div>
+      <div class="sec-sub">🚨 목표 매도 구간 (전량 익절)</div>
+      <div class="grid2">
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (1주)</div><div class="cell-val" style="font-size:13px">2,150,000 원</div></div>
+        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (최고점)</div><div class="cell-val" style="font-size:13px">2,300,000 원</div></div>
       </div>
 
-      <div class="sec-sub" style="color:var(--green)">🛡️ 역발상 그물망 매수 타점 (폭락 사냥)</div>
-      <div class="grid-highlight">
-        <div class="cell-support"><div class="c-lbl">S1 지지 (1주 재진입)</div><div class="c-val">1,810,000 원</div></div>
-        <div class="cell-support"><div class="c-lbl">S2 최하단 (투매 줍기)</div><div class="c-val">1,650,000 원</div></div>
+      <div class="sec-sub">🛡️ 지지 구간 (역발상 매수)</div>
+      <div class="grid2">
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (1주)</div><div class="cell-val" style="font-size:13px">1,810,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 지지선 (최하단)</div><div class="cell-val" style="font-size:13px">1,650,000 원</div></div>
       </div>
 
-      <div class="for-box">
-        <div class="for-row"><span class="for-lbl">메이저 프로그램</span><span class="for-trend" style="color:var(--red)">숏스퀴즈성 강제 환매수 급증</span></div>
-      </div>
       <div class="contra-box">
-        <div class="contra-title">💡 김상무의 역발상 코멘트</div>
-        <div class="contra-txt">엔비디아 공급망 랠리의 중심에서 광기가 폭발하고 있습니다. 아침에 무리하게 추가 매수하는 자들은 상투를 잡게 됩니다. 우리는 2,150,000원 돌파 시 1주를 미련 없이 전량 익절하여 현금 비중을 극대화합니다.</div>
+        <div class="contra-title">💡 역발상 분석 의견</div>
+        <div class="contra-txt">글로벌 반도체 숏스퀴즈 광풍으로 폭등 중입니다. 지금 불타기하는 알고리즘은 상투를 잡게 됩니다. 2,150,000원 터치 시 무조건 1주를 전량 수익실현하여 완벽하게 현금을 확보하십시오.</div>
       </div>
     </div>
   </div>
@@ -200,37 +202,35 @@ border-radius:0 0 14px 14px;padding:10px}
   <!-- 3. LG전자 -->
   <div class="card">
     <div class="c-hdr">
-      <div class="c-code">066570 · KOSPI</div>
+      <div class="c-code">066570</div>
       <div class="c-name">LG전자</div>
     </div>
     <div class="c-body">
       <div class="acc-box">
-        <span class="acc-lbl">나의 보유 계좌</span>
+        <span class="acc-lbl">나의 계좌 현황</span>
         <span class="acc-val" style="color:var(--yellow)">미보유 (신규 사냥 대기)</span>
       </div>
 
       <div class="grid2">
         <div class="cell"><div class="cell-lbl">보조 지표</div><div class="cell-val" style="color:var(--orange)">RSI 72.93</div></div>
-        <div class="cell"><div class="cell-lbl">시장 상태</div><div class="cell-val" style="color:var(--purple)">대체시장 오버슈팅</div></div>
+        <div class="cell"><div class="cell-lbl">시장 상태</div><div class="cell-val" style="color:var(--purple)">대체시장 초과열</div></div>
       </div>
 
-      <!-- 🚨 대표님 강조 지시: 매도/지지 네온 보드판 진입 -->
-      <div class="sec-sub" style="color:var(--green)">🛡️ 역발상 그물망 매수 타점 (신규 사냥)</div>
-      <div class="grid-highlight">
-        <div class="cell-support"><div class="c-lbl">1차 진입가 (5주 줍기)</div><div class="c-val">174,000 원</div></div>
-        <div class="cell-support"><div class="c-lbl">2차 최하단 (5주 완성)</div><div class="c-val">165,000 원</div></div>
+      <div class="sec-sub">🛡️ 지지 구간 (신규 진입 타점)</div>
+      <div class="grid2">
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">1차 매수 (5주)</div><div class="cell-val" style="font-size:13px">174,000 원</div></div>
+        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">2차 매수 (5주)</div><div class="cell-val" style="font-size:13px">165,000 원</div></div>
       </div>
 
-      <div class="sec-sub" style="color:var(--blue)">🔮 중장기 가치 리레이팅 목표가</div>
-      <div class="grid-highlight">
-        <div class="cell-target" style="border-color:var(--blue); box-shadow: 0 0 12px rgba(77,184,255,0.25); background:linear-gradient(135deg, #051829, #020b14);"><div class="c-lbl" style="color:#a6d9ff">최종 목표 1</div><div class="c-val">260,000 원</div></div>
-        <div class="cell-target" style="border-color:var(--blue); box-shadow: 0 0 12px rgba(77,184,255,0.25); background:linear-gradient(135deg, #051829, #020b14);"><div class="c-lbl" style="color:#a6d9ff">최종 목표 2</div><div class="c-val">300,000 원</div></div>
+      <div class="sec-sub">🔮 중장기 최종 매도 목표가</div>
+      <div class="grid2">
+        <div class="cell"><div class="cell-lbl">목표 상단 1</div><div class="cell-val">260,000 원</div></div>
+        <div class="cell"><div class="cell-lbl">목표 상단 2</div><div class="cell-val">300,000 원</div></div>
       </div>
 
-      <div class="pattern-wrap"><span class="ptag" style="color:var(--orange); border-color:var(--orange)">볼린저밴드 상단 돌파</span><span class="ptag" style="color:var(--purple); border-color:var(--purple)">가전 로봇 테마 대장화</span></div>
       <div class="contra-box">
-        <div class="contra-title">💡 김상무의 역발상 코멘트</div>
-        <div class="contra-txt">대체거래소에서 245,500원까지 초과열 랠리가 이어졌습니다. 지금 추격 매수하는 알고리즘들은 상투를 잡게 됩니다. 철저히 덫을 놓고 기다리시어 장중 눌림목 투매로 174,000원 이하로 꼬리를 내릴 때만 1차 진입합니다.</div>
+        <div class="contra-title">💡 역발상 분석 의견</div>
+        <div class="contra-txt">가전 로봇 재평가로 야간 시장(NXT)까지 불이 붙었습니다. 단기 상투권이므로 월요일 오전 갭상승 시 절대 추격하지 마십시오. 장중 광기가 식고 투매 물량이 쏟아져 174,000원을 터치할 때만 진입합니다.</div>
       </div>
     </div>
   </div>
