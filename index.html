@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>주식 고급 분석 - 총괄대표님 전용</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#050810;--c2:#080d18;--border:#1e2c48;
+--green:#00e676;--red:#ff4d6d;--yellow:#ffd166;--blue:#4db8ff;
+--purple:#c084fc;--orange:#f9a825;--cyan:#78c1ff}
+body{background:var(--bg);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+color:#fff;max-width:480px;margin:0 auto;padding-bottom:60px;min-height:100vh}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* HEADER */
+.hdr{background:linear-gradient(180deg,#0c1022,#050810);border-bottom:1px solid var(--border);
+padding:14px 16px 10px;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;justify-content:space-between;align-items:center}
+.hdr-lbl{font-size:11px;color:#6dcfff;letter-spacing:2px;margin-bottom:2px;font-family:monospace}
+.hdr-title{font-size:19px;font-weight:900}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.badge{font-size:12px;background:#ffffff08;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:#aabbcc}
+
+/* MAIN & CARD */
+.main{padding:12px}
+.card{margin-bottom:25px;animation:up .3s ease}
+.c-hdr{background:linear-gradient(135deg,#0f1830,#192040);border:1px solid var(--border);
+border-bottom:none;border-radius:14px 14px 0 0;padding:14px 14px 10px}
+.c-code{font-size:11px;color:#7a9abc;font-family:monospace;margin-bottom:2px}
+.c-name{font-size:20px;font-weight:900}
+.c-body{background:#060a14;border:1px solid var(--border);border-top:none;
+border-radius:0 0 14px 14px;padding:12px}
+
+.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:15px 0 6px;text-transform:uppercase;font-weight:800}
+
+/* 🚨 김상무의 하이라이트: 지지/저항구간 시각 초강조 스타일 */
+.grid-highlight {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+/* 분할 매도 타점 (레드 네온) */
+.cell-target {
+    flex: 1;
+    background: linear-gradient(135deg, #25050f, #0f0206);
+    border: 2px solid var(--red);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 0 12px rgba(255, 77, 109, 0.25);
+    animation: pulse 2.5s infinite;
+}
+.cell-target .cell-lbl {
+    font-size: 11px;
+    color: #ff8599;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.cell-target .cell-val {
+    font-size: 17px;
+    color: #ffffff;
+    font-weight: 900;
+    font-family: monospace;
+}
+
+/* 역발상 매수 타점 (그린 네온) */
+.cell-support {
+    flex: 1;
+    background: linear-gradient(135deg, #031c0d, #010c05);
+    border: 2px solid var(--green);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.25);
+}
+.cell-support .cell-lbl {
+    font-size: 11px;
+    color: #66ffb3;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.cell-support .cell-val {
+    font-size: 17px;
+    color: #ffffff;
+    font-weight: 900;
+    font-family: monospace;
+}
+
+/* 계좌 정보 미니 칩 */
+.acc-box {
+    background: #0f1524;
+    border: 1px dashed #304269;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+.acc-lbl { color: #8a9ab6; }
+.acc-val { font-weight: 700; color: var(--blue); }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-lbl">NEXTRADE · CONTRARIAN SYSTEM v2.5</div>
+      <div class="hdr-title">총괄대표님 필승 대시보드</div>
+    </div>
+  </div>
+  <div class="hdr-meta">
+    <span class="badge">💰 총자산: 1,434만</span>
+    <span class="badge" style="color:var(--yellow)">💵 예수금 비중 73% (안전)</span>
+    <span class="badge">📅 5월 25일 월요일 작전 개시</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 1. 삼성전자 -->
+  <div class="card">
+    <div class="c-hdr">
+      <div class="c-code">005930 · 코스피</div>
+      <div class="c-name">삼성전자</div>
+    </div>
+    <div class="c-body">
+      <div class="acc-box">
+        <span class="acc-lbl">보유 현황</span>
+        <span class="acc-val">7주 (평단 276,010원) ➡️ 잔여 4주 홀딩</span>
+      </div>
+      
+      <div class="sec-sub">🚨 역발상 분할 매도 구간 (과열 대응)</div>
+      <div class="grid-highlight">
+        <div class="cell-target">
+          <div class="cell-lbl">Target 1 (3주 익절)</div>
+          <div class="cell-val">312,000 원</div>
+        </div>
+        <div class="cell-target">
+          <div class="cell-lbl">Target 2 (최종 랠리)</div>
+          <div class="cell-val">350,000 원</div>
+        </div>
+      </div>
+
+      <div class="sec-sub">🛡️ 기계적 역발상 매수 구간 (폭락 대응)</div>
+      <div class="grid-highlight">
+        <div class="cell-support">
+          <div class="cell-lbl">S1 (본전 방어선)</div>
+          <div class="cell-val">282,000 원</div>
+        </div>
+        <div class="cell-support">
+          <div class="cell-lbl">S2 (비중 추가)</div>
+          <div class="cell-val">263,000 원</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SK하이닉스 -->
+  <div class="card">
+    <div class="c-hdr">
+      <div class="c-code">000660 · 코스피</div>
+      <div class="c-name">SK하이닉스</div>
+    </div>
+    <div class="c-body">
+      <div class="acc-box">
+        <span class="acc-lbl">보유 현황</span>
+        <span class="acc-val">1주 (평단 1,915,500원)</span>
+      </div>
+      
+      <div class="sec-sub">🚨 역발상 분할 매도 구간 (과열 대응)</div>
+      <div class="grid-highlight">
+        <div class="cell-target">
+          <div class="cell-lbl">Target 1 (전량 익절)</div>
+          <div class="cell-val">2,150,000 원</div>
+        </div>
+        <div class="cell-target">
+          <div class="cell-lbl">Target 2 (오버슈팅)</div>
+          <div class="cell-val">2,300,000 원</div>
+        </div>
+      </div>
+
+      <div class="sec-sub">🛡️ 기계적 역발상 매수 구간 (폭락 대응)</div>
+      <div class="grid-highlight">
+        <div class="cell-support">
+          <div class="cell-lbl">S1 (매물대 지지)</div>
+          <div class="cell-val">1,810,000 원</div>
+        </div>
+        <div class="cell-support">
+          <div class="cell-lbl">S2 (알고리즘 투매)</div>
+          <div class="cell-val">1,650,000 원</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. LG전자 -->
+  <div class="card">
+    <div class="c-hdr">
+      <div class="c-code">066570 · 코스피</div>
+      <div class="c-name">LG전자</div>
+    </div>
+    <div class="c-body">
+      <div class="acc-box">
+        <span class="acc-lbl">보유 현황</span>
+        <span class="acc-val" style="color:var(--yellow)">미보유 (신규 매수 대기)</span>
+      </div>
+
+      <div class="sec-sub">🛡️ 기계적 역발상 매수 구간 (진입 타점)</div>
+      <div class="grid-highlight">
+        <div class="cell-support">
+          <div class="cell-lbl">1차 진입 (5주)</div>
+          <div class="cell-val">174,000 원</div>
+        </div>
+        <div class="cell-support">
+          <div class="cell-lbl">2차 진입 (5주 추가)</div>
+          <div class="cell-val">165,000 원</div>
+        </div>
+      </div>
+      
+      <div class="sec-sub">🔮 중장기 최종 매도 목표가</div>
+      <div class="grid-highlight">
+        <div class="cell-target" style="border-color:var(--blue); box-shadow: 0 0 12px rgba(77,184,255,0.25); background:linear-gradient(135deg, #051829, #020b14);">
+          <div class="cell-lbl" style="color:#a6d9ff">최종 목표 1</div>
+          <div class="cell-val">260,000 원</div>
+        </div>
+        <div class="cell-target" style="border-color:var(--blue); box-shadow: 0 0 12px rgba(77,184,255,0.25); background:linear-gradient(135deg, #051829, #020b14);">
+          <div class="cell-lbl" style="color:#a6d9ff">최종 목표 2</div>
+          <div class="cell-val">300,000 원</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
