@@ -1,0 +1,34 @@
+
+name: 5-Minute Market Tracker Engine
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 저장소 코드 불러오기
+      uses: actions/checkout@v3
+
+    - name: 파이썬 가상 환경 세팅
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 크롤링 필수 도구 자동 설치
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: 주가 수집 엔진 가동 및 데이터 주입
+      run: python cloud_engine.py
+
+    - name: 데이터가 주입된 HTML 웹사이트에 즉시 반영
+      run: |
+        git config --global user.name "Contrarian-Bot"
+        git config --global user.email "bot@contrarian.com"
+        git add index.html
+        git commit -m "🔄 실시간 주가 데이터 갱신 완료" || exit 0
+        git push
