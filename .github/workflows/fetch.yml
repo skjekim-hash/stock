@@ -25,7 +25,7 @@ jobs:
           python-version: '3.11'
 
       - name: 주식 데이터 수집
-        run: python scripts/fetch_stocks.py
+        run: python fetch_stocks.py
 
       - name: data.json 커밋 & 푸시
         run: |
