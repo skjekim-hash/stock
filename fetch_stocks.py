@@ -52,9 +52,13 @@ def fetch_naver_price(code):
 
         price = to_n(d.get("closePrice")) or to_n(d.get("currentPrice"))
         if price > 0:
+            # compareToPreviousClosePrice = 전일대비 변동폭 (부호 포함)
+            # 전일 종가 = 현재가 - 변동폭
+            change_val = to_n(d.get("compareToPreviousClosePrice", 0))
+            prev_close = round(price - change_val) if change_val != 0 else round(price)
             return {
                 "price": round(price),
-                "prevClose": round(to_n(d.get("compareToPreviousClosePrice", 0))),
+                "prevClose": prev_close,
                 "high52w": round(to_n(d.get("highPrice", 0)) or to_n(d.get("yearHighPrice", 0))),
                 "low52w": round(to_n(d.get("lowPrice", 0)) or to_n(d.get("yearLowPrice", 0))),
                 "source": "네이버 금융",
