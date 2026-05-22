@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>주식 고급 분석</title>
+<title>국내 주식 AI 분석</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#050810;--c2:#080d18;--border:#1e2c48;
@@ -16,39 +15,35 @@ body{background:var(--bg);font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-
 color:#fff;max-width:480px;margin:0 auto;padding-bottom:60px;min-height:100vh}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* HEADER */
 .hdr{background:linear-gradient(180deg,#0c1022,#050810);border-bottom:1px solid var(--border);
 padding:14px 16px 10px;position:sticky;top:0;z-index:100}
 .hdr-top{display:flex;justify-content:space-between;align-items:center}
-.hdr-lbl{font-size:11px;color:#6dcfff;letter-spacing:2px;margin-bottom:2px;font-family:monospace}
-.hdr-title{font-size:19px;font-weight:900}
-.hdr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-.badge{font-size:12px;background:#ffffff08;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:#aabbcc}
+.hdr-lbl{font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:2px;font-family:monospace}
+.hdr-title{font-size:20px;font-weight:900}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.badge{font-size:11px;background:#ffffff08;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:#aabbcc}
 .btn{display:inline-flex;align-items:center;gap:5px;border-radius:11px;padding:8px 14px;
 font-size:12px;font-weight:900;cursor:pointer;border:none;transition:all .2s}
 .btn-g{background:linear-gradient(135deg,#071a0e,#0c2418);border:1px solid #00e67645;color:var(--green)}
 .btn-g:disabled{background:#0a1410;border-color:#1e3020;color:#2a4030;cursor:not-allowed}
 .spin{display:inline-block;animation:spin .8s linear infinite}
 .prog-wrap{height:3px;background:#1e2c48;border-radius:2px;margin-top:9px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:2px;transition:width .5s ease}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:2px;transition:width .5s}
 
-/* MAIN */
 .main{padding:12px}
 .start{text-align:center;padding:60px 20px;animation:up .3s ease}
 .loading{text-align:center;padding:50px 0}
-.spinner{width:44px;height:44px;border:3px solid #4a5a74;border-radius:50%;
+.spinner{width:44px;height:44px;border:3px solid #141c2e;border-radius:50%;
 animation:spin .7s linear infinite;margin:0 auto 14px}
 .ld-title{font-size:14px;font-weight:700;margin-bottom:6px}
-.ld-sub{font-size:11px;color:#7a9abc;line-height:1.9}
-.proxy-st{font-size:12px;color:#7a9abc;margin-top:5px}
+.ld-sub{font-size:12px;color:#7a9abc;line-height:1.9}
 .err-box{background:#130408;border:1px solid #ff4d6d28;border-radius:12px;padding:14px;margin-bottom:12px}
 .err-title{color:var(--red);font-size:13px;font-weight:800;margin-bottom:6px}
-.err-msg{color:#a0b0c8;font-size:11px;line-height:1.7;margin-bottom:10px;white-space:pre-wrap;word-break:break-all}
+.err-msg{color:#8090b0;font-size:12px;line-height:1.7;margin-bottom:10px;word-break:break-all}
 
 /* CARD */
-.card{margin-bottom:20px;animation:up .3s ease}
+.card{margin-bottom:18px;animation:up .3s ease}
 .c-hdr{background:linear-gradient(135deg,#0f1830,#192040);border:1px solid var(--border);
 border-bottom:none;border-radius:14px 14px 0 0;padding:12px 14px 10px}
 .c-code{font-size:11px;color:#7a9abc;font-family:monospace;margin-bottom:2px}
@@ -56,91 +51,71 @@ border-bottom:none;border-radius:14px 14px 0 0;padding:12px 14px 10px}
 .c-body{background:#060a14;border:1px solid var(--border);border-top:none;
 border-radius:0 0 14px 14px;padding:10px}
 
-/* SECTION */
 .sec{border-radius:0 10px 10px 0;padding:11px 13px;margin-bottom:9px;background:var(--c2)}
 .sec-ttl{font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px;
 display:flex;gap:4px;align-items:center}
-.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:12px 0 5px;text-transform:uppercase}
+.sec-num{opacity:.4}
+.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:8px 0 5px}
 
-/* PRICE */
 .p-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:9px}
 .p-big{font-size:30px;font-weight:900;font-family:monospace;letter-spacing:-2px;line-height:1}
-.p-chg{font-size:12px;font-weight:700;padding-bottom:2px}
+.p-chg{font-size:13px;font-weight:700;padding-bottom:2px}
 .grid2{display:flex;gap:7px;margin-bottom:7px}
 .grid3{display:flex;gap:6px;margin-bottom:7px}
 .cell{flex:1;background:#0a0f1c;border-radius:8px;padding:6px 8px}
 .cell-lbl{font-size:11px;color:#7a9abc;margin-bottom:2px}
-.cell-val{font-size:11px;font-weight:700;font-family:monospace}
+.cell-val{font-size:12px;font-weight:700;font-family:monospace}
 .src{font-size:11px;color:#7a9abc;display:flex;gap:3px;align-items:center;margin-top:6px}
 
-/* SIGNAL SCORE BAR */
-.score-wrap{margin-bottom:10px}
-.score-bar-bg{height:8px;background:#151a28;border-radius:4px;position:relative;overflow:hidden}
-.score-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.score-labels{display:flex;justify-content:space-between;margin-top:3px}
+.score-bar-bg{height:7px;background:#151a28;border-radius:4px;position:relative;overflow:hidden;margin:6px 0 2px}
+.score-bar-fill{height:100%;border-radius:4px;transition:width 1s}
+.score-labels{display:flex;justify-content:space-between}
 .score-labels span{font-size:11px;color:#8090b0}
 
-/* RSI */
 .rsi-bar-bg{position:relative;height:5px;background:#151a28;border-radius:3px}
-.rsi-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.rsi-bar-fill{height:100%;border-radius:3px;transition:width 1.2s}
 .rsi-hint{display:flex;justify-content:space-between;margin-top:2px}
-.rsi-hint span{font-size:11px;color:#8090b0}
+.rsi-hint span{font-size:10px;color:#8090b0}
 
-/* IND GRID */
 .ind-grid{display:flex;gap:6px;margin-bottom:5px}
 .ind-cell{flex:1;background:#0a0f1c;border-radius:7px;padding:7px 4px;text-align:center}
-.ind-lbl{font-size:11px;color:#8090b0;margin-bottom:2px}
-.ind-val{font-size:11px;font-weight:700;font-family:monospace}
+.ind-lbl{font-size:10px;color:#8090b0;margin-bottom:2px}
+.ind-val{font-size:12px;font-weight:700;font-family:monospace}
 
-/* IROW */
 .irow{display:flex;justify-content:space-between;align-items:flex-start;
-padding:5px 0;border-bottom:1px solid #111928;gap:6px}
-.irow-lbl{font-size:12px;color:#80a0c8;min-width:90px;flex-shrink:0;padding-top:1px}
+padding:6px 0;border-bottom:1px solid #111928;gap:6px}
+.irow-lbl{font-size:11px;color:#8090b0;min-width:88px;flex-shrink:0;padding-top:1px}
 .irow-r{text-align:right}
 .irow-val{font-size:12px;font-weight:700;font-family:monospace}
-.irow-cmt{font-size:12px;color:#7090b0;margin-top:1px;line-height:1.35}
+.irow-cmt{font-size:11px;color:#6a7a96;margin-top:1px;line-height:1.35}
 
-/* OPINION */
 .op-box{display:inline-flex;align-items:center;gap:12px;border-radius:11px;padding:10px 24px}
 .op-ico{font-size:26px}
 .op-txt{font-size:26px;font-weight:900;letter-spacing:3px}
 
-/* CHIPS */
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{flex:1;min-width:74px;border-radius:9px;padding:8px 6px;text-align:center}
 .chip-lbl{font-size:11px;margin-bottom:2px;opacity:.7}
 .chip-val{font-size:13px;font-weight:800;font-family:monospace}
-.chip-note{font-size:11px;color:#80a0c8;margin-top:2px}
+.chip-note{font-size:11px;color:#8090b0;margin-top:2px}
 
-/* PATTERN TAGS */
-.pattern-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px}
-.ptag{font-size:12px;border-radius:20px;padding:3px 9px;font-weight:700}
-
-/* CONTRARIAN BOX */
+.ptag{font-size:11px;border-radius:20px;padding:3px 9px;font-weight:700;display:inline-block;margin:2px}
 .contra-box{border-radius:9px;padding:9px 11px;margin-bottom:8px}
-.contra-title{font-size:12px;font-weight:800;margin-bottom:4px;display:flex;gap:5px;align-items:center}
-.contra-txt{font-size:11px;color:#a0b0c8;line-height:1.5}
-
-/* FOREIGN */
 .for-box{border-radius:7px;padding:8px 11px;margin-bottom:8px}
 .for-row{display:flex;justify-content:space-between;margin-bottom:3px}
-.for-lbl{font-size:12px;color:#80a0c8}
-.for-trend{font-size:11px;font-weight:700}
-.for-cmt{font-size:11px;color:#8a9ab6;line-height:1.5}
-
-/* BULLETS */
+.for-lbl{font-size:11px;color:#8090b0}
+.for-trend{font-size:12px;font-weight:700}
+.for-cmt{font-size:12px;color:#8090b0;line-height:1.55}
 .bul{display:flex;gap:7px;margin-bottom:6px}
-.bul-dot{flex-shrink:0;line-height:1.6;font-size:11px}
-.bul-txt{font-size:11px;color:#a0b0c8;line-height:1.6}
-
-.neutral-msg{font-size:11px;color:#a0b0c0;line-height:1.7}
-.footer{text-align:center;font-size:12px;color:#4a5a74;line-height:1.9;padding:4px 0 8px;margin-top:4px}
-
-/* FEAR GAUGE */
-.fear-wrap{margin-bottom:8px}
+.bul-dot{flex-shrink:0;line-height:1.6;font-size:12px}
+.bul-txt{font-size:12px;color:#a0b0c8;line-height:1.6}
+.neutral-msg{font-size:12px;color:#8090b0;line-height:1.7}
 .fear-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#00e676,#ffd166,#ff4d6d);
-position:relative;margin:5px 0 3px}
+position:relative;margin:4px 0 3px}
 .fear-needle{position:absolute;top:-3px;width:2px;height:12px;background:#fff;border-radius:1px;transform:translateX(-50%)}
+.footer{text-align:center;font-size:11px;color:#6080a0;line-height:1.9;padding:4px 0 8px;margin-top:4px}
+.auto-badge{font-size:11px;background:#00e67610;border:1px solid #00e67630;color:#00e676;
+border-radius:20px;padding:2px 9px}
 </style>
 </head>
 <body>
@@ -148,150 +123,328 @@ position:relative;margin:5px 0 3px}
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <div class="hdr-lbl">KRX · ADVANCED AI ANALYSIS v2.0</div>
-      <div class="hdr-title">국내 주식 고급 분석</div>
+      <div class="hdr-lbl">KRX · AI ANALYSIS</div>
+      <div class="hdr-title">국내 주식 분석</div>
     </div>
+    <button class="btn btn-g" id="mainBtn" onclick="loadData()">
+      <span id="btnIcon">✦</span>
+      <span id="btnText">분석 보기</span>
+    </button>
   </div>
   <div class="hdr-meta">
-    <span class="badge">💰 자산: 1,434만</span>
-    <span class="badge" style="color:var(--yellow)">💵 예수금 비중 73%</span>
-    <span class="badge">⏰ 5분 자동 클라우드 동기화</span>
+    <span class="badge" id="mktBadge">--</span>
+    <span class="badge auto-badge">⚡ 5분 자동 갱신</span>
+    <span class="badge" id="updBadge" style="display:none"></span>
+    <span class="badge">⏰ 평일 07:30 알람</span>
+  </div>
+  <div class="prog-wrap" id="progWrap" style="display:none">
+    <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
 </div>
 
 <div class="main" id="main">
-
-  <!-- 1. 삼성전자 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">005930 · KOSPI</div>
-      <div class="c-name">삼성전자</div>
+  <div class="start" id="startScreen">
+    <div style="font-size:46px;margin-bottom:12px">📊</div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:8px">SK하이닉스 · 삼성전자 · LG전자</div>
+    <div style="font-size:12px;color:#7a9abc;line-height:2;margin-bottom:20px">
+      GitHub Actions가 5분마다 자동 수집<br>
+      RSI · MACD · ADX · OBV · 역발상 신호<br>
+      <span style="color:#4a6888;font-size:11px">프록시 오류 없음 · 완전 무료</span>
     </div>
-    <div class="c-body">
-      <div class="p-row">
-        <div class="p-big">299,500</div>
-        <div class="p-chg" style="color:var(--red)">▲ 23,500 (+8.51%)</div>
-      </div>
-      <div class="acc-box">
-        <span class="acc-lbl">나의 보유 평단가</span>
-        <span class="acc-val">7주 (평단 276,010원)</span>
-      </div>
-      
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">88점 (탐욕)</div></div>
-        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
-      </div>
-
-      <div class="sec-sub">AI 탐욕 지수 게이지</div>
-      <div class="fear-wrap"><div class="fear-bar"><div class="fear-needle" style="left: 88%"></div></div></div>
-
-      <div class="sec-sub">상대강도지수 (RSI)</div>
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width: 76.2%; background: var(--red);"></div></div>
-      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (76.2)</span></div>
-
-      <div class="sec-sub" style="color:var(--red); font-weight:800;">🚨 목표 매도 구간 (분할 익절 수치)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (3주 매도)</div><div class="cell-val">315,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (2주 매도)</div><div class="cell-val">323,500 원</div></div>
-      </div>
-
-      <div class="sec-sub" style="color:var(--green); font-weight:800;">🛡️ 지지 구간 (역발상 매수 그물)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (3주 줍기)</div><div class="cell-val">282,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (20주 스나이핑)</div><div class="cell-val">263,000 원</div></div>
-      </div>
-
-      <div class="sec-sub">메이저 수급 동향</div>
-      <div class="for-box" style="background: #111928; padding:8px 10px; border-radius:8px;">
-        <div class="for-row"><span class="for-lbl">외국인 기관 트렌드</span><span class="for-trend" style="color:var(--red)">대량 순매수 지속 유입</span></div>
-      </div>
-
-      <div class="sec-sub">기술적 차트 패턴</div>
-      <div class="pattern-wrap">
-        <span class="ptag" style="color:var(--red); background:#ff4d6d15">볼린저밴드 상단 돌파</span>
-        <span class="ptag" style="color:var(--blue); background:#4db8ff15">정배열 골든크로스</span>
-      </div>
-    </div>
+    <button class="btn btn-g" style="padding:12px 32px;font-size:14px;border-radius:13px" onclick="loadData()">
+      ✦ 분석 보기
+    </button>
   </div>
 
-  <!-- 2. SK하이닉스 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">000660 · KOSPI</div>
-      <div class="c-name">SK하이닉스</div>
-    </div>
-    <div class="c-body">
-      <div class="p-row">
-        <div class="p-big">1,940,000</div>
-        <div class="p-chg" style="color:var(--red)">▲ 195,000 (+11.17%)</div>
-      </div>
-      <div class="acc-box">
-        <span class="acc-lbl">나의 보유 평단가</span>
-        <span class="acc-val">1주 (평단 1,915,500원)</span>
-      </div>
-
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">AI 종합 점수</div><div class="cell-val" style="color:var(--purple)">92점 (초과열)</div></div>
-        <div class="cell"><div class="cell-lbl">최종 매매 의견</div><div class="cell-val" style="color:var(--red)">STRONG BUY</div></div>
-      </div>
-
-      <div class="sec-sub">AI 탐욕 지수 게이지</div>
-      <div class="fear-wrap"><div class="fear-bar"><div class="fear-needle" style="left: 92%"></div></div></div>
-
-      <div class="sec-sub">상대강도지수 (RSI)</div>
-      <div class="rsi-bar-bg"><div class="rsi-bar-fill" style="width: 81.5%; background: var(--red);"></div></div>
-      <div class="rsi-hint"><span>과매도 (30)</span><span>과매수 (81.5)</span></div>
-
-      <div class="sec-sub" style="color:var(--red); font-weight:800;">🚨 목표 매도 구간 (전량 익절 수치)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 1 (1주 전량)</div><div class="cell-val">2,150,000 원</div></div>
-        <div class="cell" style="background:#200a10; border:1px solid var(--red)"><div class="cell-lbl" style="color:#ff8599">Target 2 (오버슈팅)</div><div class="cell-val">2,300,000 원</div></div>
-      </div>
-
-      <div class="sec-sub" style="color:var(--green); font-weight:800;">🛡️ 지지 구간 (역발상 매수 그물)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S1 지지선 (1주 재진입)</div><div class="cell-val">1,810,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">S2 최하단 (투매 사냥)</div><div class="cell-val">1,650,000 원</div></div>
-      </div>
-    </div>
+  <div class="loading" id="loadingScreen" style="display:none">
+    <div class="spinner" id="ldSpinner"></div>
+    <div class="ld-title" id="ldTitle">데이터 불러오는 중...</div>
+    <div class="ld-sub" id="ldSub"></div>
   </div>
 
-  <!-- 3. LG전자 -->
-  <div class="card">
-    <div class="c-hdr">
-      <div class="c-code">066570 · KOSPI</div>
-      <div class="c-name">LG전자</div>
-    </div>
-    <div class="c-body">
-      <div class="p-row">
-        <div class="p-big">235,000</div>
-        <div class="p-chg" style="color:var(--red)">▲ 54,000 (+29.83% 상한가)</div>
-      </div>
-      <div class="acc-box">
-        <span class="acc-lbl">나의 보유 평단가</span>
-        <span class="acc-val" style="color:var(--yellow)">미보유 (신규 사냥 대기)</span>
-      </div>
-
-      <div class="grid2">
-        <div class="cell"><div class="cell-lbl">보조 지표</div><div class="cell-val" style="color:var(--orange)">RSI 72.93</div></div>
-        <div class="cell"><div class="cell-lbl">시장 상태</div><div class="cell-val" style="color:var(--purple)">대체시장 추가 오버슈팅</div></div>
-      </div>
-
-      <div class="sec-sub" style="color:var(--green); font-weight:800;">🛡️ 지지 구간 (신규 진입 타점)</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">1차 매수 (5주 줍기)</div><div class="cell-val">174,000 원</div></div>
-        <div class="cell" style="background:#0a2012; border:1px solid var(--green)"><div class="cell-lbl" style="color:#66ffb3">2차 매수 (5주 완성)</div><div class="cell-val">165,000 원</div></div>
-      </div>
-
-      <div class="sec-sub" style="color:var(--blue); font-weight:800;">🔮 중장기 최종 매도 목표가</div>
-      <div class="grid2">
-        <div class="cell" style="background:#0a1a2f; border:1px solid var(--blue)"><div class="cell-lbl" style="color:#a6d9ff">목표 상단 1</div><div class="cell-val">260,000 원</div></div>
-        <div class="cell" style="background:#0a1a2f; border:1px solid var(--blue)"><div class="cell-lbl" style="color:#a6d9ff">목표 상단 2</div><div class="cell-val">300,000 원</div></div>
-      </div>
-    </div>
+  <div class="err-box" id="errBox" style="display:none">
+    <div class="err-title" id="errTitle">⚠️ 오류</div>
+    <div class="err-msg" id="errMsg"></div>
+    <button class="btn btn-g" style="padding:6px 14px;font-size:11px" onclick="loadData()">↻ 다시 시도</button>
   </div>
 
+  <div id="results" style="display:none"></div>
+  <div class="footer" id="footer" style="display:none">
+    주가: 네이버 금융 · 지표: 60일 OHLCV 자동 계산 · GitHub Actions 5분 갱신<br>
+    본 분석은 참고용입니다. 투자 판단과 책임은 투자자 본인에게 있습니다.
+  </div>
 </div>
 
+<script>
+const OP_STYLE={
+  매수:{color:"#00e676",bg:"#00e67612",border:"#00e67640",icon:"▲"},
+  중립:{color:"#ffd166",bg:"#ffd16612",border:"#ffd16640",icon:"◆"},
+  매도:{color:"#ff4d6d",bg:"#ff4d6d12",border:"#ff4d6d40",icon:"▼"},
+};
+const STOCKS=[
+  {code:"000660",name:"SK하이닉스",emoji:"🔵"},
+  {code:"005930",name:"삼성전자",  emoji:"🟡"},
+  {code:"066570",name:"LG전자",    emoji:"🔴"},
+];
+
+function kst(){
+  const d=new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
+  const h=d.getHours(),mn=d.getMinutes(),day=d.getDay(),min=h*60+mn;
+  const open=day>=1&&day<=5&&min>=540&&min<=930;
+  return{open,label:open?"현재가":"종가",
+    status:(day===0||day===6)?"주말휴장":open?"🟢 장중":min<540?"🟡 장전":"🔴 장마감"};
+}
+const W=n=>(!n||isNaN(+n)||+n===0)?"—":`₩${(+n).toLocaleString("ko-KR")}`;
+const P=n=>n==null?"—":`${+n>0?"+":""}${(+n).toFixed(2)}%`;
+const F1=n=>n==null?"—":(+n).toFixed(1);
+const F2=n=>n==null?"—":(+n).toFixed(2);
+const B=(items,color)=>(items||[]).filter(Boolean).map(t=>
+  `<div class="bul"><span class="bul-dot" style="color:${color}">•</span><span class="bul-txt">${t}</span></div>`
+).join("");
+
+function hideAll(){
+  ["startScreen","loadingScreen","errBox","results","footer"]
+    .forEach(id=>document.getElementById(id).style.display="none");
+  document.getElementById("progWrap").style.display="none";
+}
+
+function renderCard(s,idx){
+  const st=STOCKS.find(x=>x.code===s.code)||STOCKS[idx];
+  const op=OP_STYLE[s.opinion]||OP_STYLE["중립"];
+  const up=(+s.change||0)>=0;
+  const fc_c={매수우세:"#00e676",매도우세:"#ff4d6d",중립:"#ffd166"}[s.ft]||"#888";
+  const rc=+s.rsi>70?"#ff4d6d":+s.rsi<30?"#00e676":"#ffd166";
+  const mc=(+s.macd)>=(+s.macdSignal)?"#00e676":"#ff4d6d";
+  const sc=+s.stoch>80?"#ff4d6d":+s.stoch<20?"#00e676":"#ffd166";
+  const wc=s.wr!=null?(+s.wr>-20?"#ff4d6d":+s.wr<-80?"#00e676":"#ffd166"):"#888";
+  const mc2=s.mfi!=null?(+s.mfi>80?"#ff4d6d":+s.mfi<20?"#00e676":"#ffd166"):"#888";
+  const rsiPct=Math.min(Math.max(+s.rsi||50,0),100);
+  const scoreNorm=Math.min(Math.max((s.score+6)/12*100,0),100);
+  const scoreColor=s.score>=4?"#00e676":s.score<=-3?"#ff4d6d":"#ffd166";
+  const kstInfo=kst();
+
+  const chips=s.opinion!=="중립"&&+s.suggestedPrice>0?`
+    <div class="chips">
+      <div class="chip" style="background:${op.bg};border:1px solid ${op.border}">
+        <div class="chip-lbl" style="color:${op.color}88">${s.suggestedLabel}</div>
+        <div class="chip-val" style="color:${op.color}">${W(s.suggestedPrice)}</div>
+        <div class="chip-note">진입가</div>
+      </div>
+      ${+s.targetPrice?`<div class="chip" style="background:#4db8ff09;border:1px solid #4db8ff28">
+        <div class="chip-lbl" style="color:#4db8ff88">1차 목표</div>
+        <div class="chip-val" style="color:#4db8ff">${W(s.targetPrice)}</div>
+        <div class="chip-note">익절 1</div>
+      </div>`:""}
+      ${+s.targetPrice2?`<div class="chip" style="background:#c084fc09;border:1px solid #c084fc28">
+        <div class="chip-lbl" style="color:#c084fc88">2차 목표</div>
+        <div class="chip-val" style="color:#c084fc">${W(s.targetPrice2)}</div>
+        <div class="chip-note">익절 2</div>
+      </div>`:""}
+      ${+s.stopLoss?`<div class="chip" style="background:#ff4d6d09;border:1px solid #ff4d6d28">
+        <div class="chip-lbl" style="color:#ff4d6d88">손절</div>
+        <div class="chip-val" style="color:#ff4d6d">${W(s.stopLoss)}</div>
+        <div class="chip-note">리스크 한도</div>
+      </div>`:""}
+    </div>`:`<div class="neutral-msg">방향성 불명확 — ADX ${s.adx?.adx||"-"} (${s.adx?.strength||"추세 확인 필요"})<br>추세 전환 신호 확인 후 진입 권장.</div>`;
+
+  return`<div class="card">
+    <div class="c-hdr">
+      <div class="c-code">${st.emoji} KRX · ${s.code}</div>
+      <div class="c-name">${st.name}</div>
+    </div>
+    <div class="c-body">
+
+      <div class="sec" style="border-left:3px solid #7eb8ff">
+        <div class="sec-ttl" style="color:#7eb8ff">💹 <span class="sec-num">①</span> 현재 주가 (${kstInfo.label})</div>
+        <div class="p-row">
+          <span class="p-big">${W(s.price)}</span>
+          ${s.change?`<span class="p-chg" style="color:${up?"#00e676":"#ff4d6d"}">${up?"▲":"▼"} ${W(Math.abs(+s.change))} (${P(s.changePct)})</span>`:""}
+        </div>
+        ${s.high52w>0?`<div class="grid2">
+          <div class="cell"><div class="cell-lbl">52주 최고</div><div class="cell-val" style="color:#ff4d6d">${W(s.high52w)}</div></div>
+          <div class="cell"><div class="cell-lbl">52주 최저</div><div class="cell-val" style="color:#00e676">${W(s.low52w)}</div></div>
+        </div>`:""}
+        <div class="grid3">
+          <div class="cell"><div class="cell-lbl">5일 이평</div><div class="cell-val" style="color:${+s.sma5>+s.sma20?"#00e676":"#ff4d6d"}">${W(s.sma5)}</div></div>
+          <div class="cell"><div class="cell-lbl">20일 이평</div><div class="cell-val" style="color:#9ab">${W(s.sma20)}</div></div>
+          <div class="cell"><div class="cell-lbl">VWAP</div><div class="cell-val" style="color:${s.price>s.vwap?"#00e676":"#ff4d6d"}">${W(s.vwap)}</div></div>
+        </div>
+        <div class="src"><span style="color:#00e676">●</span>${s.source} · GitHub Actions 자동수집</div>
+      </div>
+
+      <div class="sec" style="border-left:3px solid ${op.color}">
+        <div class="sec-ttl" style="color:${op.color}">🎯 <span class="sec-num">②</span> 분석 결과</div>
+        <div class="op-box" style="background:${op.bg};border:1px solid ${op.border};margin-bottom:10px">
+          <span class="op-ico" style="color:${op.color}">${op.icon}</span>
+          <span class="op-txt" style="color:${op.color}">${s.opinion}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:#6a7a96">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
+          <span style="font-size:11px;color:${scoreColor};font-weight:700">${s.score>=4?"강한 매수":s.score>=2?"매수":s.score<=-3?"강한 매도":s.score<=-1?"매도":"중립"}</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:${scoreNorm}%;background:${scoreColor}"></div></div>
+        <div class="score-labels"><span>매도</span><span>중립</span><span>매수</span></div>
+        ${s.patterns?.length?`<div style="margin-top:8px">${s.patterns.map(p=>`<span class="ptag" style="background:${p.color}18;color:${p.color};border:1px solid ${p.color}40">${p.name} (${p.type})</span>`).join("")}</div>`:""}
+      </div>
+
+      <div class="sec" style="border-left:3px solid #c084fc">
+        <div class="sec-ttl" style="color:#c084fc">💰 <span class="sec-num">③</span> 제안 금액</div>
+        ${chips}
+        ${s.pivot?`<div class="sec-sub" style="margin-top:10px">피봇 포인트</div>
+        <div class="grid3">
+          <div class="cell"><div class="cell-lbl">저항2(R2)</div><div class="cell-val" style="color:#ff4d6d">${W(s.pivot.r2)}</div></div>
+          <div class="cell"><div class="cell-lbl">저항1(R1)</div><div class="cell-val" style="color:#ffd166">${W(s.pivot.r1)}</div></div>
+          <div class="cell"><div class="cell-lbl">피봇(P)</div><div class="cell-val" style="color:#9ab">${W(s.pivot.p)}</div></div>
+        </div>
+        <div class="grid2">
+          <div class="cell"><div class="cell-lbl">지지1(S1)</div><div class="cell-val" style="color:#ffd166">${W(s.pivot.s1)}</div></div>
+          <div class="cell"><div class="cell-lbl">지지2(S2)</div><div class="cell-val" style="color:#00e676">${W(s.pivot.s2)}</div></div>
+        </div>`:""}
+      </div>
+
+      <div class="sec" style="border-left:3px solid #f9a825">
+        <div class="sec-ttl" style="color:#f9a825">📊 <span class="sec-num">④</span> 제안 근거</div>
+        <div class="sec-sub">모멘텀 지표</div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:#7a9abc">RSI (14)</span>
+            <span style="font-size:12px;font-weight:700;color:${rc};font-family:monospace">${s.rsi??"-"} <span style="font-size:10px;font-weight:400;color:${rc}aa">${+s.rsi>70?"과매수":+s.rsi<30?"과매도":"중립"}</span></span>
+          </div>
+          <div class="rsi-bar-bg">
+            <div style="position:absolute;left:30%;top:0;bottom:0;width:1px;background:#252b3a"></div>
+            <div style="position:absolute;left:70%;top:0;bottom:0;width:1px;background:#252b3a"></div>
+            <div class="rsi-bar-fill" style="width:${rsiPct}%;background:linear-gradient(90deg,#00ff8844,${rc})"></div>
+          </div>
+          <div style="font-size:11px;color:#6a7a96;margin-top:3px">${s.rsiComment}</div>
+        </div>
+        <div class="ind-grid">
+          <div class="ind-cell"><div class="ind-lbl">Williams %R</div><div class="ind-val" style="color:${wc}">${F1(s.wr)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">MFI</div><div class="ind-val" style="color:${mc2}">${F1(s.mfi)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">Stoch %K</div><div class="ind-val" style="color:${sc}">${F1(s.stoch)}</div></div>
+        </div>
+        <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.wrComment} | ${s.mfiComment}</div>
+        <div class="sec-sub">추세 지표</div>
+        <div class="ind-grid" style="margin-bottom:4px">
+          <div class="ind-cell"><div class="ind-lbl">MACD</div><div class="ind-val" style="color:${mc}">${F2(s.macd)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">Signal</div><div class="ind-val" style="color:${mc}">${F2(s.macdSignal)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">Hist</div><div class="ind-val" style="color:${(+s.macdHist)>=0?"#00e676":"#ff4d6d"}">${F2(s.macdHist)}</div></div>
+        </div>
+        <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.macdComment}</div>
+        <div class="irow">
+          <span class="irow-lbl">ADX (추세강도)</span>
+          <div class="irow-r"><div class="irow-val" style="color:${+s.adx?.adx>25?"#00e676":"#ffd166"}">${F1(s.adx?.adx)}</div>
+          <div class="irow-cmt">${s.adx?.strength||""} | +DI ${F1(s.adx?.pdi)} / -DI ${F1(s.adx?.ndi)}</div></div>
+        </div>
+        <div class="sec-sub" style="margin-top:10px">거래량 지표</div>
+        <div class="irow">
+          <span class="irow-lbl">OBV 추세</span>
+          <div class="irow-r"><div class="irow-val" style="color:${s.obv?.trend==="상승"?"#00e676":s.obv?.trend==="하락"?"#ff4d6d":"#ffd166"}">${s.obv?.trend||"-"}</div>
+          <div class="irow-cmt">5일 기울기 ${s.obv?.slope>0?"+":""}${s.obv?.slope}%</div></div>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl">거래량 비율</span>
+          <div class="irow-r"><div class="irow-val" style="color:${s.volRatio>1.5?"#ff4d6d":s.volRatio>1.1?"#ffd166":"#9ab"}">${s.volRatio}x</div>
+          <div class="irow-cmt">${s.volRatio>1.5?"급등 거래량":s.volRatio>1.1?"평균 이상":s.volRatio<0.8?"평균 이하":"평균 수준"} (20일 대비)</div></div>
+        </div>
+        <div class="sec-sub" style="margin-top:10px">외국인 수급</div>
+        <div class="for-box" style="background:${fc_c}0c;border:1px solid ${fc_c}28">
+          <div class="for-row"><span class="for-lbl">수급 방향</span><span class="for-trend" style="color:${fc_c}">${s.ft}</span></div>
+          <div class="for-cmt">${s.fc}</div>
+        </div>
+        <div class="sec-sub">공포·탐욕 지수</div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:11px;color:#6a7a96">시장 심리</span>
+            <span style="font-size:12px;font-weight:700;color:${s.fg.color}">${s.fg.score} — ${s.fg.label}</span>
+          </div>
+          <div class="fear-bar"><div class="fear-needle" style="left:${s.fg.score}%"></div></div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-size:10px;color:#8090b0">극단 공포</span><span style="font-size:10px;color:#8090b0">중립</span><span style="font-size:10px;color:#8090b0">극단 탐욕</span>
+          </div>
+        </div>
+        <div class="sec-sub">종합 근거</div>
+        ${B(s.basis,"#f9a825")}
+      </div>
+
+      <div class="sec" style="border-left:3px solid #c084fc">
+        <div class="sec-ttl" style="color:#c084fc">🔄 <span class="sec-num">⑤</span> 역발상 신호</div>
+        <div class="contra-box" style="background:${s.contra.strength>=2?"#00e67609":s.contra.strength<=-2?"#ff4d6d09":"#ffd16609"};border:1px solid ${s.contra.strength>=2?"#00e67628":s.contra.strength<=-2?"#ff4d6d28":"#ffd16628"}">
+          <div style="font-size:11px;font-weight:800;color:${s.contra.strength>=2?"#00e676":s.contra.strength<=-2?"#ff4d6d":"#ffd166"};margin-bottom:4px">⚡ ${s.contra.action}</div>
+          ${B(s.contra.signals,s.contra.strength>=2?"#00e676":s.contra.strength<=-2?"#ff4d6d":"#ffd166")}
+          ${!s.contra.signals?.length?`<div style="font-size:12px;color:#8090b0">현 신호 유효 — 역발상 기회 없음</div>`:""}
+        </div>
+      </div>
+
+      <div class="sec" style="border-left:3px solid #ff4d6d">
+        <div class="sec-ttl" style="color:#ff4d6d">⚠️ <span class="sec-num">⑥</span> RISK</div>
+        ${B(s.risk,"#ff4d6d")}
+      </div>
+
+      <div class="sec" style="border-left:3px solid #78c1ff">
+        <div class="sec-ttl" style="color:#78c1ff">📌 <span class="sec-num">⑦</span> 참고 사항</div>
+        ${B(s.notes,"#78c1ff")}
+      </div>
+
+    </div>
+  </div>`;
+}
+
+let loading=false;
+
+async function loadData(){
+  if(loading) return;
+  loading=true;
+  const btn=document.getElementById("mainBtn");
+  btn.disabled=true;
+  document.getElementById("btnIcon").className="spin";
+  document.getElementById("btnIcon").textContent="↻";
+  document.getElementById("btnText").textContent="불러오는 중...";
+  document.getElementById("mktBadge").textContent=kst().status;
+  document.getElementById("progWrap").style.display="";
+  document.getElementById("progFill").style.width="30%";
+
+  hideAll();
+  document.getElementById("loadingScreen").style.display="";
+  document.getElementById("ldTitle").textContent="데이터 불러오는 중...";
+  document.getElementById("ldSub").textContent="GitHub Actions 자동 수집 데이터 로드";
+
+  try{
+    // 캐시 방지
+    const res=await fetch(`data.json?_=${Date.now()}`);
+    if(!res.ok) throw new Error(`data.json 로드 실패: HTTP ${res.status}`);
+    const data=await res.json();
+
+    document.getElementById("progFill").style.width="100%";
+    await new Promise(r=>setTimeout(r,200));
+
+    hideAll();
+    document.getElementById("results").innerHTML=data.stocks.map((s,i)=>renderCard(s,i)).join("");
+    document.getElementById("results").style.display="";
+    document.getElementById("footer").style.display="";
+
+    document.getElementById("updBadge").textContent=`수집: ${data.updatedAt||data.updatedTime||"최근"}`;
+    document.getElementById("updBadge").style.display="";
+
+  }catch(e){
+    hideAll();
+    document.getElementById("errBox").style.display="";
+    document.getElementById("errTitle").textContent="⚠️ 데이터 로드 실패";
+    document.getElementById("errMsg").textContent=
+      e.message+"\n\nGitHub Actions가 아직 실행되지 않았거나\ndata.json이 없을 수 있습니다.\n저장소에서 Actions > Run workflow를 눌러 수동 실행해보세요.";
+  }finally{
+    loading=false;
+    btn.disabled=false;
+    document.getElementById("btnIcon").className="";
+    document.getElementById("btnIcon").textContent="↻";
+    document.getElementById("btnText").textContent=
+      document.getElementById("results").style.display!=="none"?"새로고침":"분석 보기";
+    document.getElementById("progWrap").style.display="none";
+  }
+}
+
+// 5분마다 자동 새로고침
+setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 5*60*1000);
+document.getElementById("mktBadge").textContent=kst().status;
+</script>
 </body>
 </html>
