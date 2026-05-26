@@ -21,8 +21,10 @@ padding:14px 16px 10px;position:sticky;top:0;z-index:100}
 .hdr-top{display:flex;justify-content:space-between;align-items:center}
 .hdr-lbl{font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:2px;font-family:monospace}
 .hdr-title{font-size:20px;font-weight:900}
-.hdr-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .badge{font-size:11px;background:#ffffff08;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:#aabbcc}
+.badge-green{background:#00e67610;border-color:#00e67630;color:#00e676}
+.badge-kospi{background:#4db8ff10;border-color:#4db8ff30;color:#4db8ff}
 .btn{display:inline-flex;align-items:center;gap:5px;border-radius:11px;padding:8px 14px;
 font-size:12px;font-weight:900;cursor:pointer;border:none;transition:all .2s}
 .btn-g{background:linear-gradient(135deg,#071a0e,#0c2418);border:1px solid #00e67645;color:var(--green)}
@@ -34,28 +36,26 @@ font-size:12px;font-weight:900;cursor:pointer;border:none;transition:all .2s}
 .main{padding:12px}
 .start{text-align:center;padding:60px 20px;animation:up .3s ease}
 .loading{text-align:center;padding:50px 0}
-.spinner{width:44px;height:44px;border:3px solid #141c2e;border-radius:50%;
-animation:spin .7s linear infinite;margin:0 auto 14px}
+.spinner{width:44px;height:44px;border:3px solid #141c2e;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
 .ld-title{font-size:14px;font-weight:700;margin-bottom:6px}
 .ld-sub{font-size:12px;color:#7a9abc;line-height:1.9}
 .err-box{background:#130408;border:1px solid #ff4d6d28;border-radius:12px;padding:14px;margin-bottom:12px}
 .err-title{color:var(--red);font-size:13px;font-weight:800;margin-bottom:6px}
 .err-msg{color:#8090b0;font-size:12px;line-height:1.7;margin-bottom:10px;word-break:break-all}
 
-/* CARD */
-.card{margin-bottom:18px;animation:up .3s ease}
+.card{margin-bottom:20px;animation:up .3s ease}
 .c-hdr{background:linear-gradient(135deg,#0f1830,#192040);border:1px solid var(--border);
-border-bottom:none;border-radius:14px 14px 0 0;padding:12px 14px 10px}
+border-bottom:none;border-radius:14px 14px 0 0;padding:12px 14px 10px;
+display:flex;justify-content:space-between;align-items:flex-end}
 .c-code{font-size:11px;color:#7a9abc;font-family:monospace;margin-bottom:2px}
 .c-name{font-size:20px;font-weight:900}
-.c-body{background:#060a14;border:1px solid var(--border);border-top:none;
-border-radius:0 0 14px 14px;padding:10px}
+.c-rs{font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px}
+.c-body{background:#060a14;border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;padding:10px}
 
 .sec{border-radius:0 10px 10px 0;padding:11px 13px;margin-bottom:9px;background:var(--c2)}
-.sec-ttl{font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px;
-display:flex;gap:4px;align-items:center}
+.sec-ttl{font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px;display:flex;gap:4px;align-items:center}
 .sec-num{opacity:.4}
-.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:1px;margin:8px 0 5px}
+.sec-sub{font-size:11px;color:#7a9abc;letter-spacing:.5px;margin:8px 0 5px}
 
 .p-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:9px}
 .p-big{font-size:30px;font-weight:900;font-family:monospace;letter-spacing:-2px;line-height:1}
@@ -82,8 +82,7 @@ display:flex;gap:4px;align-items:center}
 .ind-lbl{font-size:10px;color:#8090b0;margin-bottom:2px}
 .ind-val{font-size:12px;font-weight:700;font-family:monospace}
 
-.irow{display:flex;justify-content:space-between;align-items:flex-start;
-padding:6px 0;border-bottom:1px solid #111928;gap:6px}
+.irow{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #111928;gap:6px}
 .irow-lbl{font-size:11px;color:#8090b0;min-width:88px;flex-shrink:0;padding-top:1px}
 .irow-r{text-align:right}
 .irow-val{font-size:12px;font-weight:700;font-family:monospace}
@@ -106,16 +105,35 @@ padding:6px 0;border-bottom:1px solid #111928;gap:6px}
 .for-lbl{font-size:11px;color:#8090b0}
 .for-trend{font-size:12px;font-weight:700}
 .for-cmt{font-size:12px;color:#8090b0;line-height:1.55}
+
+/* 수급 그리드 */
+.investor-grid{display:flex;gap:6px;margin-bottom:8px}
+.inv-cell{flex:1;background:#0a0f1c;border-radius:8px;padding:7px 6px;text-align:center}
+.inv-lbl{font-size:10px;color:#7a9abc;margin-bottom:3px}
+.inv-val{font-size:12px;font-weight:700;font-family:monospace}
+
+/* 뉴스 */
+.news-item{padding:8px 0;border-bottom:1px solid #111928;display:flex;gap:8px;align-items:flex-start}
+.news-sent{font-size:10px;border-radius:10px;padding:2px 7px;font-weight:700;flex-shrink:0;margin-top:1px}
+.news-title{font-size:12px;color:#a0b0c8;line-height:1.5;flex:1}
+.news-date{font-size:10px;color:#6a7a96;margin-top:2px}
+
+/* DART */
+.dart-item{padding:7px 0;border-bottom:1px solid #111928;display:flex;gap:8px;align-items:center}
+.dart-badge{font-size:10px;border-radius:10px;padding:2px 7px;font-weight:700;flex-shrink:0}
+.dart-title{font-size:12px;color:#a0b0c8;flex:1}
+.dart-date{font-size:10px;color:#6a7a96;flex-shrink:0}
+
+/* 주봉 */
+.weekly-box{background:#0a0f1c;border-radius:8px;padding:9px 11px;margin-bottom:8px}
+
 .bul{display:flex;gap:7px;margin-bottom:6px}
 .bul-dot{flex-shrink:0;line-height:1.6;font-size:12px}
 .bul-txt{font-size:12px;color:#a0b0c8;line-height:1.6}
 .neutral-msg{font-size:12px;color:#8090b0;line-height:1.7}
-.fear-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#00e676,#ffd166,#ff4d6d);
-position:relative;margin:4px 0 3px}
+.fear-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#00e676,#ffd166,#ff4d6d);position:relative;margin:4px 0 3px}
 .fear-needle{position:absolute;top:-3px;width:2px;height:12px;background:#fff;border-radius:1px;transform:translateX(-50%)}
 .footer{text-align:center;font-size:11px;color:#6080a0;line-height:1.9;padding:4px 0 8px;margin-top:4px}
-.auto-badge{font-size:11px;background:#00e67610;border:1px solid #00e67630;color:#00e676;
-border-radius:20px;padding:2px 9px}
 </style>
 </head>
 <body>
@@ -123,7 +141,7 @@ border-radius:20px;padding:2px 9px}
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <div class="hdr-lbl">KRX · AI ANALYSIS</div>
+      <div class="hdr-lbl">KRX · AI ANALYSIS v3.0</div>
       <div class="hdr-title">국내 주식 분석</div>
     </div>
     <button class="btn btn-g" id="mainBtn" onclick="loadData()">
@@ -133,9 +151,9 @@ border-radius:20px;padding:2px 9px}
   </div>
   <div class="hdr-meta">
     <span class="badge" id="mktBadge">--</span>
-    <span class="badge auto-badge">⚡ 1분 자동 갱신</span>
+    <span class="badge badge-green">⚡ 1분 자동 갱신</span>
+    <span class="badge badge-kospi" id="kospiBar">KOSPI --</span>
     <span class="badge" id="updBadge" style="display:none"></span>
-    <span class="badge">⏰ 평일 07:30 알람</span>
   </div>
   <div class="prog-wrap" id="progWrap" style="display:none">
     <div class="prog-fill" id="progFill" style="width:0%"></div>
@@ -147,9 +165,10 @@ border-radius:20px;padding:2px 9px}
     <div style="font-size:46px;margin-bottom:12px">📊</div>
     <div style="font-size:16px;font-weight:800;margin-bottom:8px">SK하이닉스 · 삼성전자 · LG전자</div>
     <div style="font-size:12px;color:#7a9abc;line-height:2;margin-bottom:20px">
-      GitHub Actions가 1분마다 자동 수집<br>
-      RSI · MACD · ADX · OBV · 역발상 신호<br>
-      <span style="color:#4a6888;font-size:11px">프록시 오류 없음 · 완전 무료</span>
+      외국인·기관 순매수 · 공매도 비율<br>
+      KOSPI 상대강도 · 주봉 멀티타임프레임<br>
+      52주 신고가 · 뉴스 감성 · DART 공시<br>
+      <span style="color:#4a6888;font-size:11px">GitHub Actions 1분 자동수집 · 완전 무료</span>
     </div>
     <button class="btn btn-g" style="padding:12px 32px;font-size:14px;border-radius:13px" onclick="loadData()">
       ✦ 분석 보기
@@ -157,9 +176,9 @@ border-radius:20px;padding:2px 9px}
   </div>
 
   <div class="loading" id="loadingScreen" style="display:none">
-    <div class="spinner" id="ldSpinner"></div>
+    <div class="spinner"></div>
     <div class="ld-title" id="ldTitle">데이터 불러오는 중...</div>
-    <div class="ld-sub" id="ldSub"></div>
+    <div class="ld-sub">GitHub Actions 자동 수집 데이터 로드</div>
   </div>
 
   <div class="err-box" id="errBox" style="display:none">
@@ -170,7 +189,7 @@ border-radius:20px;padding:2px 9px}
 
   <div id="results" style="display:none"></div>
   <div class="footer" id="footer" style="display:none">
-    주가: 네이버 금융 · 지표: 60일 OHLCV 자동 계산 · GitHub Actions 5분 갱신<br>
+    주가: 네이버 금융 · 지표: 60일 OHLCV · 수급: 네이버 금융 · 뉴스: 네이버 · DART: 금감원<br>
     본 분석은 참고용입니다. 투자 판단과 책임은 투자자 본인에게 있습니다.
   </div>
 </div>
@@ -194,6 +213,7 @@ function kst(){
   return{open,label:open?"현재가":"종가",
     status:(day===0||day===6)?"주말휴장":open?"🟢 장중":min<540?"🟡 장전":"🔴 장마감"};
 }
+
 const W=n=>(!n||isNaN(+n)||+n===0)?"—":`₩${(+n).toLocaleString("ko-KR")}`;
 const P=n=>n==null?"—":`${+n>0?"+":""}${(+n).toFixed(2)}%`;
 const F1=n=>n==null?"—":(+n).toFixed(1);
@@ -219,9 +239,44 @@ function renderCard(s,idx){
   const wc=s.wr!=null?(+s.wr>-20?"#ff4d6d":+s.wr<-80?"#00e676":"#ffd166"):"#888";
   const mc2=s.mfi!=null?(+s.mfi>80?"#ff4d6d":+s.mfi<20?"#00e676":"#ffd166"):"#888";
   const rsiPct=Math.min(Math.max(+s.rsi||50,0),100);
-  const scoreNorm=Math.min(Math.max((s.score+6)/12*100,0),100);
-  const scoreColor=s.score>=4?"#00e676":s.score<=-3?"#ff4d6d":"#ffd166";
+  const scoreNorm=Math.min(Math.max((s.score+8)/16*100,0),100);
+  const scoreColor=s.score>=5?"#00e676":s.score<=-4?"#ff4d6d":"#ffd166";
   const kstInfo=kst();
+  const rs=s.relativeStrength;
+  const rsColor=rs?.strong?"#00e676":"#ff4d6d";
+
+  // 외국인·기관 수급
+  const inv=s.investor||{};
+  const f=inv.foreign||0, inst=inv.institution||0, indiv=inv.individual||0;
+
+  // 뉴스
+  const newsHtml=(s.news||[]).map(n=>`
+    <div class="news-item">
+      <span class="news-sent" style="background:${ n.sentiment==='긍정'?'#00e67620':n.sentiment==='부정'?'#ff4d6d20':'#ffd16620'};color:${ n.sentiment==='긍정'?'#00e676':n.sentiment==='부정'?'#ff4d6d':'#ffd166'}">${n.sentiment}</span>
+      <div>
+        <div class="news-title">${n.title}</div>
+        <div class="news-date">${n.date}</div>
+      </div>
+    </div>`).join("") || '<div style="font-size:12px;color:#7a9abc">뉴스 없음</div>';
+
+  // DART
+  const dartHtml=(s.dart||[]).map(d=>`
+    <div class="dart-item">
+      <span class="dart-badge" style="background:${d.important?'#ffd16620':'#1e2c48'};color:${d.important?'#ffd166':'#7a9abc'}">${d.important?'중요':'일반'}</span>
+      <span class="dart-title">${d.title}</span>
+      <span class="dart-date">${d.date}</span>
+    </div>`).join("") || '<div style="font-size:12px;color:#7a9abc">공시 없음</div>';
+
+  // 52주 돌파
+  const bo=s.breakout||{};
+  const boColor=bo.nearHigh?"#00e676":bo.nearLow?"#ffd166":"#7a9abc";
+
+  // 거래량 급증
+  const vs=s.volSurge||{};
+
+  // 주봉
+  const wk=s.weekly||{};
+  const wkColor={매수:"#00e676",매도:"#ff4d6d",중립:"#ffd166"}[wk.opinion]||"#ffd166";
 
   const chips=s.opinion!=="중립"&&+s.suggestedPrice>0?`
     <div class="chips">
@@ -245,15 +300,22 @@ function renderCard(s,idx){
         <div class="chip-val" style="color:#ff4d6d">${W(s.stopLoss)}</div>
         <div class="chip-note">리스크 한도</div>
       </div>`:""}
-    </div>`:`<div class="neutral-msg">방향성 불명확 — ADX ${s.adx?.adx||"-"} (${s.adx?.strength||"추세 확인 필요"})<br>추세 전환 신호 확인 후 진입 권장.</div>`;
+    </div>` :
+    `<div class="neutral-msg">방향성 불명확 — ADX ${s.adx?.adx||"-"} (${s.adx?.strength||"추세 확인 필요"})<br>추세 전환 신호 확인 후 진입 권장.</div>`;
 
   return`<div class="card">
     <div class="c-hdr">
-      <div class="c-code">${st.emoji} KRX · ${s.code}</div>
-      <div class="c-name">${st.name}</div>
+      <div>
+        <div class="c-code">${st.emoji} KRX · ${s.code}</div>
+        <div class="c-name">${st.name}</div>
+      </div>
+      ${rs?`<span class="c-rs" style="background:${rsColor}18;color:${rsColor};border:1px solid ${rsColor}40">
+        KOSPI대비 ${rs.rs>0?"+":""}${rs.rs}%p
+      </span>`:""}
     </div>
     <div class="c-body">
 
+      <!-- ① 현재 주가 -->
       <div class="sec" style="border-left:3px solid #7eb8ff">
         <div class="sec-ttl" style="color:#7eb8ff">💹 <span class="sec-num">①</span> 현재 주가 (${kstInfo.label})</div>
         <div class="p-row">
@@ -269,9 +331,21 @@ function renderCard(s,idx){
           <div class="cell"><div class="cell-lbl">20일 이평</div><div class="cell-val" style="color:#9ab">${W(s.sma20)}</div></div>
           <div class="cell"><div class="cell-lbl">VWAP</div><div class="cell-val" style="color:${s.price>s.vwap?"#00e676":"#ff4d6d"}">${W(s.vwap)}</div></div>
         </div>
+        <!-- 52주 위치 -->
+        ${bo.position!=null?`<div style="background:#0a0f1c;border-radius:8px;padding:8px 10px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:#7a9abc">52주 위치</span>
+            <span style="font-size:11px;font-weight:700;color:${boColor}">${bo.position}% ${bo.nearHigh?"🔥신고가근접":bo.nearLow?"💎신저가근접":""}</span>
+          </div>
+          <div style="height:5px;background:#151a28;border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${bo.position}%;background:linear-gradient(90deg,#00e676,${boColor});border-radius:3px"></div>
+          </div>
+          <div style="font-size:11px;color:#7a9abc;margin-top:3px">${bo.comment}</div>
+        </div>`:""}
         <div class="src"><span style="color:#00e676">●</span>${s.source} · GitHub Actions 자동수집</div>
       </div>
 
+      <!-- ② 분석 결과 -->
       <div class="sec" style="border-left:3px solid ${op.color}">
         <div class="sec-ttl" style="color:${op.color}">🎯 <span class="sec-num">②</span> 분석 결과</div>
         <div class="op-box" style="background:${op.bg};border:1px solid ${op.border};margin-bottom:10px">
@@ -280,13 +354,23 @@ function renderCard(s,idx){
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:3px">
           <span style="font-size:11px;color:#6a7a96">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
-          <span style="font-size:11px;color:${scoreColor};font-weight:700">${s.score>=4?"강한 매수":s.score>=2?"매수":s.score<=-3?"강한 매도":s.score<=-1?"매도":"중립"}</span>
+          <span style="font-size:11px;color:${scoreColor};font-weight:700">${s.score>=5?"강한 매수":s.score>=2?"매수":s.score<=-4?"강한 매도":s.score<=-1?"매도":"중립"}</span>
         </div>
         <div class="score-bar-bg"><div class="score-bar-fill" style="width:${scoreNorm}%;background:${scoreColor}"></div></div>
         <div class="score-labels"><span>매도</span><span>중립</span><span>매수</span></div>
+        <!-- 주봉 멀티타임프레임 -->
+        <div class="weekly-box" style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:#7a9abc">📅 주봉 신호</span>
+            <span style="font-size:12px;font-weight:700;color:${wkColor}">${wk.opinion||"중립"}</span>
+          </div>
+          <div style="font-size:11px;color:#6a7a96">${wk.comment||""}</div>
+        </div>
+        <!-- 캔들 패턴 -->
         ${s.patterns?.length?`<div style="margin-top:8px">${s.patterns.map(p=>`<span class="ptag" style="background:${p.color}18;color:${p.color};border:1px solid ${p.color}40">${p.name} (${p.type})</span>`).join("")}</div>`:""}
       </div>
 
+      <!-- ③ 제안 금액 -->
       <div class="sec" style="border-left:3px solid #c084fc">
         <div class="sec-ttl" style="color:#c084fc">💰 <span class="sec-num">③</span> 제안 금액</div>
         ${chips}
@@ -302,13 +386,66 @@ function renderCard(s,idx){
         </div>`:""}
       </div>
 
+      <!-- ④ 수급 분석 -->
+      <div class="sec" style="border-left:3px solid #00e676">
+        <div class="sec-ttl" style="color:#00e676">💰 <span class="sec-num">④</span> 수급 분석</div>
+        <!-- 외국인·기관 순매수 -->
+        <div class="sec-sub">외국인·기관 순매수</div>
+        <div class="investor-grid">
+          <div class="inv-cell">
+            <div class="inv-lbl">외국인</div>
+            <div class="inv-val" style="color:${f>0?"#00e676":f<0?"#ff4d6d":"#ffd166"}">${f>0?"+":""}${f.toLocaleString()}</div>
+          </div>
+          <div class="inv-cell">
+            <div class="inv-lbl">기관</div>
+            <div class="inv-val" style="color:${inst>0?"#00e676":inst<0?"#ff4d6d":"#ffd166"}">${inst>0?"+":""}${inst.toLocaleString()}</div>
+          </div>
+          <div class="inv-cell">
+            <div class="inv-lbl">개인</div>
+            <div class="inv-val" style="color:${indiv>0?"#00e676":indiv<0?"#ff4d6d":"#ffd166"}">${indiv>0?"+":""}${indiv.toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="for-box" style="background:${fc_c}0c;border:1px solid ${fc_c}28">
+          <div class="for-row"><span class="for-lbl">수급 방향</span><span class="for-trend" style="color:${fc_c}">${s.ft}</span></div>
+          <div class="for-cmt">${s.fc}</div>
+        </div>
+        <!-- 공매도 -->
+        <div class="sec-sub">공매도</div>
+        <div class="irow">
+          <span class="irow-lbl">공매도 비율</span>
+          <div class="irow-r">
+            <div class="irow-val" style="color:${+s.short?.ratio>5?"#ff4d6d":+s.short?.ratio>2?"#ffd166":"#00e676"}">${s.short?.ratio||0}%</div>
+            <div class="irow-cmt">${s.short?.comment||""}</div>
+          </div>
+        </div>
+        <!-- 거래량 급증 -->
+        <div class="sec-sub" style="margin-top:8px">거래량</div>
+        <div class="irow">
+          <span class="irow-lbl">거래량 비율</span>
+          <div class="irow-r">
+            <div class="irow-val" style="color:${vs.surge?"#ff4d6d":+vs.ratio>1.3?"#ffd166":"#9ab"}">${vs.ratio||1}x ${vs.surge?"🔥":""}</div>
+            <div class="irow-cmt">${vs.comment||""}</div>
+          </div>
+        </div>
+        <!-- KOSPI 상대강도 -->
+        <div class="sec-sub" style="margin-top:8px">KOSPI 상대강도</div>
+        <div class="irow">
+          <span class="irow-lbl">RS</span>
+          <div class="irow-r">
+            <div class="irow-val" style="color:${rs?.strong?"#00e676":"#ff4d6d"}">${rs?.rs>0?"+":""}${rs?.rs||0}%p</div>
+            <div class="irow-cmt">${rs?.comment||""}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ 기술 지표 -->
       <div class="sec" style="border-left:3px solid #f9a825">
-        <div class="sec-ttl" style="color:#f9a825">📊 <span class="sec-num">④</span> 제안 근거</div>
-        <div class="sec-sub">모멘텀 지표</div>
+        <div class="sec-ttl" style="color:#f9a825">📊 <span class="sec-num">⑤</span> 기술 지표</div>
+        <div class="sec-sub">모멘텀</div>
         <div style="margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
             <span style="font-size:11px;color:#7a9abc">RSI (14)</span>
-            <span style="font-size:12px;font-weight:700;color:${rc};font-family:monospace">${s.rsi??"-"} <span style="font-size:10px;font-weight:400;color:${rc}aa">${+s.rsi>70?"과매수":+s.rsi<30?"과매도":"중립"}</span></span>
+            <span style="font-size:12px;font-weight:700;color:${rc};font-family:monospace">${s.rsi??"-"} <span style="font-size:10px;font-weight:400">${+s.rsi>70?"과매수":+s.rsi<30?"과매도":"중립"}</span></span>
           </div>
           <div class="rsi-bar-bg">
             <div style="position:absolute;left:30%;top:0;bottom:0;width:1px;background:#252b3a"></div>
@@ -323,7 +460,7 @@ function renderCard(s,idx){
           <div class="ind-cell"><div class="ind-lbl">Stoch %K</div><div class="ind-val" style="color:${sc}">${F1(s.stoch)}</div></div>
         </div>
         <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.wrComment} | ${s.mfiComment}</div>
-        <div class="sec-sub">추세 지표</div>
+        <div class="sec-sub">추세</div>
         <div class="ind-grid" style="margin-bottom:4px">
           <div class="ind-cell"><div class="ind-lbl">MACD</div><div class="ind-val" style="color:${mc}">${F2(s.macd)}</div></div>
           <div class="ind-cell"><div class="ind-lbl">Signal</div><div class="ind-val" style="color:${mc}">${F2(s.macdSignal)}</div></div>
@@ -331,57 +468,64 @@ function renderCard(s,idx){
         </div>
         <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.macdComment}</div>
         <div class="irow">
-          <span class="irow-lbl">ADX (추세강도)</span>
+          <span class="irow-lbl">ADX</span>
           <div class="irow-r"><div class="irow-val" style="color:${+s.adx?.adx>25?"#00e676":"#ffd166"}">${F1(s.adx?.adx)}</div>
-          <div class="irow-cmt">${s.adx?.strength||""} | +DI ${F1(s.adx?.pdi)} / -DI ${F1(s.adx?.ndi)}</div></div>
+          <div class="irow-cmt">${s.adx?.strength||""}</div></div>
         </div>
-        <div class="sec-sub" style="margin-top:10px">거래량 지표</div>
         <div class="irow">
-          <span class="irow-lbl">OBV 추세</span>
+          <span class="irow-lbl">OBV</span>
           <div class="irow-r"><div class="irow-val" style="color:${s.obv?.trend==="상승"?"#00e676":s.obv?.trend==="하락"?"#ff4d6d":"#ffd166"}">${s.obv?.trend||"-"}</div>
           <div class="irow-cmt">5일 기울기 ${s.obv?.slope>0?"+":""}${s.obv?.slope}%</div></div>
         </div>
-        <div class="irow">
-          <span class="irow-lbl">거래량 비율</span>
-          <div class="irow-r"><div class="irow-val" style="color:${s.volRatio>1.5?"#ff4d6d":s.volRatio>1.1?"#ffd166":"#9ab"}">${s.volRatio}x</div>
-          <div class="irow-cmt">${s.volRatio>1.5?"급등 거래량":s.volRatio>1.1?"평균 이상":s.volRatio<0.8?"평균 이하":"평균 수준"} (20일 대비)</div></div>
-        </div>
-        <div class="sec-sub" style="margin-top:10px">외국인 수급</div>
-        <div class="for-box" style="background:${fc_c}0c;border:1px solid ${fc_c}28">
-          <div class="for-row"><span class="for-lbl">수급 방향</span><span class="for-trend" style="color:${fc_c}">${s.ft}</span></div>
-          <div class="for-cmt">${s.fc}</div>
-        </div>
-        <div class="sec-sub">공포·탐욕 지수</div>
-        <div style="margin-bottom:8px">
+        <!-- 공포탐욕 -->
+        <div class="sec-sub" style="margin-top:8px">공포·탐욕 지수</div>
+        <div style="margin-bottom:4px">
           <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-            <span style="font-size:11px;color:#6a7a96">시장 심리</span>
-            <span style="font-size:12px;font-weight:700;color:${s.fg.color}">${s.fg.score} — ${s.fg.label}</span>
+            <span style="font-size:11px;color:#7a9abc">시장 심리</span>
+            <span style="font-size:12px;font-weight:700;color:${s.fg?.color}">${s.fg?.score} — ${s.fg?.label}</span>
           </div>
-          <div class="fear-bar"><div class="fear-needle" style="left:${s.fg.score}%"></div></div>
+          <div class="fear-bar"><div class="fear-needle" style="left:${s.fg?.score||50}%"></div></div>
           <div style="display:flex;justify-content:space-between">
-            <span style="font-size:10px;color:#8090b0">극단 공포</span><span style="font-size:10px;color:#8090b0">중립</span><span style="font-size:10px;color:#8090b0">극단 탐욕</span>
+            <span style="font-size:10px;color:#8090b0">극단 공포</span>
+            <span style="font-size:10px;color:#8090b0">중립</span>
+            <span style="font-size:10px;color:#8090b0">극단 탐욕</span>
           </div>
         </div>
         <div class="sec-sub">종합 근거</div>
         ${B(s.basis,"#f9a825")}
       </div>
 
+      <!-- ⑥ 역발상 신호 -->
       <div class="sec" style="border-left:3px solid #c084fc">
-        <div class="sec-ttl" style="color:#c084fc">🔄 <span class="sec-num">⑤</span> 역발상 신호</div>
-        <div class="contra-box" style="background:${s.contra.strength>=2?"#00e67609":s.contra.strength<=-2?"#ff4d6d09":"#ffd16609"};border:1px solid ${s.contra.strength>=2?"#00e67628":s.contra.strength<=-2?"#ff4d6d28":"#ffd16628"}">
-          <div style="font-size:11px;font-weight:800;color:${s.contra.strength>=2?"#00e676":s.contra.strength<=-2?"#ff4d6d":"#ffd166"};margin-bottom:4px">⚡ ${s.contra.action}</div>
-          ${B(s.contra.signals,s.contra.strength>=2?"#00e676":s.contra.strength<=-2?"#ff4d6d":"#ffd166")}
-          ${!s.contra.signals?.length?`<div style="font-size:12px;color:#8090b0">현 신호 유효 — 역발상 기회 없음</div>`:""}
+        <div class="sec-ttl" style="color:#c084fc">🔄 <span class="sec-num">⑥</span> 역발상 신호</div>
+        <div class="contra-box" style="background:${s.contra?.strength>=2?"#00e67609":s.contra?.strength<=-2?"#ff4d6d09":"#ffd16609"};border:1px solid ${s.contra?.strength>=2?"#00e67628":s.contra?.strength<=-2?"#ff4d6d28":"#ffd16628"}">
+          <div style="font-size:11px;font-weight:800;color:${s.contra?.strength>=2?"#00e676":s.contra?.strength<=-2?"#ff4d6d":"#ffd166"};margin-bottom:4px">⚡ ${s.contra?.action||"현 신호 유효"}</div>
+          ${B(s.contra?.signals||[],(s.contra?.strength||0)>=2?"#00e676":(s.contra?.strength||0)<=-2?"#ff4d6d":"#ffd166")}
+          ${!s.contra?.signals?.length?`<div style="font-size:12px;color:#8090b0">역발상 기회 없음. 현 신호 신뢰도 높음.</div>`:""}
         </div>
       </div>
 
+      <!-- ⑦ 뉴스 -->
+      <div class="sec" style="border-left:3px solid #4db8ff">
+        <div class="sec-ttl" style="color:#4db8ff">📰 <span class="sec-num">⑦</span> 최신 뉴스</div>
+        ${newsHtml}
+      </div>
+
+      <!-- ⑧ DART 공시 -->
+      <div class="sec" style="border-left:3px solid #ffd166">
+        <div class="sec-ttl" style="color:#ffd166">📋 <span class="sec-num">⑧</span> DART 공시</div>
+        ${dartHtml}
+      </div>
+
+      <!-- ⑨ RISK -->
       <div class="sec" style="border-left:3px solid #ff4d6d">
-        <div class="sec-ttl" style="color:#ff4d6d">⚠️ <span class="sec-num">⑥</span> RISK</div>
+        <div class="sec-ttl" style="color:#ff4d6d">⚠️ <span class="sec-num">⑨</span> RISK</div>
         ${B(s.risk,"#ff4d6d")}
       </div>
 
+      <!-- ⑩ 참고 사항 -->
       <div class="sec" style="border-left:3px solid #78c1ff">
-        <div class="sec-ttl" style="color:#78c1ff">📌 <span class="sec-num">⑦</span> 참고 사항</div>
+        <div class="sec-ttl" style="color:#78c1ff">📌 <span class="sec-num">⑩</span> 참고 사항</div>
         ${B(s.notes,"#78c1ff")}
       </div>
 
@@ -406,10 +550,8 @@ async function loadData(){
   hideAll();
   document.getElementById("loadingScreen").style.display="";
   document.getElementById("ldTitle").textContent="데이터 불러오는 중...";
-  document.getElementById("ldSub").textContent="GitHub Actions 자동 수집 데이터 로드";
 
   try{
-    // 캐시 방지
     const res=await fetch(`data.json?_=${Date.now()}`);
     if(!res.ok) throw new Error(`data.json 로드 실패: HTTP ${res.status}`);
     const data=await res.json();
@@ -417,20 +559,27 @@ async function loadData(){
     document.getElementById("progFill").style.width="100%";
     await new Promise(r=>setTimeout(r,200));
 
+    // KOSPI 배지 업데이트
+    if(data.kospi?.price){
+      const k=data.kospi;
+      const up=k.changePct>=0;
+      document.getElementById("kospiBar").textContent=
+        `KOSPI ${k.price.toLocaleString()} ${up?"▲":"▼"}${Math.abs(k.changePct)}%`;
+      document.getElementById("kospiBar").style.color=up?"#00e676":"#ff4d6d";
+    }
+
     hideAll();
     document.getElementById("results").innerHTML=data.stocks.map((s,i)=>renderCard(s,i)).join("");
     document.getElementById("results").style.display="";
     document.getElementById("footer").style.display="";
-
-    document.getElementById("updBadge").textContent=`수집: ${data.updatedAt||data.updatedTime||"최근"}`;
+    document.getElementById("updBadge").textContent=`수집: ${data.updatedAt||data.updatedTime}`;
     document.getElementById("updBadge").style.display="";
 
   }catch(e){
     hideAll();
     document.getElementById("errBox").style.display="";
     document.getElementById("errTitle").textContent="⚠️ 데이터 로드 실패";
-    document.getElementById("errMsg").textContent=
-      e.message+"\n\nGitHub Actions가 아직 실행되지 않았거나\ndata.json이 없을 수 있습니다.\n저장소에서 Actions > Run workflow를 눌러 수동 실행해보세요.";
+    document.getElementById("errMsg").textContent=e.message+"\n\nActions 탭에서 Run workflow를 눌러 수동 실행해보세요.";
   }finally{
     loading=false;
     btn.disabled=false;
