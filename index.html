@@ -133,7 +133,7 @@ border-radius:20px;padding:2px 9px}
   </div>
   <div class="hdr-meta">
     <span class="badge" id="mktBadge">--</span>
-    <span class="badge auto-badge">⚡ 5분 자동 갱신</span>
+    <span class="badge auto-badge">⚡ 1분 자동 갱신</span>
     <span class="badge" id="updBadge" style="display:none"></span>
     <span class="badge">⏰ 평일 07:30 알람</span>
   </div>
@@ -147,7 +147,7 @@ border-radius:20px;padding:2px 9px}
     <div style="font-size:46px;margin-bottom:12px">📊</div>
     <div style="font-size:16px;font-weight:800;margin-bottom:8px">SK하이닉스 · 삼성전자 · LG전자</div>
     <div style="font-size:12px;color:#7a9abc;line-height:2;margin-bottom:20px">
-      GitHub Actions가 5분마다 자동 수집<br>
+      GitHub Actions가 1분마다 자동 수집<br>
       RSI · MACD · ADX · OBV · 역발상 신호<br>
       <span style="color:#4a6888;font-size:11px">프록시 오류 없음 · 완전 무료</span>
     </div>
@@ -442,8 +442,8 @@ async function loadData(){
   }
 }
 
-// 5분마다 자동 새로고침
-setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 5*60*1000);
+// 1분마다 자동 새로고침
+setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 60*1000);
 document.getElementById("mktBadge").textContent=kst().status;
 </script>
 </body>
