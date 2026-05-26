@@ -390,9 +390,58 @@ function renderCard(s,idx){
         ${s.patterns?.length?`<div style="margin-top:8px">${s.patterns.map(p=>`<span class="ptag" style="background:${p.color}18;color:${p.color};border:1px solid ${p.color}40">${p.name} (${p.type})</span>`).join("")}</div>`:""}
       </div>
 
-      <!-- ③ 제안 금액 -->
+      <!-- ③ 목표주가·적정주가 -->
+      <div class="sec" style="border-left:3px solid #f9a825">
+        <div class="sec-ttl" style="color:#f9a825">🎯 <span class="sec-num">③</span> 목표주가 · 적정주가</div>
+
+        <!-- 증권사 목표주가 -->
+        <div class="sec-sub">증권사 컨센서스 목표주가</div>
+        ${+s.targetPrice_consensus>0?`
+        <div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;color:#7a9abc">평균 목표주가</span>
+            <span style="font-size:18px;font-weight:900;color:#ffd166;font-family:monospace">${W(s.targetPrice_consensus)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:#7a9abc">현재가 대비</span>
+            <span style="font-size:12px;font-weight:700;color:${s.targetPrice_consensus>s.price?"#00e676":"#ff4d6d"}">
+              ${s.targetPrice_consensus>s.price?"▲":"▼"} ${Math.abs(Math.round((s.targetPrice_consensus-s.price)/s.price*100))}% 
+              (${s.targetPrice_consensus>s.price?"상승여력":"하락우려"})
+            </span>
+          </div>
+          <div class="grid2" style="margin-top:6px">
+            <div class="cell"><div class="cell-lbl">최고 목표</div><div class="cell-val" style="color:#00e676">${W(s.targetPrice_high)}</div></div>
+            <div class="cell"><div class="cell-lbl">최저 목표</div><div class="cell-val" style="color:#ff4d6d">${W(s.targetPrice_low)}</div></div>
+          </div>
+          <div style="font-size:11px;color:#6a7a96;margin-top:4px">출처: ${s.targetPrice_source}</div>
+        </div>
+        `:`<div style="font-size:12px;color:#7a9abc;margin-bottom:8px">목표주가 데이터 수집 중</div>`}
+
+        <!-- 적정주가 -->
+        <div class="sec-sub">적정주가 (PER·PBR 기반)</div>
+        <div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;color:#7a9abc">계산된 적정주가</span>
+            <span style="font-size:18px;font-weight:900;color:#78c1ff;font-family:monospace">${W(s.fairValue)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:#7a9abc">괴리율</span>
+            <span style="font-size:12px;font-weight:700;color:${+s.fairValueGap>5?"#00e676":+s.fairValueGap<-5?"#ff4d6d":"#ffd166"}">
+              ${+s.fairValueGap>0?"+":""}${s.fairValueGap}%
+            </span>
+          </div>
+          <div style="font-size:11px;color:#6a7a96;margin-bottom:6px">${s.fairValueComment}</div>
+          <div class="grid2">
+            ${s.fairValueDetail?.per_fair?`<div class="cell"><div class="cell-lbl">PER 적정가 (${s.fairValueDetail.sector_per}배)</div><div class="cell-val" style="color:#78c1ff">${W(s.fairValueDetail.per_fair)}</div></div>`:""}
+            ${s.fairValueDetail?.pbr_fair?`<div class="cell"><div class="cell-lbl">PBR 적정가 (${s.fairValueDetail.sector_pbr}배)</div><div class="cell-val" style="color:#78c1ff">${W(s.fairValueDetail.pbr_fair)}</div></div>`:""}
+          </div>
+          ${s.eps?`<div style="font-size:11px;color:#6a7a96;margin-top:4px">EPS ${W(s.eps)} · BPS ${W(s.bps)} · 업종: ${s.fairValueDetail?.sector}</div>`:""}
+        </div>
+      </div>
+
+      <!-- ④ 제안 금액 -->
       <div class="sec" style="border-left:3px solid #c084fc">
-        <div class="sec-ttl" style="color:#c084fc">💰 <span class="sec-num">③</span> 제안 금액</div>
+        <div class="sec-ttl" style="color:#c084fc">💰 <span class="sec-num">④</span> 제안 금액</div>
         ${chips}
         ${s.pivot?`<div class="sec-sub" style="margin-top:10px">피봇 포인트</div>
         <div class="grid3">
@@ -408,7 +457,7 @@ function renderCard(s,idx){
 
       <!-- ④ 수급 분석 -->
       <div class="sec" style="border-left:3px solid #00e676">
-        <div class="sec-ttl" style="color:#00e676">💰 <span class="sec-num">④</span> 수급 분석</div>
+        <div class="sec-ttl" style="color:#00e676">💰 <span class="sec-num">⑤</span> 수급 분석</div>
         <!-- 외국인·기관 순매수 -->
         <div class="sec-sub">외국인·기관 순매수</div>
         <div class="investor-grid">
@@ -460,7 +509,7 @@ function renderCard(s,idx){
 
       <!-- ⑤ 기술 지표 -->
       <div class="sec" style="border-left:3px solid #f9a825">
-        <div class="sec-ttl" style="color:#f9a825">📊 <span class="sec-num">⑤</span> 기술 지표</div>
+        <div class="sec-ttl" style="color:#f9a825">📊 <span class="sec-num">⑥</span> 기술 지표</div>
         <div class="sec-sub">모멘텀</div>
         <div style="margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
@@ -517,7 +566,7 @@ function renderCard(s,idx){
 
       <!-- ⑥ 역발상 신호 -->
       <div class="sec" style="border-left:3px solid #c084fc">
-        <div class="sec-ttl" style="color:#c084fc">🔄 <span class="sec-num">⑥</span> 역발상 신호</div>
+        <div class="sec-ttl" style="color:#c084fc">🔄 <span class="sec-num">⑦</span> 역발상 신호</div>
         <div class="contra-box" style="background:${s.contra?.strength>=2?"#00e67609":s.contra?.strength<=-2?"#ff4d6d09":"#ffd16609"};border:1px solid ${s.contra?.strength>=2?"#00e67628":s.contra?.strength<=-2?"#ff4d6d28":"#ffd16628"}">
           <div style="font-size:11px;font-weight:800;color:${s.contra?.strength>=2?"#00e676":s.contra?.strength<=-2?"#ff4d6d":"#ffd166"};margin-bottom:4px">⚡ ${s.contra?.action||"현 신호 유효"}</div>
           ${B(s.contra?.signals||[],(s.contra?.strength||0)>=2?"#00e676":(s.contra?.strength||0)<=-2?"#ff4d6d":"#ffd166")}
@@ -527,25 +576,25 @@ function renderCard(s,idx){
 
       <!-- ⑦ 뉴스 -->
       <div class="sec" style="border-left:3px solid #4db8ff">
-        <div class="sec-ttl" style="color:#4db8ff">📰 <span class="sec-num">⑦</span> 최신 뉴스</div>
+        <div class="sec-ttl" style="color:#4db8ff">📰 <span class="sec-num">⑧</span> 최신 뉴스</div>
         ${newsHtml}
       </div>
 
       <!-- ⑧ DART 공시 -->
       <div class="sec" style="border-left:3px solid #ffd166">
-        <div class="sec-ttl" style="color:#ffd166">📋 <span class="sec-num">⑧</span> DART 공시</div>
+        <div class="sec-ttl" style="color:#ffd166">📋 <span class="sec-num">⑨</span> DART 공시</div>
         ${dartHtml}
       </div>
 
       <!-- ⑨ RISK -->
       <div class="sec" style="border-left:3px solid #ff4d6d">
-        <div class="sec-ttl" style="color:#ff4d6d">⚠️ <span class="sec-num">⑨</span> RISK</div>
+        <div class="sec-ttl" style="color:#ff4d6d">⚠️ <span class="sec-num">⑩</span> RISK</div>
         ${B(s.risk,"#ff4d6d")}
       </div>
 
       <!-- ⑩ 참고 사항 -->
       <div class="sec" style="border-left:3px solid #78c1ff">
-        <div class="sec-ttl" style="color:#78c1ff">📌 <span class="sec-num">⑩</span> 참고 사항</div>
+        <div class="sec-ttl" style="color:#78c1ff">📌 <span class="sec-num">⑪</span> 참고 사항</div>
         ${B(s.notes,"#78c1ff")}
       </div>
 

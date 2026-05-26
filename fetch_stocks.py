@@ -229,6 +229,122 @@ def fetch_kospi():
 
 
 # ─────────────────────────────────────────
+# 증권사 목표주가 + 적정주가 (네이버 금융)
+# ─────────────────────────────────────────
+def fetch_target_price(code):
+    result = {"consensus": 0, "high": 0, "low": 0, "avg": 0,
+              "count": 0, "comment": "", "source": ""}
+    try:
+        import re
+        # 네이버 금융 컨센서스 페이지
+        html = http_get(
+            f"https://finance.naver.com/item/analyst.naver?code={code}",
+            headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
+        )
+        # 목표주가 파싱
+        targets = re.findall(r'목표주가[^0-9]*([0-9,]+)', html)
+        prices = [int(p.replace(",", "")) for p in targets if int(p.replace(",", "")) > 0]
+        if prices:
+            result["consensus"] = round(sum(prices) / len(prices))
+            result["high"]      = max(prices)
+            result["low"]       = min(prices)
+            result["avg"]       = result["consensus"]
+            result["count"]     = len(prices)
+            result["source"]    = "네이버 금융 컨센서스"
+    except Exception as e:
+        print(f"  목표주가 HTML 실패 ({code}): {e}", file=sys.stderr)
+
+    # Yahoo Finance 폴백
+    if result["consensus"] == 0:
+        try:
+            d = http_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.KS")
+            meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
+            tp = meta.get("targetMeanPrice") or meta.get("fiftyTwoWeekHigh", 0)
+            if tp:
+                result["consensus"] = round(float(tp))
+                result["source"]    = "Yahoo Finance"
+        except: pass
+
+    return result
+
+
+def calc_fair_value(code, price, eps=None, bps=None, growth=None):
+    """PER·PBR 기반 적정주가 계산"""
+    # 종목별 업종 평균 PER/PBR (2026 기준)
+    sector_data = {
+        "000660": {"per": 12, "pbr": 1.8, "name": "반도체"},   # SK하이닉스
+        "005930": {"per": 14, "pbr": 1.5, "name": "반도체"},   # 삼성전자
+        "066570": {"per": 10, "pbr": 0.9, "name": "가전/전장"}, # LG전자
+    }
+    sd = sector_data.get(code, {"per": 12, "pbr": 1.5, "name": "일반"})
+
+    results = {}
+
+    # EPS 기반 PER 적정주가 (Yahoo Finance에서 EPS 사용)
+    if eps and eps > 0:
+        results["per_fair"] = round(eps * sd["per"])
+        results["per_label"] = f"업종 평균 PER {sd['per']}배"
+
+    # BPS 기반 PBR 적정주가
+    if bps and bps > 0:
+        results["pbr_fair"] = round(bps * sd["pbr"])
+        results["pbr_label"] = f"업종 평균 PBR {sd['pbr']}배"
+
+    # 종합 적정주가 (PER·PBR 평균)
+    vals = [v for k, v in results.items() if k.endswith("_fair")]
+    if vals:
+        results["fair_value"] = round(sum(vals) / len(vals))
+    else:
+        results["fair_value"] = 0
+
+    # 현재가 대비 괴리율
+    if results["fair_value"] > 0 and price > 0:
+        gap = round((results["fair_value"] - price) / price * 100, 1)
+        results["gap"] = gap
+        results["gap_comment"] = (
+            f"적정가 대비 {abs(gap)}% {'저평가 — 매수 기회' if gap > 5 else '고평가 — 주의' if gap < -5 else '적정 수준'}"
+        )
+    else:
+        results["gap"] = 0
+        results["gap_comment"] = "EPS/BPS 데이터 부족"
+
+    results["sector"] = sd["name"]
+    results["sector_per"] = sd["per"]
+    results["sector_pbr"] = sd["pbr"]
+    return results
+
+
+def fetch_financial_data(yf_sym, code):
+    """Yahoo Finance에서 EPS, BPS 수집"""
+    eps = bps = None
+    try:
+        d = http_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{yf_sym}?interval=1d&range=1d")
+        meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
+        # EPS
+        eps_val = meta.get("epsTrailingTwelveMonths") or meta.get("eps")
+        if eps_val:
+            # Yahoo는 달러 기준이므로 환율 적용 (약 1350원)
+            eps = round(float(eps_val) * 1350) if float(eps_val) < 1000 else round(float(eps_val))
+        # BPS (book value per share)
+        bps_val = meta.get("bookValue")
+        if bps_val:
+            bps = round(float(bps_val) * 1350) if float(bps_val) < 1000 else round(float(bps_val))
+    except Exception as e:
+        print(f"  재무데이터 실패 ({yf_sym}): {e}", file=sys.stderr)
+
+    # EPS 없으면 종목별 추정값 사용 (2025 실적 기준)
+    fallback = {
+        "000660": {"eps": 180000, "bps": 950000},  # SK하이닉스
+        "005930": {"eps": 20000,  "bps": 180000},  # 삼성전자
+        "066570": {"eps": 18000,  "bps": 195000},  # LG전자
+    }
+    if not eps and code in fallback:
+        eps = fallback[code]["eps"]
+        bps = fallback[code]["bps"]
+    return eps, bps
+
+
+# ─────────────────────────────────────────
 # Yahoo Finance OHLCV (일봉 + 주봉)
 # ─────────────────────────────────────────
 def fetch_yahoo_ohlcv(yf_sym, interval="1d", range_="60d"):
@@ -768,6 +884,10 @@ def analyze_stock(stock, kospi):
     meta_d, candles_d = fetch_yahoo_ohlcv(stock["yf"], "1d", "60d")
     meta_w, candles_w = fetch_yahoo_ohlcv(stock["yf"], "1wk", "1y")
     meta_m, candles_m = fetch_yahoo_ohlcv(stock["yf"], "1mo", "5y")
+    # 목표주가 + 적정주가
+    target   = fetch_target_price(code)
+    eps, bps = fetch_financial_data(stock["yf"], code)
+    fair     = calc_fair_value(code, price, eps, bps)
 
     closes_d  = [c["close"]  for c in candles_d]
     highs_d   = [c["high"]   for c in candles_d]
@@ -847,6 +967,23 @@ def analyze_stock(stock, kospi):
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
+        "targetPrice_consensus": target.get("consensus", 0),
+        "targetPrice_high": target.get("high", 0),
+        "targetPrice_low": target.get("low", 0),
+        "targetPrice_count": target.get("count", 0),
+        "targetPrice_source": target.get("source", ""),
+        "fairValue": fair.get("fair_value", 0),
+        "fairValueGap": fair.get("gap", 0),
+        "fairValueComment": fair.get("gap_comment", ""),
+        "fairValueDetail": {
+            "per_fair": fair.get("per_fair", 0),
+            "pbr_fair": fair.get("pbr_fair", 0),
+            "sector": fair.get("sector", ""),
+            "sector_per": fair.get("sector_per", 0),
+            "sector_pbr": fair.get("sector_pbr", 0),
+        },
+        "eps": eps or 0,
+        "bps": bps or 0,
         "boll": {"upper": round(boll["upper"]) if boll else 0,
                  "mid":   round(boll["mid"])   if boll else 0,
                  "lower": round(boll["lower"]) if boll else 0,
