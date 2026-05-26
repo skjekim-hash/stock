@@ -61,9 +61,39 @@ def to_n(v, default=0):
 # 네이버 금융 현재가
 # ─────────────────────────────────────────
 def fetch_naver_price(code):
+    # 방법 1: /price 엔드포인트 - 최신 체결가 (가장 정확)
+    try:
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/price?pageSize=2&page=1")
+        rows = d if isinstance(d, list) else d.get("priceInfos") or d.get("prices") or []
+        if rows and len(rows) > 0:
+            latest = rows[0]
+            price = to_n(latest.get("closePrice") or latest.get("nv") or 0)
+            traded_at = latest.get("localTradedAt") or latest.get("tradeTime") or ""
+            if price > 0:
+                # basic에서 전일종가·52주 가져오기
+                prev = high52w = low52w = 0
+                try:
+                    b = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
+                    chg = to_n(b.get("compareToPreviousClosePrice", 0))
+                    prev = round(price - chg) if chg else round(price)
+                    high52w = round(to_n(b.get("highPrice")) or to_n(b.get("yearHighPrice")))
+                    low52w  = round(to_n(b.get("lowPrice"))  or to_n(b.get("yearLowPrice")))
+                except: pass
+                return {
+                    "price": round(price), "prevClose": prev,
+                    "high52w": high52w, "low52w": low52w,
+                    "tradedAt": str(traded_at)[:19],
+                    "source": "네이버 금융",
+                }
+    except Exception as e:
+        print(f"  네이버 price 실패 ({code}): {e}", file=sys.stderr)
+
+    # 방법 2: /basic 엔드포인트 폴백
     try:
         d = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
-        price = to_n(d.get("closePrice")) or to_n(d.get("currentPrice"))
+        # 장중 실시간 우선: dealTradeTime, overMarketPriceInfo 등 확인
+        price = (to_n(d.get("closePrice")) or to_n(d.get("currentPrice"))
+                 or to_n(d.get("nv")) or to_n(d.get("now")))
         if price > 0:
             change_val = to_n(d.get("compareToPreviousClosePrice", 0))
             return {
@@ -71,10 +101,11 @@ def fetch_naver_price(code):
                 "prevClose": round(price - change_val) if change_val else round(price),
                 "high52w":   round(to_n(d.get("highPrice")) or to_n(d.get("yearHighPrice"))),
                 "low52w":    round(to_n(d.get("lowPrice"))  or to_n(d.get("yearLowPrice"))),
+                "tradedAt":  str(d.get("localTradedAt") or d.get("dealTradeTime") or "")[:19],
                 "source":    "네이버 금융",
             }
     except Exception as e:
-        print(f"  네이버 실패 ({code}): {e}", file=sys.stderr)
+        print(f"  네이버 basic 실패 ({code}): {e}", file=sys.stderr)
     return None
 
 
@@ -815,6 +846,7 @@ def analyze_stock(stock, kospi):
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        "tradedAt": naver.get("tradedAt", "") if naver else "",
         "boll": {"upper": round(boll["upper"]) if boll else 0,
                  "mid":   round(boll["mid"])   if boll else 0,
                  "lower": round(boll["lower"]) if boll else 0,

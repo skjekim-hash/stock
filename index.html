@@ -357,7 +357,7 @@ function renderCard(s,idx){
           </div>
           <div style="font-size:11px;color:#7a9abc;margin-top:3px">${bo.comment}</div>
         </div>`:""}
-        <div class="src"><span style="color:#00e676">●</span>${s.source} · GitHub Actions 자동수집</div>
+        <div class="src"><span style="color:#00e676">●</span>${s.source}${s.tradedAt?` · 체결 ${s.tradedAt.slice(11,16)||s.tradedAt}`:""} · 자동수집</div>
       </div>
 
       <!-- ② 분석 결과 -->
