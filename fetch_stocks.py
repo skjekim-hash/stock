@@ -233,36 +233,81 @@ def fetch_yahoo_ohlcv(yf_sym, interval="1d", range_="60d"):
 
 # ─────────────────────────────────────────
 # ─────────────────────────────────────────
-# 뉴스 수집 (Google News RSS - 해외서버 허용)
+# ─────────────────────────────────────────
+# 뉴스 수집 (연합뉴스·한경·머니투데이 RSS)
 # ─────────────────────────────────────────
 def fetch_news(code, name, limit=5):
     news_list = []
-    pos_kw = ["급등","상승","호실적","매수","신고가","수주","흑자","개선","증가","성장","강세","돌파","반등","최고"]
-    neg_kw = ["급락","하락","부진","매도","신저가","적자","감소","둔화","약세","리스크","우려","경고","폭락","손실"]
-    try:
-        import xml.etree.ElementTree as ET
-        from urllib.parse import quote
-        from email.utils import parsedate
-        query = quote(name)
-        url = f"https://news.google.com/rss/search?q={query}+주식&hl=ko&gl=KR&ceid=KR:ko"
-        xml_str = http_get(url, timeout=15)
-        root = ET.fromstring(xml_str)
-        for item in root.findall(".//item")[:limit]:
-            title = item.findtext("title") or ""
-            pub   = item.findtext("pubDate") or ""
-            link  = item.findtext("link") or ""
-            try:
-                pd = parsedate(pub)
-                date_str = f"{pd[0]}-{pd[1]:02d}-{pd[2]:02d}" if pd else pub[:10]
-            except:
-                date_str = pub[:10]
-            clean = title.split(" - ")[0].strip() if " - " in title else title.strip()
-            if clean:
+    pos_kw = ["급등","상승","호실적","매수","신고가","수주","흑자","개선","증가","성장","강세","돌파","반등","최고","어닝","깜짝"]
+    neg_kw = ["급락","하락","부진","매도","신저가","적자","감소","둔화","약세","리스크","우려","경고","폭락","손실","실망","쇼크"]
+
+    import xml.etree.ElementTree as ET
+    from email.utils import parsedate
+
+    # 종목별 RSS 소스 목록 (해외 서버 허용)
+    rss_sources = [
+        # 네이버 뉴스 검색 RSS
+        f"https://news.naver.com/main/rss/searchRss.naver?query={name}",
+        # 연합뉴스 검색 RSS
+        f"https://www.yna.co.kr/search/index?query={name}&lang=en&channel=rss",
+        # 한국경제 RSS
+        f"https://feeds.hankyung.com/apps/news.xml?category=economy",
+        # 머니투데이 RSS
+        f"https://news.mt.co.kr/mtenter/mtenterRss.html",
+        # Yahoo Finance 뉴스 (영문이지만 안정적)
+        f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={code}.KS&region=KR&lang=ko-KR",
+    ]
+
+    seen = set()
+    for rss_url in rss_sources:
+        if len(news_list) >= limit:
+            break
+        try:
+            xml_str = http_get(rss_url, timeout=12)
+            root = ET.fromstring(xml_str)
+            items = root.findall(".//item")
+            for item in items:
+                title = item.findtext("title") or ""
+                pub   = item.findtext("pubDate") or ""
+                link  = item.findtext("link") or ""
+
+                # 종목 관련 뉴스만 필터링
+                if name not in title and code not in title:
+                    # 반도체/가전/전자 관련 키워드도 허용
+                    sector_kw = {
+                        "000660": ["SK하이닉스","하이닉스","HBM","반도체","메모리"],
+                        "005930": ["삼성전자","삼성","갤럭시","파운드리","반도체"],
+                        "066570": ["LG전자","LG","가전","전장","OLED"],
+                    }
+                    kws = sector_kw.get(code, [name])
+                    if not any(k in title for k in kws):
+                        continue
+
+                # 날짜 파싱
+                try:
+                    pd = parsedate(pub)
+                    date_str = f"{pd[0]}-{pd[1]:02d}-{pd[2]:02d}" if pd else pub[:10]
+                except:
+                    date_str = pub[:10] if pub else ""
+
+                # 출처 제거
+                clean = title.split(" - ")[0].split(" | ")[0].strip()
+                if not clean or clean in seen:
+                    continue
+                seen.add(clean)
+
                 sentiment = "긍정" if any(k in clean for k in pos_kw) else                             "부정" if any(k in clean for k in neg_kw) else "중립"
-                news_list.append({"title": clean[:60], "date": date_str,
-                                  "sentiment": sentiment, "url": link})
-    except Exception as e:
-        print(f"  Google 뉴스 실패 ({name}): {e}", file=sys.stderr)
+                news_list.append({
+                    "title": clean[:60],
+                    "date": date_str,
+                    "sentiment": sentiment,
+                    "url": link,
+                })
+                if len(news_list) >= limit:
+                    break
+        except Exception as e:
+            print(f"  RSS 실패 ({rss_url[-40:]}): {e}", file=sys.stderr)
+
     return news_list
 
 # ─────────────────────────────────────────
