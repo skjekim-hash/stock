@@ -79,103 +79,107 @@ def fetch_naver_price(code):
 
 
 # ─────────────────────────────────────────
-# 외국인·기관 순매수 (네이버 금융 + KRX)
+# 외국인·기관 순매수 (네이버 금융 HTML 파싱)
 # ─────────────────────────────────────────
 def fetch_investor_flow(code):
     result = {"foreign": 0, "institution": 0, "individual": 0, "foreignTrend": "중립", "comment": ""}
-
-    # 방법 1: 네이버 금융 PC 버전 HTML 파싱
     try:
-        html = http_get(f"https://finance.naver.com/item/frgn.naver?code={code}")
+        # 네이버 금융 PC 버전 - 투자자별 매매동향 HTML
+        html = http_get(
+            f"https://finance.naver.com/item/frgn.naver?code={code}",
+            headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
+        )
         import re
-        # 외국인 순매수 파싱
-        fgn = re.search(r'외국인.*?([+-]?\d[\d,]*)\s*주', html)
-        inst = re.search(r'기관.*?([+-]?\d[\d,]*)\s*주', html)
-        if fgn:
-            result["foreign"] = int(fgn.group(1).replace(",",""))
-        if inst:
-            result["institution"] = int(inst.group(1).replace(",",""))
+        # 순매수 수량 테이블 파싱 (단위: 주)
+        nums = re.findall(r'<td[^>]*class="[^"]*num[^"]*"[^>]*>([^<]+)</td>', html)
+        nums = [n.strip().replace(",","").replace("+","") for n in nums if n.strip()]
+        nums = [int(n) for n in nums if re.match(r"^-?\d+$", n)]
+
+        # 외국인(index 0), 기관(index 1), 개인(index 2) 순서로 나옴
+        if len(nums) >= 3:
+            result["foreign"]     = nums[0]
+            result["institution"] = nums[1]
+            result["individual"]  = nums[2]
+        elif len(nums) >= 1:
+            result["foreign"] = nums[0]
+
+        # 텍스트 기반 폴백
+        if result["foreign"] == 0:
+            fgn_m = re.search(r'외국인[^0-9-+]*([+-]?[\d,]+)', html)
+            if fgn_m:
+                result["foreign"] = int(fgn_m.group(1).replace(",",""))
     except Exception as e:
         print(f"  수급 HTML 실패 ({code}): {e}", file=sys.stderr)
 
-    # 방법 2: 네이버 모바일 API 여러 엔드포인트 시도
+    # 네이버 모바일 JSON API 폴백
     if result["foreign"] == 0:
-        for url in [
-            f"https://m.stock.naver.com/api/stock/{code}/investorTrade",
-            f"https://m.stock.naver.com/api/stock/{code}/investor",
-            f"https://polling.finance.naver.com/api/realtime/domestic/stock/{code}",
-        ]:
+        for ep in ["investorTrade", "investor", "tradeVolume"]:
             try:
-                d = http_json(url)
-                items = d if isinstance(d, list) else d.get("list") or d.get("data") or []
-                if isinstance(items, list):
-                    for item in items:
-                        nm = str(item.get("investorType") or item.get("type") or "")
-                        net = to_n(item.get("netBuySellVolume") or item.get("netBuy") or item.get("net") or 0)
-                        if any(k in nm for k in ["외국","forg","FORG"]):
-                            result["foreign"] = round(net)
-                        elif any(k in nm for k in ["기관","inst","INST"]):
-                            result["institution"] = round(net)
-                        elif any(k in nm for k in ["개인","indiv","INDIV"]):
-                            result["individual"] = round(net)
-                elif isinstance(d, dict):
-                    result["foreign"]     = round(to_n(d.get("foreignNetBuy") or d.get("frgn") or 0))
-                    result["institution"] = round(to_n(d.get("instNetBuy") or d.get("orgn") or 0))
-                    result["individual"]  = round(to_n(d.get("indivNetBuy") or d.get("indv") or 0))
-                if result["foreign"] != 0 or result["institution"] != 0:
-                    break
-            except Exception as e:
-                print(f"  수급 API 실패 ({url[-30:]}): {e}", file=sys.stderr)
+                d = http_json(f"https://m.stock.naver.com/api/stock/{code}/{ep}")
+                rows = d if isinstance(d, list) else (d.get("list") or d.get("data") or [])
+                for row in rows:
+                    nm = str(row.get("investorType") or row.get("type") or "")
+                    val = to_n(row.get("netBuySellVolume") or row.get("netBuy") or row.get("net") or 0)
+                    if any(k in nm for k in ["외국","forg","FORG"]): result["foreign"] = round(val)
+                    elif any(k in nm for k in ["기관","inst","INST"]): result["institution"] = round(val)
+                    elif any(k in nm for k in ["개인","indiv","INDIV"]): result["individual"] = round(val)
+                if result["foreign"] != 0: break
+            except: pass
 
-    f, inst = result["foreign"], result["institution"]
-    if f > 0 and inst > 0:
+    f, ins = result["foreign"], result["institution"]
+    if f > 0 and ins > 0:
         result["foreignTrend"] = "매수우세"
-        result["comment"] = f"외국인 +{f:,}주 · 기관 +{inst:,}주 순매수. 강한 매수 압력."
+        result["comment"] = f"외국인 +{f:,}주 · 기관 +{ins:,}주 순매수. 강한 매수 압력."
     elif f > 0:
         result["foreignTrend"] = "매수우세"
         result["comment"] = f"외국인 +{f:,}주 순매수. 외국인 주도 상승 기대."
-    elif f < 0 and inst < 0:
+    elif f < 0 and ins < 0:
         result["foreignTrend"] = "매도우세"
-        result["comment"] = f"외국인 {f:,}주 · 기관 {inst:,}주 순매도. 강한 매도 압력."
+        result["comment"] = f"외국인 {f:,}주 · 기관 {ins:,}주 순매도. 강한 매도 압력."
     elif f < 0:
         result["foreignTrend"] = "매도우세"
         result["comment"] = f"외국인 {f:,}주 순매도. 수급 부담 존재."
     else:
         result["foreignTrend"] = "중립"
-        result["comment"] = "외국인·기관 수급 중립. 방향성 확인 필요."
+        result["comment"] = "외국인·기관 수급 — 장중 집계 중이거나 데이터 준비 중."
     return result
 
 
 # ─────────────────────────────────────────
-# 공매도 비율 (네이버 금융)
+# 공매도 비율 (네이버 금융 HTML 파싱)
 # ─────────────────────────────────────────
 def fetch_short_selling(code):
-    for url in [
-        f"https://m.stock.naver.com/api/stock/{code}/shortSelling",
-        f"https://m.stock.naver.com/api/stock/{code}/short",
-        f"https://finance.naver.com/item/shortSelling.naver?code={code}",
-    ]:
-        try:
-            d = http_json(url)
-            # 다양한 필드명 시도
-            ratio = to_n(
-                d.get("shortSellingRatio") or d.get("ratio") or
-                d.get("shortRatio") or d.get("short_ratio") or 0
+    try:
+        html = http_get(
+            f"https://finance.naver.com/item/main.naver?code={code}",
+            headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
+        )
+        import re
+        # 공매도 비율 파싱
+        m = re.search(r"공매도[^0-9]*(\d+\.?\d*)\s*%", html)
+        if m:
+            ratio = float(m.group(1))
+            comment = (
+                "공매도 비율 높음 — 하락 압력 주의" if ratio > 5 else
+                "공매도 비율 보통" if ratio > 2 else
+                "공매도 비율 낮음 — 하락 압력 적음"
             )
-            volume = round(to_n(
-                d.get("shortSellingVolume") or d.get("volume") or
-                d.get("shortVolume") or 0
-            ))
-            if ratio > 0 or volume > 0:
-                comment = (
-                    "공매도 비율 높음 — 하락 압력 주의" if ratio > 5 else
-                    "공매도 비율 보통" if ratio > 2 else
-                    "공매도 비율 낮음 — 하락 압력 적음"
-                )
-                return {"ratio": round(ratio, 2), "volume": volume, "comment": comment}
-        except Exception as e:
-            print(f"  공매도 실패 ({url[-30:]}): {e}", file=sys.stderr)
-    return {"ratio": 0, "volume": 0, "comment": "공매도 데이터 없음"}
+            return {"ratio": ratio, "volume": 0, "comment": comment}
+    except Exception as e:
+        print(f"  공매도 HTML 실패 ({code}): {e}", file=sys.stderr)
+
+    # JSON API 폴백
+    for ep in ["shortSelling", "short"]:
+        try:
+            d = http_json(f"https://m.stock.naver.com/api/stock/{code}/{ep}")
+            ratio = to_n(d.get("shortSellingRatio") or d.get("ratio") or 0)
+            if ratio > 0:
+                comment = ("공매도 비율 높음 — 하락 압력 주의" if ratio > 5 else
+                           "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
+                return {"ratio": round(ratio, 2), "volume": 0, "comment": comment}
+        except: pass
+
+    return {"ratio": 0, "volume": 0, "comment": "공매도 데이터 준비 중"}
 
 
 # ─────────────────────────────────────────
