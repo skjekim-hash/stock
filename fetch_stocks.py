@@ -27,7 +27,7 @@ KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
 
 
-def http_get(url, timeout=15, headers=None):
+def http_get(url, timeout=8, headers=None):
     h = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     if headers:
         h.update(headers)
@@ -239,6 +239,7 @@ def fetch_target_price(code):
         # 네이버 금융 컨센서스 페이지
         html = http_get(
             f"https://finance.naver.com/item/analyst.naver?code={code}",
+            timeout=6,
             headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
         )
         # 목표주가 파싱
@@ -391,18 +392,12 @@ def fetch_news(code, name, limit=5):
     import xml.etree.ElementTree as ET
     from email.utils import parsedate
 
-    # 종목별 RSS 소스 목록 (해외 서버 허용)
+    # RSS 소스 (빠른 것 우선 2개만)
     rss_sources = [
-        # 네이버 뉴스 검색 RSS
-        f"https://news.naver.com/main/rss/searchRss.naver?query={name}",
-        # 연합뉴스 검색 RSS
-        f"https://www.yna.co.kr/search/index?query={name}&lang=en&channel=rss",
-        # 한국경제 RSS
-        f"https://feeds.hankyung.com/apps/news.xml?category=economy",
-        # 머니투데이 RSS
-        f"https://news.mt.co.kr/mtenter/mtenterRss.html",
-        # Yahoo Finance 뉴스 (영문이지만 안정적)
+        # Yahoo Finance (가장 빠르고 안정적)
         f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={code}.KS&region=KR&lang=ko-KR",
+        # 네이버 뉴스
+        f"https://news.naver.com/main/rss/searchRss.naver?query={name}",
     ]
 
     seen = set()
@@ -879,11 +874,11 @@ def analyze_stock(stock, kospi):
     short    = fetch_short_selling(code)
     news     = fetch_news(code, name)
     dart     = fetch_dart(code)
-    time.sleep(0.3)  # 네이버 API 부하 방지
+    time.sleep(0.1)
 
     meta_d, candles_d = fetch_yahoo_ohlcv(stock["yf"], "1d", "60d")
     meta_w, candles_w = fetch_yahoo_ohlcv(stock["yf"], "1wk", "1y")
-    meta_m, candles_m = fetch_yahoo_ohlcv(stock["yf"], "1mo", "5y")
+    meta_m, candles_m = fetch_yahoo_ohlcv(stock["yf"], "1mo", "2y")  # 2년으로 단축
     # 목표주가 + 적정주가
     target   = fetch_target_price(code)
     eps, bps = fetch_financial_data(stock["yf"], code)
@@ -1039,7 +1034,7 @@ def main():
                 print(f"  ⚠ {stock['name']} 데이터 없음", file=sys.stderr)
         except Exception as e:
             print(f"  ❌ {stock['name']} 오류: {e}", file=sys.stderr)
-        time.sleep(0.5)
+        time.sleep(0.2)
 
     output = {
         "updatedAt": now.strftime("%Y-%m-%d %H:%M:%S KST"),
