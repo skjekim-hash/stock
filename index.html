@@ -242,6 +242,12 @@ function renderCard(s,idx){
   const scoreNorm=Math.min(Math.max((s.score+8)/16*100,0),100);
   const scoreColor=s.score>=5?"#00e676":s.score<=-4?"#ff4d6d":"#ffd166";
   const kstInfo=kst();
+  // 목표주가 HTML (중첩 백틱 방지)
+  const tpUpColor=s.targetPrice_consensus>s.price?"#00e676":"#ff4d6d";
+  const tpDir=s.targetPrice_consensus>s.price?"▲":"▼";
+  const tpDiff=Math.abs(Math.round((s.targetPrice_consensus-s.price)/s.price*100));
+  const tpLabel=s.targetPrice_consensus>s.price?"상승여력":"하락우려";
+  const tpFVpColor=+s.fairValueGap>5?"#00e676":+s.fairValueGap<-5?"#ff4d6d":"#ffd166";
   const rs=s.relativeStrength;
   const rsColor=rs?.strong?"#00e676":"#ff4d6d";
 
@@ -396,26 +402,23 @@ function renderCard(s,idx){
 
         <!-- 증권사 목표주가 -->
         <div class="sec-sub">증권사 컨센서스 목표주가</div>
-        ${+s.targetPrice_consensus>0?`
-        <div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:11px;color:#7a9abc">평균 목표주가</span>
-            <span style="font-size:18px;font-weight:900;color:#ffd166;font-family:monospace">${W(s.targetPrice_consensus)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:11px;color:#7a9abc">현재가 대비</span>
-            <span style="font-size:12px;font-weight:700;color:${s.targetPrice_consensus>s.price?"#00e676":"#ff4d6d"}">
-              ${s.targetPrice_consensus>s.price?"▲":"▼"} ${Math.abs(Math.round((s.targetPrice_consensus-s.price)/s.price*100))}% 
-              (${s.targetPrice_consensus>s.price?"상승여력":"하락우려"})
-            </span>
-          </div>
-          <div class="grid2" style="margin-top:6px">
-            <div class="cell"><div class="cell-lbl">최고 목표</div><div class="cell-val" style="color:#00e676">${W(s.targetPrice_high)}</div></div>
-            <div class="cell"><div class="cell-lbl">최저 목표</div><div class="cell-val" style="color:#ff4d6d">${W(s.targetPrice_low)}</div></div>
-          </div>
-          <div style="font-size:11px;color:#6a7a96;margin-top:4px">출처: ${s.targetPrice_source}</div>
-        </div>
-        `:`<div style="font-size:12px;color:#7a9abc;margin-bottom:8px">목표주가 데이터 수집 중</div>`}
+        ${+s.targetPrice_consensus>0?
+          `<div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:11px;color:#7a9abc">평균 목표주가</span>
+              <span style="font-size:18px;font-weight:900;color:#ffd166;font-family:monospace">${W(s.targetPrice_consensus)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;color:#7a9abc">현재가 대비</span>
+              <span style="font-size:12px;font-weight:700;color:${tpUpColor}">${tpDir} ${tpDiff}% (${tpLabel})</span>
+            </div>
+            <div class="grid2" style="margin-top:6px">
+              <div class="cell"><div class="cell-lbl">최고 목표</div><div class="cell-val" style="color:#00e676">${W(s.targetPrice_high)}</div></div>
+              <div class="cell"><div class="cell-lbl">최저 목표</div><div class="cell-val" style="color:#ff4d6d">${W(s.targetPrice_low)}</div></div>
+            </div>
+            <div style="font-size:11px;color:#6a7a96;margin-top:4px">출처: ${s.targetPrice_source}</div>
+          </div>`
+        :"<div style='font-size:12px;color:#7a9abc;margin-bottom:8px'>목표주가 데이터 수집 중</div>"}
 
         <!-- 적정주가 -->
         <div class="sec-sub">적정주가 (PER·PBR 기반)</div>
@@ -426,16 +429,16 @@ function renderCard(s,idx){
           </div>
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
             <span style="font-size:11px;color:#7a9abc">괴리율</span>
-            <span style="font-size:12px;font-weight:700;color:${+s.fairValueGap>5?"#00e676":+s.fairValueGap<-5?"#ff4d6d":"#ffd166"}">
+            <span style="font-size:12px;font-weight:700;color:${tpFVpColor}">
               ${+s.fairValueGap>0?"+":""}${s.fairValueGap}%
             </span>
           </div>
           <div style="font-size:11px;color:#6a7a96;margin-bottom:6px">${s.fairValueComment}</div>
           <div class="grid2">
-            ${s.fairValueDetail?.per_fair?`<div class="cell"><div class="cell-lbl">PER 적정가 (${s.fairValueDetail.sector_per}배)</div><div class="cell-val" style="color:#78c1ff">${W(s.fairValueDetail.per_fair)}</div></div>`:""}
-            ${s.fairValueDetail?.pbr_fair?`<div class="cell"><div class="cell-lbl">PBR 적정가 (${s.fairValueDetail.sector_pbr}배)</div><div class="cell-val" style="color:#78c1ff">${W(s.fairValueDetail.pbr_fair)}</div></div>`:""}
+            ${(s.fairValueDetail&&s.fairValueDetail.per_fair)?'<div class="cell"><div class="cell-lbl">PER 적정가 ('+(s.fairValueDetail.sector_per||0)+'배)</div><div class="cell-val" style="color:#78c1ff">'+W(s.fairValueDetail.per_fair)+'</div></div>':""}
+            ${(s.fairValueDetail&&s.fairValueDetail.pbr_fair)?'<div class="cell"><div class="cell-lbl">PBR 적정가 ('+(s.fairValueDetail.sector_pbr||0)+'배)</div><div class="cell-val" style="color:#78c1ff">'+W(s.fairValueDetail.pbr_fair)+'</div></div>':""}
           </div>
-          ${s.eps?`<div style="font-size:11px;color:#6a7a96;margin-top:4px">EPS ${W(s.eps)} · BPS ${W(s.bps)} · 업종: ${s.fairValueDetail?.sector}</div>`:""}
+          ${s.eps?'<div style="font-size:11px;color:#6a7a96;margin-top:4px">EPS '+W(s.eps)+' · BPS '+W(s.bps)+' · 업종: '+(s.fairValueDetail&&s.fairValueDetail.sector||"")+'</div>':""}
         </div>
       </div>
 
@@ -613,6 +616,7 @@ async function loadData(){
   document.getElementById("btnIcon").textContent="↻";
   document.getElementById("btnText").textContent="불러오는 중...";
   document.getElementById("mktBadge").textContent=kst().status;
+document.getElementById("startScreen").style.display="";
   document.getElementById("progWrap").style.display="";
   document.getElementById("progFill").style.width="30%";
 
@@ -663,6 +667,7 @@ async function loadData(){
 // 1분마다 자동 새로고침
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 60*1000);
 document.getElementById("mktBadge").textContent=kst().status;
+document.getElementById("startScreen").style.display="";
 </script>
 </body>
 </html>
