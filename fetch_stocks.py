@@ -342,8 +342,11 @@ def calc_macd(closes):
     if len(ml) < 9:
         return None, None, None
     sig = ema(ml, 9)
-    m, s = round(ml[-1], 2), round(sig[-1], 2)
-    return m, s, round(m - s, 2)
+    # 주가 대비 % 정규화 (단위 통일)
+    base = closes[-1] if closes[-1] != 0 else 1
+    m = round(ml[-1] / base * 100, 3)
+    s = round(sig[-1] / base * 100, 3)
+    return m, s, round(m - s, 3)
 
 
 def calc_stoch(highs, lows, closes, p=14):
@@ -410,6 +413,14 @@ def calc_vwap(highs, lows, closes, volumes, p=5):
     return None if sv == 0 else round(tv / sv)
 
 
+def calc_boll(closes, p=20):
+    if len(closes) < p:
+        return None
+    sl = closes[-p:]
+    m = sum(sl) / p
+    std = (sum((v - m) ** 2 for v in sl) / p) ** 0.5
+    return {"upper": m + 2 * std, "mid": m, "lower": m - 2 * std}
+
 def calc_pivot(highs, lows, closes):
     if len(closes) < 2:
         return None
@@ -456,16 +467,23 @@ def detect_patterns(opens, highs, lows, closes):
 
 def fear_greed(rsi, stoch, obv_slope, adx_val, vol_ratio):
     score = 50
-    if rsi: score += (rsi - 50) * 0.4
-    if stoch: score += (stoch - 50) * 0.2
-    if obv_slope: score += obv_slope * 0.5
-    if adx_val: score += 0 if adx_val > 25 else -5
-    if vol_ratio: score += 5 if vol_ratio > 1.2 else (-5 if vol_ratio < 0.8 else 0)
+    # RSI: 가장 중요 지표 (가중치 높음)
+    if rsi is not None: score += (rsi - 50) * 0.5
+    # 스토캐스틱
+    if stoch is not None: score += (stoch - 50) * 0.15
+    # OBV 기울기: 극단값 클리핑 (-10~+10 범위로 제한)
+    if obv_slope is not None:
+        clipped = max(min(obv_slope, 10), -10)
+        score += clipped * 0.3
+    # ADX: 추세 강도
+    if adx_val is not None: score += 3 if adx_val > 30 else (-3 if adx_val < 15 else 0)
+    # 거래량 비율
+    if vol_ratio is not None: score += 4 if vol_ratio > 1.5 else (-4 if vol_ratio < 0.6 else 0)
     score = min(max(round(score), 0), 100)
-    label = ("극단적 탐욕" if score >= 70 else "탐욕" if score >= 55
-             else "중립" if score >= 45 else "공포" if score >= 30 else "극단적 공포")
-    color = ("#ff4d6d" if score >= 70 else "#ffd166" if score >= 55
-             else "#9ab" if score >= 45 else "#ffd166" if score >= 30 else "#00e676")
+    label = ("극단적 탐욕" if score >= 75 else "탐욕" if score >= 60
+             else "중립" if score >= 40 else "공포" if score >= 25 else "극단적 공포")
+    color = ("#ff4d6d" if score >= 75 else "#ffd166" if score >= 60
+             else "#9ab" if score >= 40 else "#ffd166" if score >= 25 else "#00e676")
     return {"score": score, "label": label, "color": color}
 
 
@@ -623,7 +641,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
 
-    opinion = "매수" if score >= 5 else "매도" if score <= -4 else "중립"
+    opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
     return opinion, score
 
 
@@ -679,6 +697,7 @@ def analyze_stock(stock, kospi):
 
     meta_d, candles_d = fetch_yahoo_ohlcv(stock["yf"], "1d", "60d")
     meta_w, candles_w = fetch_yahoo_ohlcv(stock["yf"], "1wk", "1y")
+    meta_m, candles_m = fetch_yahoo_ohlcv(stock["yf"], "1mo", "5y")
 
     closes_d  = [c["close"]  for c in candles_d]
     highs_d   = [c["high"]   for c in candles_d]
@@ -714,6 +733,8 @@ def analyze_stock(stock, kospi):
 
     # 고급 분석
     weekly   = calc_weekly_signal(candles_w)
+    monthly  = calc_weekly_signal(candles_m)  # 월봉도 동일 로직 적용
+    monthly["timeframe"] = "월봉"
     rs       = calc_relative_strength(
         round((price - prev) / prev * 100, 2) if prev else 0,
         kospi.get("changePct", 0)
@@ -743,12 +764,22 @@ def analyze_stock(stock, kospi):
         return ("강한 과매도 — 반등 가능" if v < 30 else "저점권 접근" if v < 45 else
                 "강한 과매수 — 조정 경계" if v > 70 else "과매수 진입" if v > 60 else "중립 구간")
 
+    # 볼린저 밴드 위치
+    boll = calc_boll(closes_d) if has_data else None
+    boll_pos = None
+    if boll and boll["upper"] != boll["lower"]:
+        boll_pos = round((closes_d[-1] - boll["lower"]) / (boll["upper"] - boll["lower"]) * 100)
+
     return {
         "code": code, "price": price,
         "change": price - prev,
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        "boll": {"upper": round(boll["upper"]) if boll else 0,
+                 "mid":   round(boll["mid"])   if boll else 0,
+                 "lower": round(boll["lower"]) if boll else 0,
+                 "position": boll_pos} if boll else None,
         "suggestedPrice": pt["sp"], "suggestedLabel": pt["sl"],
         "targetPrice": pt["tp"], "targetPrice2": pt["tp2"], "stopLoss": pt["stop"],
         "rsi": rsi, "rsiComment": cmt_rsi(rsi),
@@ -770,6 +801,7 @@ def analyze_stock(stock, kospi):
         "investor": investor,
         "short": short,
         "weekly": weekly,
+        "monthly": monthly,
         "relativeStrength": rs,
         "breakout": breakout,
         "volSurge": vol_surge,

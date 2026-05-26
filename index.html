@@ -329,8 +329,23 @@ function renderCard(s,idx){
         <div class="grid3">
           <div class="cell"><div class="cell-lbl">5일 이평</div><div class="cell-val" style="color:${+s.sma5>+s.sma20?"#00e676":"#ff4d6d"}">${W(s.sma5)}</div></div>
           <div class="cell"><div class="cell-lbl">20일 이평</div><div class="cell-val" style="color:#9ab">${W(s.sma20)}</div></div>
-          <div class="cell"><div class="cell-lbl">VWAP</div><div class="cell-val" style="color:${s.price>s.vwap?"#00e676":"#ff4d6d"}">${W(s.vwap)}</div></div>
+          <div class="cell"><div class="cell-lbl">60일 이평</div><div class="cell-val" style="color:#7a9abc">${W(s.sma60)}</div></div>
         </div>
+        <div class="grid3" style="margin-bottom:7px">
+          <div class="cell"><div class="cell-lbl">VWAP</div><div class="cell-val" style="color:${s.price>s.vwap?"#00e676":"#ff4d6d"}">${W(s.vwap)}</div></div>
+          <div class="cell"><div class="cell-lbl">볼린저 상단</div><div class="cell-val" style="color:#ff4d6d">${W(s.boll?.upper)}</div></div>
+          <div class="cell"><div class="cell-lbl">볼린저 하단</div><div class="cell-val" style="color:#00e676">${W(s.boll?.lower)}</div></div>
+        </div>
+        ${s.boll?.position!=null?`<div style="background:#0a0f1c;border-radius:8px;padding:8px 10px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:#7a9abc">볼린저 밴드 위치</span>
+            <span style="font-size:11px;font-weight:700;color:${s.boll.position>80?"#ff4d6d":s.boll.position<20?"#00e676":"#ffd166"}">${s.boll.position}%</span>
+          </div>
+          <div style="height:5px;background:#151a28;border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${s.boll.position}%;background:linear-gradient(90deg,#00e676,#ffd166,#ff4d6d);border-radius:3px"></div>
+          </div>
+          <div style="font-size:11px;color:#6a7a96;margin-top:3px">${s.boll.position>80?"상단 근접 — 단기 과열, 조정 가능":s.boll.position<20?"하단 근접 — 과매도, 반등 가능":"중간 구간 — 방향성 대기"}</div>
+        </div>`:""}
         <!-- 52주 위치 -->
         ${bo.position!=null?`<div style="background:#0a0f1c;border-radius:8px;padding:8px 10px;margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
@@ -358,13 +373,18 @@ function renderCard(s,idx){
         </div>
         <div class="score-bar-bg"><div class="score-bar-fill" style="width:${scoreNorm}%;background:${scoreColor}"></div></div>
         <div class="score-labels"><span>매도</span><span>중립</span><span>매수</span></div>
-        <!-- 주봉 멀티타임프레임 -->
+        <!-- 주봉·월봉 멀티타임프레임 -->
         <div class="weekly-box" style="margin-top:10px">
           <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-            <span style="font-size:11px;color:#7a9abc">📅 주봉 신호</span>
+            <span style="font-size:11px;color:#7a9abc">📅 주봉</span>
             <span style="font-size:12px;font-weight:700;color:${wkColor}">${wk.opinion||"중립"}</span>
           </div>
-          <div style="font-size:11px;color:#6a7a96">${wk.comment||""}</div>
+          <div style="font-size:11px;color:#6a7a96;margin-bottom:6px">${wk.comment||""}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:#7a9abc">📆 월봉</span>
+            <span style="font-size:12px;font-weight:700;color:${{매수:"#00e676",매도:"#ff4d6d",중립:"#ffd166"}[s.monthly?.opinion]||"#ffd166"}">${s.monthly?.opinion||"중립"}</span>
+          </div>
+          <div style="font-size:11px;color:#6a7a96">${s.monthly?.comment||""}</div>
         </div>
         <!-- 캔들 패턴 -->
         ${s.patterns?.length?`<div style="margin-top:8px">${s.patterns.map(p=>`<span class="ptag" style="background:${p.color}18;color:${p.color};border:1px solid ${p.color}40">${p.name} (${p.type})</span>`).join("")}</div>`:""}
@@ -462,9 +482,9 @@ function renderCard(s,idx){
         <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.wrComment} | ${s.mfiComment}</div>
         <div class="sec-sub">추세</div>
         <div class="ind-grid" style="margin-bottom:4px">
-          <div class="ind-cell"><div class="ind-lbl">MACD</div><div class="ind-val" style="color:${mc}">${F2(s.macd)}</div></div>
-          <div class="ind-cell"><div class="ind-lbl">Signal</div><div class="ind-val" style="color:${mc}">${F2(s.macdSignal)}</div></div>
-          <div class="ind-cell"><div class="ind-lbl">Hist</div><div class="ind-val" style="color:${(+s.macdHist)>=0?"#00e676":"#ff4d6d"}">${F2(s.macdHist)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">MACD%</div><div class="ind-val" style="color:${mc}">${(+s.macd).toFixed(3)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">Signal%</div><div class="ind-val" style="color:${mc}">${(+s.macdSignal).toFixed(3)}</div></div>
+          <div class="ind-cell"><div class="ind-lbl">Hist%</div><div class="ind-val" style="color:${(+s.macdHist)>=0?"#00e676":"#ff4d6d"}">${(+s.macdHist).toFixed(3)}</div></div>
         </div>
         <div style="font-size:11px;color:#6a7a96;margin-bottom:8px">${s.macdComment}</div>
         <div class="irow">
