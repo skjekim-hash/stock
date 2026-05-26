@@ -232,44 +232,38 @@ def fetch_yahoo_ohlcv(yf_sym, interval="1d", range_="60d"):
 
 
 # ─────────────────────────────────────────
-# 네이버 금융 뉴스
+# ─────────────────────────────────────────
+# 뉴스 수집 (Google News RSS - 해외서버 허용)
 # ─────────────────────────────────────────
 def fetch_news(code, name, limit=5):
     news_list = []
+    pos_kw = ["급등","상승","호실적","매수","신고가","수주","흑자","개선","증가","성장","강세","돌파","반등","최고"]
+    neg_kw = ["급락","하락","부진","매도","신저가","적자","감소","둔화","약세","리스크","우려","경고","폭락","손실"]
     try:
-        # 여러 뉴스 API 엔드포인트 시도
-        news_urls = [
-            f"https://m.stock.naver.com/api/stock/{code}/newsList?page=1&pageSize={limit}",
-            f"https://m.stock.naver.com/api/stock/{code}/news?page=1&pageSize={limit}",
-        ]
-        d = None
-        for url in news_urls:
+        import xml.etree.ElementTree as ET
+        from urllib.parse import quote
+        from email.utils import parsedate
+        query = quote(name)
+        url = f"https://news.google.com/rss/search?q={query}+주식&hl=ko&gl=KR&ceid=KR:ko"
+        xml_str = http_get(url, timeout=15)
+        root = ET.fromstring(xml_str)
+        for item in root.findall(".//item")[:limit]:
+            title = item.findtext("title") or ""
+            pub   = item.findtext("pubDate") or ""
+            link  = item.findtext("link") or ""
             try:
-                d = http_json(url)
-                if d: break
-            except: pass
-        if not d: return []
-        items = d if isinstance(d, list) else d.get("newsList") or d.get("items") or []
-        for item in items[:limit]:
-            title = item.get("title") or item.get("headline") or ""
-            date  = item.get("wDate") or item.get("publishDate") or item.get("date") or ""
-            url_  = item.get("url") or item.get("link") or ""
-            if title:
-                # 간단 감성 분석
-                pos_kw = ["급등","상승","호실적","매수","신고가","수주","흑자","개선","증가","성장","강세"]
-                neg_kw = ["급락","하락","부진","매도","신저가","적자","감소","둔화","약세","리스크","우려"]
-                sentiment = "긍정" if any(k in title for k in pos_kw) else \
-                            "부정" if any(k in title for k in neg_kw) else "중립"
-                news_list.append({
-                    "title": title[:60],
-                    "date": str(date)[:10],
-                    "sentiment": sentiment,
-                    "url": url_,
-                })
+                pd = parsedate(pub)
+                date_str = f"{pd[0]}-{pd[1]:02d}-{pd[2]:02d}" if pd else pub[:10]
+            except:
+                date_str = pub[:10]
+            clean = title.split(" - ")[0].strip() if " - " in title else title.strip()
+            if clean:
+                sentiment = "긍정" if any(k in clean for k in pos_kw) else                             "부정" if any(k in clean for k in neg_kw) else "중립"
+                news_list.append({"title": clean[:60], "date": date_str,
+                                  "sentiment": sentiment, "url": link})
     except Exception as e:
-        print(f"  뉴스 실패 ({code}): {e}", file=sys.stderr)
+        print(f"  Google 뉴스 실패 ({name}): {e}", file=sys.stderr)
     return news_list
-
 
 # ─────────────────────────────────────────
 # DART 공시 (OpenDartReader 없이 직접)
