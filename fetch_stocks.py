@@ -879,10 +879,6 @@ def analyze_stock(stock, kospi):
     meta_d, candles_d = fetch_yahoo_ohlcv(stock["yf"], "1d", "60d")
     meta_w, candles_w = fetch_yahoo_ohlcv(stock["yf"], "1wk", "1y")
     meta_m, candles_m = fetch_yahoo_ohlcv(stock["yf"], "1mo", "2y")  # 2년으로 단축
-    # 목표주가 + 적정주가
-    target   = fetch_target_price(code)
-    eps, bps = fetch_financial_data(stock["yf"], code)
-    fair     = calc_fair_value(code, price, eps, bps)
 
     closes_d  = [c["close"]  for c in candles_d]
     highs_d   = [c["high"]   for c in candles_d]
@@ -900,6 +896,11 @@ def analyze_stock(stock, kospi):
 
     if price == 0:
         return None
+
+    # 목표주가 + 적정주가 (price 정의 후 호출)
+    target   = fetch_target_price(code)
+    eps, bps = fetch_financial_data(stock["yf"], code)
+    fair     = calc_fair_value(code, price, eps, bps)
 
     # 기술 지표
     rsi   = calc_rsi(closes_d)   if has_data else None
