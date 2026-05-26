@@ -228,6 +228,55 @@ function hideAll(){
   document.getElementById("progWrap").style.display="none";
 }
 
+function renderTargetSection(s) {
+  var html = "";
+  var W2 = function(n) { return (!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR"); };
+  // 증권사 목표주가
+  html += "<div class='sec-sub'>증권사 컨센서스 목표주가</div>";
+  if (+s.targetPrice_consensus > 0) {
+    var dir = s.targetPrice_consensus > s.price ? "▲" : "▼";
+    var color = s.targetPrice_consensus > s.price ? "#00e676" : "#ff4d6d";
+    var diff = Math.abs(Math.round((s.targetPrice_consensus - s.price) / s.price * 100));
+    var label = s.targetPrice_consensus > s.price ? "상승여력" : "하락우려";
+    html += "<div style='background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px'>";
+    html += "<div style='display:flex;justify-content:space-between;margin-bottom:6px'>";
+    html += "<span style='font-size:11px;color:#7a9abc'>평균 목표주가</span>";
+    html += "<span style='font-size:18px;font-weight:900;color:#ffd166;font-family:monospace'>" + W2(s.targetPrice_consensus) + "</span></div>";
+    html += "<div style='display:flex;justify-content:space-between;margin-bottom:4px'>";
+    html += "<span style='font-size:11px;color:#7a9abc'>현재가 대비</span>";
+    html += "<span style='font-size:12px;font-weight:700;color:" + color + "'>" + dir + " " + diff + "% (" + label + ")</span></div>";
+    html += "<div style='display:flex;gap:7px;margin-top:6px'>";
+    html += "<div style='flex:1;background:#060a14;border-radius:8px;padding:6px 8px'><div style='font-size:11px;color:#7a9abc;margin-bottom:2px'>최고 목표</div><div style='font-size:12px;font-weight:700;color:#00e676;font-family:monospace'>" + W2(s.targetPrice_high) + "</div></div>";
+    html += "<div style='flex:1;background:#060a14;border-radius:8px;padding:6px 8px'><div style='font-size:11px;color:#7a9abc;margin-bottom:2px'>최저 목표</div><div style='font-size:12px;font-weight:700;color:#ff4d6d;font-family:monospace'>" + W2(s.targetPrice_low) + "</div></div>";
+    html += "</div>";
+    html += "<div style='font-size:11px;color:#6a7a96;margin-top:4px'>출처: " + (s.targetPrice_source||"") + "</div></div>";
+  } else {
+    html += "<div style='font-size:12px;color:#7a9abc;margin-bottom:8px'>목표주가 데이터 수집 중</div>";
+  }
+  // 적정주가
+  html += "<div class='sec-sub'>적정주가 (PER·PBR 기반)</div>";
+  html += "<div style='background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px'>";
+  html += "<div style='display:flex;justify-content:space-between;margin-bottom:6px'>";
+  html += "<span style='font-size:11px;color:#7a9abc'>계산된 적정주가</span>";
+  html += "<span style='font-size:18px;font-weight:900;color:#78c1ff;font-family:monospace'>" + W2(s.fairValue) + "</span></div>";
+  if (s.fairValue > 0) {
+    var gap = s.fairValueGap || 0;
+    var gcolor = gap > 5 ? "#00e676" : gap < -5 ? "#ff4d6d" : "#ffd166";
+    html += "<div style='display:flex;justify-content:space-between;margin-bottom:4px'>";
+    html += "<span style='font-size:11px;color:#7a9abc'>괴리율</span>";
+    html += "<span style='font-size:12px;font-weight:700;color:" + gcolor + "'>" + (gap > 0 ? "+" : "") + gap + "%</span></div>";
+    html += "<div style='font-size:11px;color:#6a7a96;margin-bottom:6px'>" + (s.fairValueComment||"") + "</div>";
+    var fd = s.fairValueDetail || {};
+    html += "<div style='display:flex;gap:7px'>";
+    if (fd.per_fair) html += "<div style='flex:1;background:#060a14;border-radius:8px;padding:6px 8px'><div style='font-size:11px;color:#7a9abc'>PER 적정가</div><div style='font-size:12px;font-weight:700;color:#78c1ff;font-family:monospace'>" + W2(fd.per_fair) + "</div></div>";
+    if (fd.pbr_fair) html += "<div style='flex:1;background:#060a14;border-radius:8px;padding:6px 8px'><div style='font-size:11px;color:#7a9abc'>PBR 적정가</div><div style='font-size:12px;font-weight:700;color:#78c1ff;font-family:monospace'>" + W2(fd.pbr_fair) + "</div></div>";
+    html += "</div>";
+    if (s.eps) html += "<div style='font-size:11px;color:#6a7a96;margin-top:4px'>EPS " + W2(s.eps) + " · 업종: " + (fd.sector||"") + " · PER " + (fd.sector_per||"") + "배</div>";
+  }
+  html += "</div>";
+  return html;
+}
+
 function renderCard(s,idx){
   const st=STOCKS.find(x=>x.code===s.code)||STOCKS[idx];
   const op=OP_STYLE[s.opinion]||OP_STYLE["중립"];
@@ -399,47 +448,7 @@ function renderCard(s,idx){
       <!-- ③ 목표주가·적정주가 -->
       <div class="sec" style="border-left:3px solid #f9a825">
         <div class="sec-ttl" style="color:#f9a825">🎯 <span class="sec-num">③</span> 목표주가 · 적정주가</div>
-
-        <!-- 증권사 목표주가 -->
-        <div class="sec-sub">증권사 컨센서스 목표주가</div>
-        ${+s.targetPrice_consensus>0?
-          `<div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              <span style="font-size:11px;color:#7a9abc">평균 목표주가</span>
-              <span style="font-size:18px;font-weight:900;color:#ffd166;font-family:monospace">${W(s.targetPrice_consensus)}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:11px;color:#7a9abc">현재가 대비</span>
-              <span style="font-size:12px;font-weight:700;color:${tpUpColor}">${tpDir} ${tpDiff}% (${tpLabel})</span>
-            </div>
-            <div class="grid2" style="margin-top:6px">
-              <div class="cell"><div class="cell-lbl">최고 목표</div><div class="cell-val" style="color:#00e676">${W(s.targetPrice_high)}</div></div>
-              <div class="cell"><div class="cell-lbl">최저 목표</div><div class="cell-val" style="color:#ff4d6d">${W(s.targetPrice_low)}</div></div>
-            </div>
-            <div style="font-size:11px;color:#6a7a96;margin-top:4px">출처: ${s.targetPrice_source}</div>
-          </div>`
-        :"<div style='font-size:12px;color:#7a9abc;margin-bottom:8px'>목표주가 데이터 수집 중</div>"}
-
-        <!-- 적정주가 -->
-        <div class="sec-sub">적정주가 (PER·PBR 기반)</div>
-        <div style="background:#0a0f1c;border-radius:8px;padding:10px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:11px;color:#7a9abc">계산된 적정주가</span>
-            <span style="font-size:18px;font-weight:900;color:#78c1ff;font-family:monospace">${W(s.fairValue)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:11px;color:#7a9abc">괴리율</span>
-            <span style="font-size:12px;font-weight:700;color:${tpFVpColor}">
-              ${+s.fairValueGap>0?"+":""}${s.fairValueGap}%
-            </span>
-          </div>
-          <div style="font-size:11px;color:#6a7a96;margin-bottom:6px">${s.fairValueComment}</div>
-          <div class="grid2">
-            ${(s.fairValueDetail&&s.fairValueDetail.per_fair)?'<div class="cell"><div class="cell-lbl">PER 적정가 ('+(s.fairValueDetail.sector_per||0)+'배)</div><div class="cell-val" style="color:#78c1ff">'+W(s.fairValueDetail.per_fair)+'</div></div>':""}
-            ${(s.fairValueDetail&&s.fairValueDetail.pbr_fair)?'<div class="cell"><div class="cell-lbl">PBR 적정가 ('+(s.fairValueDetail.sector_pbr||0)+'배)</div><div class="cell-val" style="color:#78c1ff">'+W(s.fairValueDetail.pbr_fair)+'</div></div>':""}
-          </div>
-          ${s.eps?'<div style="font-size:11px;color:#6a7a96;margin-top:4px">EPS '+W(s.eps)+' · BPS '+W(s.bps)+' · 업종: '+(s.fairValueDetail&&s.fairValueDetail.sector||"")+'</div>':""}
-        </div>
+        ${renderTargetSection(s)}
       </div>
 
       <!-- ④ 제안 금액 -->
