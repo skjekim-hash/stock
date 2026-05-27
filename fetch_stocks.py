@@ -30,6 +30,7 @@ except ImportError:
 import os
 KIS_APP_KEY    = os.environ.get("KIS_APP_KEY", "")
 KIS_APP_SECRET = os.environ.get("KIS_APP_SECRET", "")
+DART_API_KEY   = os.environ.get("DART_API_KEY", "")
 KIS_AVAILABLE  = bool(KIS_APP_KEY and KIS_APP_SECRET)
 KIS_BASE_URL   = "https://openapivts.koreainvestment.com:29443"  # 모의투자
 KIS_TOKEN      = {"access_token": "", "expires": 0}
@@ -357,6 +358,7 @@ except ImportError:
 import os
 KIS_APP_KEY    = os.environ.get("KIS_APP_KEY", "")
 KIS_APP_SECRET = os.environ.get("KIS_APP_SECRET", "")
+DART_API_KEY   = os.environ.get("DART_API_KEY", "")
 KIS_AVAILABLE  = bool(KIS_APP_KEY and KIS_APP_SECRET)
 KIS_BASE_URL   = "https://openapivts.koreainvestment.com:29443"  # 모의투자
 KIS_TOKEN      = {"access_token": "", "expires": 0}
@@ -993,32 +995,41 @@ def fetch_news(code, name, limit=5):
     return news_list
 
 # ─────────────────────────────────────────
-# DART 공시 (OpenDartReader 없이 직접)
+# DART 공시 (공식 OpenDART API)
 # ─────────────────────────────────────────
-def fetch_dart(code, limit=3):
+def fetch_dart(code, limit=5):
     dart_list = []
+    if not DART_API_KEY:
+        print("  DART API 키 없음", file=sys.stderr)
+        return dart_list
     try:
-        # DART 기업 공시 RSS
-        url = f"https://dart.fss.or.kr/api/search.json?stock_code={code}&page_count={limit}&sort=date&sort_mth=desc"
-        try:
-            d = http_json(url)
-        except:
-            return []
+        from datetime import datetime, timedelta
+        end = datetime.now(KST).strftime("%Y%m%d")
+        start = (datetime.now(KST) - timedelta(days=90)).strftime("%Y%m%d")
+        url = (f"https://opendart.fss.or.kr/api/list.json"
+               f"?crtfc_key={DART_API_KEY}&stock_code={code}"
+               f"&bgn_de={start}&end_de={end}&page_count={limit}&sort=date&sort_mth=desc")
+        d = http_json(url, timeout=10)
+        if d.get("status") != "000":
+            print(f"  DART 오류: {d.get('message','')}", file=sys.stderr)
+            return dart_list
         items = d.get("list") or []
+        important_kw = ["실적","분기","연간","배당","유상증자","무상증자","합병","분할","자사주","대규모","공개매수","주요사항"]
         for item in items[:limit]:
             title = item.get("report_nm") or ""
             date  = item.get("rcept_dt") or ""
             rcept = item.get("rcept_no") or ""
+            corp  = item.get("corp_name") or ""
             if title:
-                # 중요 공시 분류
-                important_kw = ["실적","분기","연간","배당","유상증자","무상증자","합병","분할","자사주","대규모"]
                 is_important = any(k in title for k in important_kw)
                 dart_list.append({
                     "title": title[:50],
-                    "date": str(date)[:8],
+                    "date": str(date)[:10],
                     "important": is_important,
+                    "corp": corp,
                     "url": f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rcept}" if rcept else "",
                 })
+        print(f"  ✅ DART {code}: {len(dart_list)}건", file=sys.stderr)
     except Exception as e:
         print(f"  DART 실패 ({code}): {e}", file=sys.stderr)
     return dart_list
