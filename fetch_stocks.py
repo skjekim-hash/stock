@@ -163,8 +163,11 @@ def fetch_kis_price(code):
 
 
 def fetch_kis_investor(code):
-    """KIS 당일 외국인·기관 순매수"""
+    """KIS 당일 외국인·기관 순매수 (실전투자만 지원)"""
     if not KIS_AVAILABLE:
+        return None
+    # 모의투자 서버는 투자자별 조회 미지원 → 스킵
+    if "openapivts" in KIS_BASE_URL:
         return None
     try:
         d = kis_request(
@@ -205,8 +208,10 @@ def fetch_kis_investor(code):
 
 
 def fetch_kis_short(code):
-    """KIS 공매도 비율"""
+    """KIS 공매도 비율 (실전투자만 지원)"""
     if not KIS_AVAILABLE:
+        return None
+    if "openapivts" in KIS_BASE_URL:
         return None
     try:
         d = kis_request(
@@ -485,8 +490,11 @@ def fetch_kis_price(code):
 
 
 def fetch_kis_investor(code):
-    """KIS 당일 외국인·기관 순매수"""
+    """KIS 당일 외국인·기관 순매수 (실전투자만 지원)"""
     if not KIS_AVAILABLE:
+        return None
+    # 모의투자 서버는 투자자별 조회 미지원 → 스킵
+    if "openapivts" in KIS_BASE_URL:
         return None
     try:
         d = kis_request(
@@ -527,8 +535,10 @@ def fetch_kis_investor(code):
 
 
 def fetch_kis_short(code):
-    """KIS 공매도 비율"""
+    """KIS 공매도 비율 (실전투자만 지원)"""
     if not KIS_AVAILABLE:
+        return None
+    if "openapivts" in KIS_BASE_URL:
         return None
     try:
         d = kis_request(
@@ -913,12 +923,14 @@ def fetch_news(code, name, limit=5):
     from email.utils import parsedate
 
     from urllib.parse import quote
-    # RSS 소스 (빠른 것 우선 2개만)
+    # RSS 소스
     rss_sources = [
-        # Yahoo Finance (가장 빠르고 안정적)
+        # Yahoo Finance (안정적)
         f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={code}.KS&region=KR&lang=ko-KR",
-        # 네이버 뉴스 (한글 URL 인코딩)
-        f"https://news.naver.com/main/rss/searchRss.naver?query={quote(name)}",
+        # 연합뉴스 (해외서버 허용)
+        f"https://www.yna.co.kr/rss/news.xml",
+        # 한국경제
+        f"https://feeds.hankyung.com/apps/news.xml?category=stock",
     ]
 
     seen = set()
