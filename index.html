@@ -163,7 +163,7 @@ display:flex;justify-content:space-between;align-items:flex-end}
 <div class="main" id="main">
   <div class="start" id="startScreen">
     <div style="font-size:46px;margin-bottom:12px">📊</div>
-    <div style="font-size:16px;font-weight:800;margin-bottom:8px">SK하이닉스 · 삼성전자 · LG전자</div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:8px">SK하이닉스 · 삼성전자 · LG전자<br>삼성전기 · 현대자동차</div>
     <div style="font-size:12px;color:#7a9abc;line-height:2;margin-bottom:20px">
       외국인·기관 순매수 · 공매도 비율<br>
       KOSPI 상대강도 · 주봉 멀티타임프레임<br>
@@ -231,87 +231,82 @@ function hideAll(){
 }
 
 function renderSummaryTable(stocks) {
-  var W2 = function(n) { return (!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR"); };
-  var OP = {"매수":"#00e676","중립":"#ffd166","매도":"#ff4d6d"};
-  var IC = {"매수":"▲","중립":"◆","매도":"▼"};
-
-  var rows = stocks.map(function(s) {
-    var st = STOCKS.find(function(x){return x.code===s.code;}) || {emoji:"",name:s.code};
-    var op = s.opinion || "중립";
-    var color = OP[op] || "#ffd166";
-    var icon = IC[op] || "◆";
-    var up = (+s.change||0) >= 0;
-    var chgColor = up ? "#00e676" : "#ff4d6d";
-    var chgStr = s.changePct ? (up?"+":"")+s.changePct+"%" : "—";
-
-    // 목표주가 대비 상승여력
-    var tp = +s.targetPrice_consensus || 0;
-    var upside = tp > 0 ? Math.round((tp - s.price) / s.price * 100) : null;
-    var upsideStr = upside !== null ? (upside>0?"+":"")+upside+"%" : "—";
-    var upsideColor = upside !== null ? (upside>5?"#00e676":upside<-5?"#ff4d6d":"#ffd166") : "#7a9abc";
-
-    // 적정주가 괴리율
-    var fv = +s.fairValue || 0;
-    var gap = fv > 0 ? Math.round((fv - s.price) / s.price * 100) : null;
-    var gapStr = gap !== null ? (gap>0?"+":"")+gap+"%" : "—";
-    var gapColor = gap !== null ? (gap>5?"#00e676":gap<-5?"#ff4d6d":"#ffd166") : "#7a9abc";
-
-    // RSI 색
-    var rsiColor = s.rsi ? (+s.rsi>70?"#ff4d6d":+s.rsi<30?"#00e676":"#ffd166") : "#7a9abc";
-
-    return "<tr onclick="document.getElementById('card-"+s.code+"').scrollIntoView({behavior:'smooth'})" style="cursor:pointer">"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;white-space:nowrap">"
-      +   "<span style="font-size:12px">" + st.emoji + " " + st.name + "</span>"
-      + "</td>"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:center">"
-      +   "<span style="color:"+color+";font-weight:900;font-size:13px">"+icon+" "+op+"</span>"
-      + "</td>"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
-      +   "<div style="font-size:12px;font-weight:700">"+W2(s.price)+"</div>"
-      +   "<div style="font-size:10px;color:"+chgColor+"">"+chgStr+"</div>"
-      + "</td>"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
-      +   "<div style="font-size:12px;color:#78c1ff">"+W2(fv)+"</div>"
-      +   "<div style="font-size:10px;color:"+gapColor+"">"+gapStr+"</div>"
-      + "</td>"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
-      +   "<div style="font-size:12px;color:#ffd166">"+W2(tp)+"</div>"
-      +   "<div style="font-size:10px;color:"+upsideColor+"">"+upsideStr+"</div>"
-      + "</td>"
-      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:center">"
-      +   "<span style="font-size:12px;color:"+rsiColor+";font-weight:700">"+(s.rsi||"—")+"</span>"
-      + "</td>"
-      + "</tr>";
-  }).join("");
-
-  return "<div style="background:#080d18;border:1px solid #1e2c48;border-radius:14px;margin-bottom:18px;overflow:hidden">"
-    + "<div style="padding:11px 14px 8px;background:linear-gradient(135deg,#0f1830,#192040);border-bottom:1px solid #1e2c48;display:flex;justify-content:space-between;align-items:center">"
-    +   "<span style="font-size:12px;font-weight:900;color:#4db8ff">⚡ 빠른 판단 요약</span>"
-    +   "<span style="font-size:10px;color:#7a9abc">종목 클릭 시 상세로 이동</span>"
-    + "</div>"
-    + "<div style="overflow-x:auto">"
-    + "<table style="width:100%;border-collapse:collapse;min-width:320px">"
-    + "<thead><tr style="background:#060a14">"
-    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:left;border-bottom:1px solid #1e2c48">종목</th>"
-    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:center;border-bottom:1px solid #1e2c48">의견</th>"
-    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">현재가</th>"
-    +   "<th style="padding:6px;font-size:10px;color:#78c1ff;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">적정가</th>"
-    +   "<th style="padding:6px;font-size:10px;color:#ffd166;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">목표가</th>"
-    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:center;border-bottom:1px solid #1e2c48">RSI</th>"
-    + "</tr></thead>"
-    + "<tbody>" + rows + "</tbody>"
-    + "</table>"
-    + "</div>"
-    + "<div style="padding:7px 14px;background:#060a14;display:flex;gap:12px;flex-wrap:wrap">"
-    +   "<span style="font-size:10px;color:#00e676">▲ 매수</span>"
-    +   "<span style="font-size:10px;color:#ffd166">◆ 중립</span>"
-    +   "<span style="font-size:10px;color:#ff4d6d">▼ 매도</span>"
-    +   "<span style="font-size:10px;color:#7a9abc">│ 적정가 아래% = 저평가</span>"
-    +   "<span style="font-size:10px;color:#7a9abc">│ 목표가 위% = 상승여력</span>"
-    + "</div>"
-    + "</div>";
+  var W2=function(n){return(!n||isNaN(+n)||+n===0)?"\u2014":"\u20a9"+(+n).toLocaleString("ko-KR");};
+  var OC={"매수":"#00e676","중립":"#ffd166","매도":"#ff4d6d"};
+  var OI={"매수":"\u25b2","중립":"\u25c6","매도":"\u25bc"};
+  var S="style=";
+  var rows="";
+  for(var i=0;i<stocks.length;i++){
+    var s=stocks[i];
+    var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"",name:s.code};
+    var op=s.opinion||"중립";
+    var oc=OC[op]||"#ffd166";
+    var oi=OI[op]||"\u25c6";
+    var up=(+s.change||0)>=0;
+    var cc=up?"#00e676":"#ff4d6d";
+    var cp=s.changePct?(up?"+":"")+s.changePct+"%":"\u2014";
+    var tp=+s.targetPrice_consensus||0;
+    var us=tp>0?Math.round((tp-s.price)/s.price*100):null;
+    var ustr=us!==null?(us>0?"+":"")+us+"%":"\u2014";
+    var uc=us!==null?(us>5?"#00e676":us<-5?"#ff4d6d":"#ffd166"):"#7a9abc";
+    var fv=+s.fairValue||0;
+    var gp=fv>0?Math.round((fv-s.price)/s.price*100):null;
+    var gstr=gp!==null?(gp>0?"+":"")+gp+"%":"\u2014";
+    var gc=gp!==null?(gp>5?"#00e676":gp<-5?"#ff4d6d":"#ffd166"):"#7a9abc";
+    var rc=s.rsi?(+s.rsi>70?"#ff4d6d":+s.rsi<30?"#00e676":"#ffd166"):"#7a9abc";
+    var td="padding:8px 6px;border-bottom:1px solid #1e2c48;";
+    var cid=s.code;
+    rows+="<tr class=sum-row data-id="+cid+">"
+      +"<td style='"+td+"white-space:nowrap'><span style='font-size:12px'>"+st.emoji+" "+st.name+"</span></td>"
+      +"<td style='"+td+"text-align:center'><span style='color:"+oc+";font-weight:900;font-size:13px'>"+oi+" "+op+"</span></td>"
+      +"<td style='"+td+"text-align:right;font-family:monospace'>"
+        +"<div style='font-size:12px;font-weight:700'>"+W2(s.price)+"</div>"
+        +"<div style='font-size:10px;color:"+cc+"'>"+cp+"</div></td>"
+      +"<td style='"+td+"text-align:right;font-family:monospace'>"
+        +"<div style='font-size:12px;color:#78c1ff'>"+W2(fv)+"</div>"
+        +"<div style='font-size:10px;color:"+gc+"'>"+gstr+"</div></td>"
+      +"<td style='"+td+"text-align:right;font-family:monospace'>"
+        +"<div style='font-size:12px;color:#ffd166'>"+W2(tp)+"</div>"
+        +"<div style='font-size:10px;color:"+uc+"'>"+ustr+"</div></td>"
+      +"<td style='"+td+"text-align:center'><span style='font-size:12px;color:"+rc+";font-weight:700'>"+(s.rsi||"\u2014")+"</span></td>"
+      +"</tr>";
+  }
+  setTimeout(function(){
+    var rs=document.querySelectorAll(".sum-row");
+    for(var i=0;i<rs.length;i++){
+      rs[i].style.cursor="pointer";
+      (function(id){
+        rs[i].onclick=function(){
+          var el=document.getElementById("card-"+id);
+          if(el) el.scrollIntoView({behavior:"smooth"});
+        };
+      })(rs[i].getAttribute("data-id"));
+    }
+  },100);
+  var th="padding:6px;font-size:10px;font-weight:700;border-bottom:1px solid #1e2c48;";
+  return "<div style='background:#080d18;border:1px solid #1e2c48;border-radius:14px;margin-bottom:18px;overflow:hidden'>"
+    +"<div style='padding:11px 14px 8px;background:linear-gradient(135deg,#0f1830,#192040);border-bottom:1px solid #1e2c48;display:flex;justify-content:space-between;align-items:center'>"
+    +"<span style='font-size:12px;font-weight:900;color:#4db8ff'>\u26a1 빠른 판단 요약</span>"
+    +"<span style='font-size:10px;color:#7a9abc'>종목 클릭 시 상세로 이동</span></div>"
+    +"<div style='overflow-x:auto'>"
+    +"<table style='width:100%;border-collapse:collapse;min-width:320px'>"
+    +"<thead><tr style='background:#060a14'>"
+    +"<th style='"+th+"text-align:left;color:#7a9abc'>종목</th>"
+    +"<th style='"+th+"text-align:center;color:#7a9abc'>의견</th>"
+    +"<th style='"+th+"text-align:right;color:#7a9abc'>현재가</th>"
+    +"<th style='"+th+"text-align:right;color:#78c1ff'>적정가</th>"
+    +"<th style='"+th+"text-align:right;color:#ffd166'>목표가</th>"
+    +"<th style='"+th+"text-align:center;color:#7a9abc'>RSI</th>"
+    +"</tr></thead>"
+    +"<tbody>"+rows+"</tbody></table></div>"
+    +"<div style='padding:7px 14px;background:#060a14;display:flex;gap:12px;flex-wrap:wrap'>"
+    +"<span style='font-size:10px;color:#00e676'>\u25b2 매수</span>"
+    +"<span style='font-size:10px;color:#ffd166'>\u25c6 중립</span>"
+    +"<span style='font-size:10px;color:#ff4d6d'>\u25bc 매도</span>"
+    +"<span style='font-size:10px;color:#7a9abc'>| 적정가% = 저/고평가</span>"
+    +"<span style='font-size:10px;color:#7a9abc'>| 목표가% = 상승여력</span>"
+    +"</div></div>";
 }
-
 function renderTargetSection(s) {
   var html = "";
   var W2 = function(n) { return (!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR"); };
@@ -709,7 +704,6 @@ async function loadData(){
   document.getElementById("btnIcon").textContent="↻";
   document.getElementById("btnText").textContent="불러오는 중...";
   document.getElementById("mktBadge").textContent=kst().status;
-document.getElementById("startScreen").style.display="";
   document.getElementById("progWrap").style.display="";
   document.getElementById("progFill").style.width="30%";
 
@@ -762,7 +756,6 @@ document.getElementById("startScreen").style.display="";
 // 1분마다 자동 새로고침
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 60*1000);
 document.getElementById("mktBadge").textContent=kst().status;
-document.getElementById("startScreen").style.display="";
 </script>
 </body>
 </html>
