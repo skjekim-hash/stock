@@ -26,6 +26,14 @@ except ImportError:
     PYKRX_AVAILABLE = False
     print("  pykrx 미설치 — 수급 데이터 없음", file=sys.stderr)
 
+# KIS API 설정 (GitHub Secrets에서 환경변수로 주입)
+import os
+KIS_APP_KEY    = os.environ.get("KIS_APP_KEY", "")
+KIS_APP_SECRET = os.environ.get("KIS_APP_SECRET", "")
+KIS_AVAILABLE  = bool(KIS_APP_KEY and KIS_APP_SECRET)
+KIS_BASE_URL   = "https://openapivts.koreainvestment.com:29443"  # 모의투자
+KIS_TOKEN      = {"access_token": "", "expires": 0}
+
 STOCKS = [
     {"code": "000660", "yf": "000660.KS", "name": "SK하이닉스", "emoji": "🔵"},
     {"code": "005930", "yf": "005930.KS", "name": "삼성전자",   "emoji": "🟡"},
@@ -65,6 +73,157 @@ def to_n(v, default=0):
         return float(str(v).replace(",", "").replace("%", "").strip())
     except (ValueError, TypeError):
         return default
+
+
+# ─────────────────────────────────────────
+# KIS API (모의투자 - 실시간 주가·수급·공매도)
+# ─────────────────────────────────────────
+def kis_get_token():
+    """KIS 접근토큰 발급 (캐시)"""
+    global KIS_TOKEN
+    if KIS_TOKEN["access_token"] and time.time() < KIS_TOKEN["expires"]:
+        return KIS_TOKEN["access_token"]
+    try:
+        url = f"{KIS_BASE_URL}/oauth2/tokenP"
+        body = json.dumps({
+            "grant_type": "client_credentials",
+            "appkey": KIS_APP_KEY,
+            "appsecret": KIS_APP_SECRET,
+        }).encode()
+        req = Request(url, data=body, method="POST", headers={
+            "Content-Type": "application/json"
+        })
+        with urlopen(req, timeout=10) as r:
+            d = json.loads(r.read().decode())
+        token = d.get("access_token", "")
+        if token:
+            KIS_TOKEN["access_token"] = token
+            KIS_TOKEN["expires"] = time.time() + 3600 * 23
+            print("  ✅ KIS 토큰 발급 성공", file=sys.stderr)
+            return token
+    except Exception as e:
+        print(f"  KIS 토큰 실패: {e}", file=sys.stderr)
+    return ""
+
+
+def kis_request(path, params, tr_id):
+    """KIS API GET 요청"""
+    token = kis_get_token()
+    if not token:
+        return None
+    from urllib.parse import urlencode
+    url = f"{KIS_BASE_URL}{path}?{urlencode(params)}"
+    req = Request(url, headers={
+        "authorization": f"Bearer {token}",
+        "appkey": KIS_APP_KEY,
+        "appsecret": KIS_APP_SECRET,
+        "tr_id": tr_id,
+        "custtype": "P",
+        "Content-Type": "application/json",
+    })
+    try:
+        with urlopen(req, timeout=10) as r:
+            return json.loads(r.read().decode())
+    except Exception as e:
+        print(f"  KIS 요청 실패 ({tr_id}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_price(code):
+    """KIS 실시간 주가 (통합시세 - 넥스트레이드 포함)"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-price",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+            "FHKST01010100"
+        )
+        if not d:
+            return None
+        out = d.get("output", {})
+        price = to_n(out.get("stck_prpr") or out.get("stck_clpr") or 0)
+        prev  = to_n(out.get("stck_sdpr") or 0)  # 전일 종가
+        if price > 0:
+            return {
+                "price":    round(price),
+                "prevClose": round(prev) if prev else round(price),
+                "high52w":  round(to_n(out.get("stck_hgpr") or 0)),
+                "low52w":   round(to_n(out.get("stck_lwpr") or 0)),
+                "tradedAt": out.get("stck_bsop_date", ""),
+                "source":   "KIS API (통합시세)",
+            }
+    except Exception as e:
+        print(f"  KIS 주가 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_investor(code):
+    """KIS 당일 외국인·기관 순매수"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-investor",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+            "FHKST01010900"
+        )
+        if not d:
+            return None
+        out = d.get("output", {})
+        f    = round(to_n(out.get("frgn_ntby_qty") or out.get("frgn_seln_vol") or 0))
+        inst = round(to_n(out.get("orgn_ntby_qty") or out.get("inst_ntby_vol") or 0))
+        indv = round(to_n(out.get("indvdl_ntby_qty") or 0))
+
+        if f > 0 and inst > 0:
+            trend = "매수우세"
+            comment = f"외국인 +{f:,}주 · 기관 +{inst:,}주 동반 순매수 (당일)"
+        elif f > 0:
+            trend = "매수우세"
+            comment = f"외국인 +{f:,}주 순매수 (당일)"
+        elif f < 0 and inst < 0:
+            trend = "매도우세"
+            comment = f"외국인 {f:,}주 · 기관 {inst:,}주 동반 순매도 (당일)"
+        elif f < 0:
+            trend = "매도우세"
+            comment = f"외국인 {f:,}주 순매도 (당일)"
+        else:
+            trend = "중립"
+            comment = "외국인·기관 수급 중립 (당일)"
+
+        return {
+            "foreign": f, "institution": inst, "individual": indv,
+            "foreignTrend": trend, "comment": comment, "date": "당일"
+        }
+    except Exception as e:
+        print(f"  KIS 수급 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_short(code):
+    """KIS 공매도 비율"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
+             "FID_INPUT_DATE_1": datetime.now(KST).strftime("%Y%m%d"),
+             "FID_INPUT_DATE_2": datetime.now(KST).strftime("%Y%m%d"),
+             "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0"},
+            "FHKST03010100"
+        )
+        if d:
+            out = d.get("output2", [{}])
+            if out:
+                ratio = to_n(out[0].get("short_sell_rate") or 0)
+                if ratio > 0:
+                    comment = ("공매도 비율 높음 — 하락 압력 주의" if ratio > 5 else
+                               "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
+                    return {"ratio": round(ratio, 2), "volume": 0, "comment": comment}
+    except Exception as e:
+        print(f"  KIS 공매도 실패 ({code}): {e}", file=sys.stderr)
+    return None
 
 
 # ─────────────────────────────────────────
@@ -185,6 +344,14 @@ except ImportError:
     PYKRX_AVAILABLE = False
     print("  pykrx 미설치 — 수급 데이터 없음", file=sys.stderr)
 
+# KIS API 설정 (GitHub Secrets에서 환경변수로 주입)
+import os
+KIS_APP_KEY    = os.environ.get("KIS_APP_KEY", "")
+KIS_APP_SECRET = os.environ.get("KIS_APP_SECRET", "")
+KIS_AVAILABLE  = bool(KIS_APP_KEY and KIS_APP_SECRET)
+KIS_BASE_URL   = "https://openapivts.koreainvestment.com:29443"  # 모의투자
+KIS_TOKEN      = {"access_token": "", "expires": 0}
+
 STOCKS = [
     {"code": "000660", "yf": "000660.KS", "name": "SK하이닉스", "emoji": "🔵"},
     {"code": "005930", "yf": "005930.KS", "name": "삼성전자",   "emoji": "🟡"},
@@ -224,6 +391,157 @@ def to_n(v, default=0):
         return float(str(v).replace(",", "").replace("%", "").strip())
     except (ValueError, TypeError):
         return default
+
+
+# ─────────────────────────────────────────
+# KIS API (모의투자 - 실시간 주가·수급·공매도)
+# ─────────────────────────────────────────
+def kis_get_token():
+    """KIS 접근토큰 발급 (캐시)"""
+    global KIS_TOKEN
+    if KIS_TOKEN["access_token"] and time.time() < KIS_TOKEN["expires"]:
+        return KIS_TOKEN["access_token"]
+    try:
+        url = f"{KIS_BASE_URL}/oauth2/tokenP"
+        body = json.dumps({
+            "grant_type": "client_credentials",
+            "appkey": KIS_APP_KEY,
+            "appsecret": KIS_APP_SECRET,
+        }).encode()
+        req = Request(url, data=body, method="POST", headers={
+            "Content-Type": "application/json"
+        })
+        with urlopen(req, timeout=10) as r:
+            d = json.loads(r.read().decode())
+        token = d.get("access_token", "")
+        if token:
+            KIS_TOKEN["access_token"] = token
+            KIS_TOKEN["expires"] = time.time() + 3600 * 23
+            print("  ✅ KIS 토큰 발급 성공", file=sys.stderr)
+            return token
+    except Exception as e:
+        print(f"  KIS 토큰 실패: {e}", file=sys.stderr)
+    return ""
+
+
+def kis_request(path, params, tr_id):
+    """KIS API GET 요청"""
+    token = kis_get_token()
+    if not token:
+        return None
+    from urllib.parse import urlencode
+    url = f"{KIS_BASE_URL}{path}?{urlencode(params)}"
+    req = Request(url, headers={
+        "authorization": f"Bearer {token}",
+        "appkey": KIS_APP_KEY,
+        "appsecret": KIS_APP_SECRET,
+        "tr_id": tr_id,
+        "custtype": "P",
+        "Content-Type": "application/json",
+    })
+    try:
+        with urlopen(req, timeout=10) as r:
+            return json.loads(r.read().decode())
+    except Exception as e:
+        print(f"  KIS 요청 실패 ({tr_id}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_price(code):
+    """KIS 실시간 주가 (통합시세 - 넥스트레이드 포함)"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-price",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+            "FHKST01010100"
+        )
+        if not d:
+            return None
+        out = d.get("output", {})
+        price = to_n(out.get("stck_prpr") or out.get("stck_clpr") or 0)
+        prev  = to_n(out.get("stck_sdpr") or 0)  # 전일 종가
+        if price > 0:
+            return {
+                "price":    round(price),
+                "prevClose": round(prev) if prev else round(price),
+                "high52w":  round(to_n(out.get("stck_hgpr") or 0)),
+                "low52w":   round(to_n(out.get("stck_lwpr") or 0)),
+                "tradedAt": out.get("stck_bsop_date", ""),
+                "source":   "KIS API (통합시세)",
+            }
+    except Exception as e:
+        print(f"  KIS 주가 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_investor(code):
+    """KIS 당일 외국인·기관 순매수"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-investor",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+            "FHKST01010900"
+        )
+        if not d:
+            return None
+        out = d.get("output", {})
+        f    = round(to_n(out.get("frgn_ntby_qty") or out.get("frgn_seln_vol") or 0))
+        inst = round(to_n(out.get("orgn_ntby_qty") or out.get("inst_ntby_vol") or 0))
+        indv = round(to_n(out.get("indvdl_ntby_qty") or 0))
+
+        if f > 0 and inst > 0:
+            trend = "매수우세"
+            comment = f"외국인 +{f:,}주 · 기관 +{inst:,}주 동반 순매수 (당일)"
+        elif f > 0:
+            trend = "매수우세"
+            comment = f"외국인 +{f:,}주 순매수 (당일)"
+        elif f < 0 and inst < 0:
+            trend = "매도우세"
+            comment = f"외국인 {f:,}주 · 기관 {inst:,}주 동반 순매도 (당일)"
+        elif f < 0:
+            trend = "매도우세"
+            comment = f"외국인 {f:,}주 순매도 (당일)"
+        else:
+            trend = "중립"
+            comment = "외국인·기관 수급 중립 (당일)"
+
+        return {
+            "foreign": f, "institution": inst, "individual": indv,
+            "foreignTrend": trend, "comment": comment, "date": "당일"
+        }
+    except Exception as e:
+        print(f"  KIS 수급 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+
+def fetch_kis_short(code):
+    """KIS 공매도 비율"""
+    if not KIS_AVAILABLE:
+        return None
+    try:
+        d = kis_request(
+            "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice",
+            {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
+             "FID_INPUT_DATE_1": datetime.now(KST).strftime("%Y%m%d"),
+             "FID_INPUT_DATE_2": datetime.now(KST).strftime("%Y%m%d"),
+             "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0"},
+            "FHKST03010100"
+        )
+        if d:
+            out = d.get("output2", [{}])
+            if out:
+                ratio = to_n(out[0].get("short_sell_rate") or 0)
+                if ratio > 0:
+                    comment = ("공매도 비율 높음 — 하락 압력 주의" if ratio > 5 else
+                               "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
+                    return {"ratio": round(ratio, 2), "volume": 0, "comment": comment}
+    except Exception as e:
+        print(f"  KIS 공매도 실패 ({code}): {e}", file=sys.stderr)
+    return None
 
 
 # ─────────────────────────────────────────
@@ -1046,9 +1364,15 @@ def analyze_stock(stock, kospi):
     print(f"\n▶ {name} ({code}) 분석 중...", file=sys.stderr)
 
     # 데이터 수집
-    naver    = fetch_naver_price(code)
-    investor = fetch_investor_flow(code)
-    short    = fetch_short_selling(code)
+    # KIS API 우선 (통합시세·당일수급) → 네이버 폴백
+    kis_price = fetch_kis_price(code) if KIS_AVAILABLE else None
+    naver     = kis_price or fetch_naver_price(code)
+
+    kis_inv   = fetch_kis_investor(code) if KIS_AVAILABLE else None
+    investor  = kis_inv or fetch_investor_flow(code)
+
+    kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
+    short     = kis_short or fetch_short_selling(code)
     news     = fetch_news(code, name)
     dart     = fetch_dart(code)
     time.sleep(0.1)
