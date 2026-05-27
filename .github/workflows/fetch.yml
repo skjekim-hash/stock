@@ -2,29 +2,41 @@ name: 주식 데이터 자동 수집
 
 on:
   schedule:
-    # KST 08:00~20:00 전체 커버 (1분 간격)
-    - cron: '* 23 * * 0-4'
-    - cron: '* 0-11 * * 1-5'
-  workflow_dispatch:
+    # 평일 장중 (KST 09:00~15:30) = UTC 00:00~06:30
+    # 매 5분마다 실행
+    - cron: '*/5 0-6 * * 1-5'
+    # 장전 (KST 07:30~09:00) = UTC 22:30~00:00
+    - cron: '*/10 22,23 * * 0-4'
+  workflow_dispatch:  # 수동 실행 버튼
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: 저장소 체크아웃
         uses: actions/checkout@v4
+
       - name: Python 설정
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: 패키지 설치
+        run: pip install pykrx --break-system-packages -q
+
       - name: 주식 데이터 수집
-        run: python fetch_stocks.py
-      - name: 커밋 & 푸시
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python scripts/fetch_stocks.py
+
+      - name: data.json 커밋 & 푸시
         run: |
           git config user.name "StockBot"
           git config user.email "bot@github.com"
           git add data.json
-          git diff --staged --quiet || git commit -m "📊 주가 업데이트"
+          git diff --staged --quiet || git commit -m "📊 주가 업데이트 $(date +'%Y-%m-%d %H:%M KST' -d '+9 hours')"
           git push
