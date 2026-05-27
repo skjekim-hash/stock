@@ -728,39 +728,52 @@ def fetch_kospi():
 # 증권사 목표주가 + 적정주가 (네이버 금융)
 # ─────────────────────────────────────────
 def fetch_target_price(code):
+    """증권사 목표주가 수집 - 네이버 모바일 API"""
     result = {"consensus": 0, "high": 0, "low": 0, "avg": 0,
               "count": 0, "comment": "", "source": ""}
     try:
         import re
-        # 네이버 금융 컨센서스 페이지
-        # 네이버 증권 컨센서스 URL (여러 시도)
-        tp_html = ""
-        for tp_url in [
-            f"https://finance.naver.com/item/coinfo.naver?code={code}&target=price",
+        # 방법 1: 네이버 모바일 컨센서스 API
+        for ep in [
             f"https://m.stock.naver.com/api/stock/{code}/consensus",
+            f"https://m.stock.naver.com/api/stock/{code}/analysisSummary",
         ]:
             try:
-                if "m.stock" in tp_url:
-                    d = http_json(tp_url)
-                    tp_vals = []
-                    if isinstance(d, list):
-                        tp_vals = [to_n(x.get("targetPrice") or x.get("tp") or 0) for x in d if x.get("targetPrice")]
-                    elif isinstance(d, dict):
-                        tp_vals = [to_n(d.get("targetPrice") or 0)]
-                    if tp_vals:
-                        avg = round(sum(tp_vals)/len(tp_vals))
-                        return {"consensus": avg, "high": max(tp_vals), "low": min(tp_vals),
-                                "avg": avg, "count": len(tp_vals), "comment": "", "source": "네이버 컨센서스"}
-                else:
-                    raw2 = urlopen(Request(tp_url, headers={
-                        "User-Agent":"Mozilla/5.0","Referer":"https://finance.naver.com/"}), timeout=6).read()
-                    tp_html = raw2.decode("euc-kr", errors="ignore")
-                    if tp_html: break
+                d = http_json(ep)
+                tp_vals = []
+                if isinstance(d, list):
+                    for x in d:
+                        v = to_n(x.get("targetPrice") or x.get("tp") or x.get("priceTarget") or 0)
+                        # 최소 10만원 이상인 값만 유효 (KRX 주가 기준)
+                        if v >= 100000:
+                            tp_vals.append(round(v))
+                elif isinstance(d, dict):
+                    v = to_n(d.get("targetPrice") or d.get("tp") or d.get("priceTarget") or 0)
+                    if v >= 100000:
+                        tp_vals.append(round(v))
+                if tp_vals:
+                    result["consensus"] = round(sum(tp_vals) / len(tp_vals))
+                    result["high"]      = max(tp_vals)
+                    result["low"]       = min(tp_vals)
+                    result["avg"]       = result["consensus"]
+                    result["count"]     = len(tp_vals)
+                    result["source"]    = "네이버 컨센서스"
+                    return result
             except: pass
-        html = tp_html
-        # 목표주가 파싱
-        targets = re.findall(r'목표주가[^0-9]*([0-9,]+)', html)
-        prices = [int(p.replace(",", "")) for p in targets if int(p.replace(",", "")) > 0]
+
+        # 방법 2: 네이버 PC 버전 HTML 파싱
+        raw = urlopen(Request(
+            f"https://finance.naver.com/item/coinfo.naver?code={code}&target=price",
+            headers={"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
+        ), timeout=8).read()
+        html = raw.decode("euc-kr", errors="ignore")
+        # 목표주가 패턴: 6자리 이상 숫자 (최소 10만원)
+        targets = re.findall(r'목표주가[^0-9]{0,20}([1-9][0-9]{5,7})', html)
+        prices = []
+        for p in targets:
+            v = int(p.replace(",", ""))
+            if 50000 <= v <= 10000000:  # 5만~1000만 범위만 유효
+                prices.append(v)
         if prices:
             result["consensus"] = round(sum(prices) / len(prices))
             result["high"]      = max(prices)
@@ -769,21 +782,8 @@ def fetch_target_price(code):
             result["count"]     = len(prices)
             result["source"]    = "네이버 금융 컨센서스"
     except Exception as e:
-        print(f"  목표주가 HTML 실패 ({code}): {e}", file=sys.stderr)
-
-    # Yahoo Finance 폴백
-    if result["consensus"] == 0:
-        try:
-            d = http_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{code}.KS")
-            meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
-            tp = meta.get("targetMeanPrice") or meta.get("fiftyTwoWeekHigh", 0)
-            if tp:
-                result["consensus"] = round(float(tp))
-                result["source"]    = "Yahoo Finance"
-        except: pass
-
+        print(f"  목표주가 실패 ({code}): {e}", file=sys.stderr)
     return result
-
 
 def calc_fair_value(code, price, eps=None, bps=None, growth=None):
     """PER·PBR 기반 적정주가 계산"""
