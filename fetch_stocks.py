@@ -81,8 +81,12 @@ def to_n(v, default=0):
 def kis_get_token():
     """KIS 접근토큰 발급 (캐시)"""
     global KIS_TOKEN
+    if not KIS_AVAILABLE:
+        print("  KIS 비활성 — Secrets 미설정", file=sys.stderr)
+        return ""
     if KIS_TOKEN["access_token"] and time.time() < KIS_TOKEN["expires"]:
         return KIS_TOKEN["access_token"]
+    print(f"  KIS 토큰 요청... KEY={KIS_APP_KEY[:8] if KIS_APP_KEY else 'EMPTY'}", file=sys.stderr)
     try:
         url = f"{KIS_BASE_URL}/oauth2/tokenP"
         body = json.dumps({
@@ -399,8 +403,12 @@ def to_n(v, default=0):
 def kis_get_token():
     """KIS 접근토큰 발급 (캐시)"""
     global KIS_TOKEN
+    if not KIS_AVAILABLE:
+        print("  KIS 비활성 — Secrets 미설정", file=sys.stderr)
+        return ""
     if KIS_TOKEN["access_token"] and time.time() < KIS_TOKEN["expires"]:
         return KIS_TOKEN["access_token"]
+    print(f"  KIS 토큰 요청... KEY={KIS_APP_KEY[:8] if KIS_APP_KEY else 'EMPTY'}", file=sys.stderr)
     try:
         url = f"{KIS_BASE_URL}/oauth2/tokenP"
         body = json.dumps({
@@ -603,10 +611,11 @@ def fetch_investor_flow(code):
     result = {"foreign": 0, "institution": 0, "individual": 0, "foreignTrend": "중립", "comment": ""}
     try:
         # 네이버 금융 PC 버전 - 투자자별 매매동향 HTML
-        html = http_get(
+        raw_bytes = urlopen(Request(
             f"https://finance.naver.com/item/frgn.naver?code={code}",
-            headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
-        )
+            headers={"User-Agent":"Mozilla/5.0","Referer":"https://finance.naver.com/"}
+        ), timeout=8).read()
+        html = raw_bytes.decode("euc-kr", errors="ignore")
         import re
         # 순매수 수량 테이블 파싱 (단위: 주)
         nums = re.findall(r'<td[^>]*class="[^"]*num[^"]*"[^>]*>([^<]+)</td>', html)
@@ -724,11 +733,31 @@ def fetch_target_price(code):
     try:
         import re
         # 네이버 금융 컨센서스 페이지
-        html = http_get(
-            f"https://finance.naver.com/item/analyst.naver?code={code}",
-            timeout=6,
-            headers={"Referer": "https://finance.naver.com/", "Accept-Language": "ko-KR"}
-        )
+        # 네이버 증권 컨센서스 URL (여러 시도)
+        tp_html = ""
+        for tp_url in [
+            f"https://finance.naver.com/item/coinfo.naver?code={code}&target=price",
+            f"https://m.stock.naver.com/api/stock/{code}/consensus",
+        ]:
+            try:
+                if "m.stock" in tp_url:
+                    d = http_json(tp_url)
+                    tp_vals = []
+                    if isinstance(d, list):
+                        tp_vals = [to_n(x.get("targetPrice") or x.get("tp") or 0) for x in d if x.get("targetPrice")]
+                    elif isinstance(d, dict):
+                        tp_vals = [to_n(d.get("targetPrice") or 0)]
+                    if tp_vals:
+                        avg = round(sum(tp_vals)/len(tp_vals))
+                        return {"consensus": avg, "high": max(tp_vals), "low": min(tp_vals),
+                                "avg": avg, "count": len(tp_vals), "comment": "", "source": "네이버 컨센서스"}
+                else:
+                    raw2 = urlopen(Request(tp_url, headers={
+                        "User-Agent":"Mozilla/5.0","Referer":"https://finance.naver.com/"}), timeout=6).read()
+                    tp_html = raw2.decode("euc-kr", errors="ignore")
+                    if tp_html: break
+            except: pass
+        html = tp_html
         # 목표주가 파싱
         targets = re.findall(r'목표주가[^0-9]*([0-9,]+)', html)
         prices = [int(p.replace(",", "")) for p in targets if int(p.replace(",", "")) > 0]
@@ -883,12 +912,13 @@ def fetch_news(code, name, limit=5):
     import xml.etree.ElementTree as ET
     from email.utils import parsedate
 
+    from urllib.parse import quote
     # RSS 소스 (빠른 것 우선 2개만)
     rss_sources = [
         # Yahoo Finance (가장 빠르고 안정적)
         f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={code}.KS&region=KR&lang=ko-KR",
-        # 네이버 뉴스
-        f"https://news.naver.com/main/rss/searchRss.naver?query={name}",
+        # 네이버 뉴스 (한글 URL 인코딩)
+        f"https://news.naver.com/main/rss/searchRss.naver?query={quote(name)}",
     ]
 
     seen = set()
