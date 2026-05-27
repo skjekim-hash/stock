@@ -201,9 +201,11 @@ const OP_STYLE={
   매도:{color:"#ff4d6d",bg:"#ff4d6d12",border:"#ff4d6d40",icon:"▼"},
 };
 const STOCKS=[
-  {code:"000660",name:"SK하이닉스",emoji:"🔵"},
-  {code:"005930",name:"삼성전자",  emoji:"🟡"},
-  {code:"066570",name:"LG전자",    emoji:"🔴"},
+  {code:"000660",name:"SK하이닉스", emoji:"🔵"},
+  {code:"005930",name:"삼성전자",   emoji:"🟡"},
+  {code:"066570",name:"LG전자",     emoji:"🔴"},
+  {code:"009150",name:"삼성전기",   emoji:"🟠"},
+  {code:"005380",name:"현대자동차", emoji:"🟢"},
 ];
 
 function kst(){
@@ -226,6 +228,88 @@ function hideAll(){
   ["startScreen","loadingScreen","errBox","results","footer"]
     .forEach(id=>document.getElementById(id).style.display="none");
   document.getElementById("progWrap").style.display="none";
+}
+
+function renderSummaryTable(stocks) {
+  var W2 = function(n) { return (!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR"); };
+  var OP = {"매수":"#00e676","중립":"#ffd166","매도":"#ff4d6d"};
+  var IC = {"매수":"▲","중립":"◆","매도":"▼"};
+
+  var rows = stocks.map(function(s) {
+    var st = STOCKS.find(function(x){return x.code===s.code;}) || {emoji:"",name:s.code};
+    var op = s.opinion || "중립";
+    var color = OP[op] || "#ffd166";
+    var icon = IC[op] || "◆";
+    var up = (+s.change||0) >= 0;
+    var chgColor = up ? "#00e676" : "#ff4d6d";
+    var chgStr = s.changePct ? (up?"+":"")+s.changePct+"%" : "—";
+
+    // 목표주가 대비 상승여력
+    var tp = +s.targetPrice_consensus || 0;
+    var upside = tp > 0 ? Math.round((tp - s.price) / s.price * 100) : null;
+    var upsideStr = upside !== null ? (upside>0?"+":"")+upside+"%" : "—";
+    var upsideColor = upside !== null ? (upside>5?"#00e676":upside<-5?"#ff4d6d":"#ffd166") : "#7a9abc";
+
+    // 적정주가 괴리율
+    var fv = +s.fairValue || 0;
+    var gap = fv > 0 ? Math.round((fv - s.price) / s.price * 100) : null;
+    var gapStr = gap !== null ? (gap>0?"+":"")+gap+"%" : "—";
+    var gapColor = gap !== null ? (gap>5?"#00e676":gap<-5?"#ff4d6d":"#ffd166") : "#7a9abc";
+
+    // RSI 색
+    var rsiColor = s.rsi ? (+s.rsi>70?"#ff4d6d":+s.rsi<30?"#00e676":"#ffd166") : "#7a9abc";
+
+    return "<tr onclick="document.getElementById('card-"+s.code+"').scrollIntoView({behavior:'smooth'})" style="cursor:pointer">"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;white-space:nowrap">"
+      +   "<span style="font-size:12px">" + st.emoji + " " + st.name + "</span>"
+      + "</td>"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:center">"
+      +   "<span style="color:"+color+";font-weight:900;font-size:13px">"+icon+" "+op+"</span>"
+      + "</td>"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
+      +   "<div style="font-size:12px;font-weight:700">"+W2(s.price)+"</div>"
+      +   "<div style="font-size:10px;color:"+chgColor+"">"+chgStr+"</div>"
+      + "</td>"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
+      +   "<div style="font-size:12px;color:#78c1ff">"+W2(fv)+"</div>"
+      +   "<div style="font-size:10px;color:"+gapColor+"">"+gapStr+"</div>"
+      + "</td>"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:right;font-family:monospace">"
+      +   "<div style="font-size:12px;color:#ffd166">"+W2(tp)+"</div>"
+      +   "<div style="font-size:10px;color:"+upsideColor+"">"+upsideStr+"</div>"
+      + "</td>"
+      + "<td style="padding:8px 6px;border-bottom:1px solid #1e2c48;text-align:center">"
+      +   "<span style="font-size:12px;color:"+rsiColor+";font-weight:700">"+(s.rsi||"—")+"</span>"
+      + "</td>"
+      + "</tr>";
+  }).join("");
+
+  return "<div style="background:#080d18;border:1px solid #1e2c48;border-radius:14px;margin-bottom:18px;overflow:hidden">"
+    + "<div style="padding:11px 14px 8px;background:linear-gradient(135deg,#0f1830,#192040);border-bottom:1px solid #1e2c48;display:flex;justify-content:space-between;align-items:center">"
+    +   "<span style="font-size:12px;font-weight:900;color:#4db8ff">⚡ 빠른 판단 요약</span>"
+    +   "<span style="font-size:10px;color:#7a9abc">종목 클릭 시 상세로 이동</span>"
+    + "</div>"
+    + "<div style="overflow-x:auto">"
+    + "<table style="width:100%;border-collapse:collapse;min-width:320px">"
+    + "<thead><tr style="background:#060a14">"
+    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:left;border-bottom:1px solid #1e2c48">종목</th>"
+    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:center;border-bottom:1px solid #1e2c48">의견</th>"
+    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">현재가</th>"
+    +   "<th style="padding:6px;font-size:10px;color:#78c1ff;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">적정가</th>"
+    +   "<th style="padding:6px;font-size:10px;color:#ffd166;font-weight:700;text-align:right;border-bottom:1px solid #1e2c48">목표가</th>"
+    +   "<th style="padding:6px;font-size:10px;color:#7a9abc;font-weight:700;text-align:center;border-bottom:1px solid #1e2c48">RSI</th>"
+    + "</tr></thead>"
+    + "<tbody>" + rows + "</tbody>"
+    + "</table>"
+    + "</div>"
+    + "<div style="padding:7px 14px;background:#060a14;display:flex;gap:12px;flex-wrap:wrap">"
+    +   "<span style="font-size:10px;color:#00e676">▲ 매수</span>"
+    +   "<span style="font-size:10px;color:#ffd166">◆ 중립</span>"
+    +   "<span style="font-size:10px;color:#ff4d6d">▼ 매도</span>"
+    +   "<span style="font-size:10px;color:#7a9abc">│ 적정가 아래% = 저평가</span>"
+    +   "<span style="font-size:10px;color:#7a9abc">│ 목표가 위% = 상승여력</span>"
+    + "</div>"
+    + "</div>";
 }
 
 function renderTargetSection(s) {
@@ -358,7 +442,7 @@ function renderCard(s,idx){
     </div>` :
     `<div class="neutral-msg">방향성 불명확 — ADX ${s.adx?.adx||"-"} (${s.adx?.strength||"추세 확인 필요"})<br>추세 전환 신호 확인 후 진입 권장.</div>`;
 
-  return`<div class="card">
+  return`<div class="card" id="card-${s.code}">
     <div class="c-hdr">
       <div>
         <div class="c-code">${st.emoji} KRX · ${s.code}</div>
@@ -651,7 +735,9 @@ document.getElementById("startScreen").style.display="";
     }
 
     hideAll();
-    document.getElementById("results").innerHTML=data.stocks.map((s,i)=>renderCard(s,i)).join("");
+    document.getElementById("results").innerHTML=
+      renderSummaryTable(data.stocks) +
+      data.stocks.map((s,i)=>renderCard(s,i)).join("");
     document.getElementById("results").style.display="";
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집: ${data.updatedAt||data.updatedTime}`;

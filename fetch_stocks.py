@@ -18,10 +18,179 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError
 from urllib.parse import urlencode, quote
 
+# pykrx - KRX 전일 수급 데이터
+try:
+    from pykrx import stock as krx_stock
+    PYKRX_AVAILABLE = True
+except ImportError:
+    PYKRX_AVAILABLE = False
+    print("  pykrx 미설치 — 수급 데이터 없음", file=sys.stderr)
+
 STOCKS = [
     {"code": "000660", "yf": "000660.KS", "name": "SK하이닉스", "emoji": "🔵"},
     {"code": "005930", "yf": "005930.KS", "name": "삼성전자",   "emoji": "🟡"},
     {"code": "066570", "yf": "066570.KS", "name": "LG전자",     "emoji": "🔴"},
+    {"code": "009150", "yf": "009150.KS", "name": "삼성전기",   "emoji": "🟠"},
+    {"code": "005380", "yf": "005380.KS", "name": "현대자동차", "emoji": "🟢"},
+]
+KOSPI_CODE = "0001"
+KST = timezone(timedelta(hours=9))
+
+
+def http_get(url, timeout=8, headers=None):
+    h = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+    if headers:
+        h.update(headers)
+    req = Request(url, headers=h)
+    with urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8")
+
+
+def http_json(url, timeout=15, headers=None):
+    return json.loads(http_get(url, timeout, headers))
+
+
+def safe(fn, default=None):
+    try:
+        return fn()
+    except Exception as e:
+        print(f"  ⚠ {fn.__name__ if hasattr(fn,'__name__') else '?'}: {e}", file=sys.stderr)
+        return default
+
+
+def to_n(v, default=0):
+    if v is None:
+        return default
+    try:
+        return float(str(v).replace(",", "").replace("%", "").strip())
+    except (ValueError, TypeError):
+        return default
+
+
+# ─────────────────────────────────────────
+# 네이버 금융 현재가
+# ─────────────────────────────────────────
+def fetch_naver_price(code):
+    # 방법 1: /price 엔드포인트 - 최신 체결가 (가장 정확)
+    try:
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/price?pageSize=2&page=1")
+        rows = d if isinstance(d, list) else d.get("priceInfos") or d.get("prices") or []
+        if rows and len(rows) > 0:
+            latest = rows[0]
+            price = to_n(latest.get("closePrice") or latest.get("nv") or 0)
+            traded_at = latest.get("localTradedAt") or latest.get("tradeTime") or ""
+            if price > 0:
+                # basic에서 전일종가·52주 가져오기
+                prev = high52w = low52w = 0
+                try:
+                    b = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
+                    chg = to_n(b.get("compareToPreviousClosePrice", 0))
+                    prev = round(price - chg) if chg else round(price)
+                    high52w = round(to_n(b.get("highPrice")) or to_n(b.get("yearHighPrice")))
+                    low52w  = round(to_n(b.get("lowPrice"))  or to_n(b.get("yearLowPrice")))
+                except: pass
+                return {
+                    "price": round(price), "prevClose": prev,
+                    "high52w": high52w, "low52w": low52w,
+                    "tradedAt": str(traded_at)[:19],
+                    "source": "네이버 금융",
+                }
+    except Exception as e:
+        print(f"  네이버 price 실패 ({code}): {e}", file=sys.stderr)
+
+    # 방법 2: /basic 엔드포인트 폴백
+    try:
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
+        # 장중 실시간 우선: dealTradeTime, overMarketPriceInfo 등 확인
+        price = (to_n(d.get("closePrice")) or to_n(d.get("currentPrice"))
+                 or to_n(d.get("nv")) or to_n(d.get("now")))
+        if price > 0:
+            change_val = to_n(d.get("compareToPreviousClosePrice", 0))
+            return {
+                "price":     round(price),
+                "prevClose": round(price - change_val) if change_val else round(price),
+                "high52w":   round(to_n(d.get("highPrice")) or to_n(d.get("yearHighPrice"))),
+                "low52w":    round(to_n(d.get("lowPrice"))  or to_n(d.get("yearLowPrice"))),
+                "tradedAt":  str(d.get("localTradedAt") or d.get("dealTradeTime") or "")[:19],
+                "source":    "네이버 금융",
+            }
+    except Exception as e:
+        print(f"  네이버 basic 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+
+# ─────────────────────────────────────────
+# 외국인·기관 순매수 (pykrx - KRX 전일 데이터)
+# ─────────────────────────────────────────
+def get_prev_business_day():
+    """전 영업일 계산"""
+    today = datetime.now(KST)
+    if today.weekday() == 0:   # 월요일 → 금요일
+        return (today - timedelta(days=3)).strftime("%Y%m%d")
+    elif today.weekday() in [5, 6]:  # 주말 → 금요일
+        return (today - timedelta(days=today.weekday()-4)).strftime("%Y%m%d")
+    else:
+        return (today - timedelta(days=1)).strftime("%Y%m%d")
+
+
+def fetch_investor_flow(code):
+    result = {"foreign": 0, "institution": 0, "individual": 0,
+              "foreignTrend": "중립", "comment": "", "date": ""}
+
+    # pykrx로 전일 KRX 수급 데이터 조회
+    if PYKRX_AVAILABLE:
+        try:
+            date_str = get_prev_business_day()
+            df = krx_stock.get_market_trading_volume_by_investor(date_str, date_str, code)
+            if df is not None and not df.empty:
+                def get_val(idx_list):
+                    for idx in idx_list:
+                        if idx in df.index:
+                            return int(df.loc[idx, '순매수'])
+                    return 0
+                f    = get_val(['외국인합계', '외국인'])
+                inst = get_val(['기관합계', '기관'])
+                indv = get_val(['개인'])
+                result["foreign"]     = f
+                result["institution"] = inst
+                result["individual"]  = indv
+                result["date"]        = date_str
+                if f > 0 and inst > 0:
+                    result["foreignTrend"] = "매수우세"
+                    result["comment"] = f"외국인 +{f:,}주 · 기관 +{inst:,}주 동반 순매수 (전일)"
+                elif f > 0:
+                    result["foreignTrend"] = "매수우세"
+                    result["comment"] = f"외국인 +{f:,}주 순매수 (전일). 외국인 주도 상승 기대."
+                elif f < 0 and inst < 0:
+                    result["foreignTrend"] = "매도우세"
+                    result["comment"] = f"외국인 {f:,}주 · 기관 {inst:,}주 동반 순매도 (전일)"
+                elif f < 0:
+                    result["foreignTrend"] = "매도우세"
+                    result["comment"] = f"외국인 {f:,}주 순매도 (전일). 수급 부담 존재."
+                else:
+                    result["foreignTrend"] = "중립"
+                    result["comment"] = "외국인·기관 수급 중립 (전일)"
+                return result
+        except Exception as e:
+            print(f"  pykrx 수급 실패 ({code}): {e}", file=sys.stderr)
+
+    result["comment"] = "수급 데이터 없음 (pykrx 미설치 또는 오류)"
+    return result
+
+# pykrx - KRX 전일 수급 데이터
+try:
+    from pykrx import stock as krx_stock
+    PYKRX_AVAILABLE = True
+except ImportError:
+    PYKRX_AVAILABLE = False
+    print("  pykrx 미설치 — 수급 데이터 없음", file=sys.stderr)
+
+STOCKS = [
+    {"code": "000660", "yf": "000660.KS", "name": "SK하이닉스", "emoji": "🔵"},
+    {"code": "005930", "yf": "005930.KS", "name": "삼성전자",   "emoji": "🟡"},
+    {"code": "066570", "yf": "066570.KS", "name": "LG전자",     "emoji": "🔴"},
+    {"code": "009150", "yf": "009150.KS", "name": "삼성전기",   "emoji": "🟠"},
+    {"code": "005380", "yf": "005380.KS", "name": "현대자동차", "emoji": "🟢"},
 ]
 KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
@@ -273,9 +442,11 @@ def calc_fair_value(code, price, eps=None, bps=None, growth=None):
     """PER·PBR 기반 적정주가 계산"""
     # 종목별 업종 평균 PER/PBR (2026 기준)
     sector_data = {
-        "000660": {"per": 12, "pbr": 1.8, "name": "반도체"},   # SK하이닉스
-        "005930": {"per": 14, "pbr": 1.5, "name": "반도체"},   # 삼성전자
+        "000660": {"per": 12, "pbr": 1.8, "name": "반도체"},    # SK하이닉스
+        "005930": {"per": 14, "pbr": 1.5, "name": "반도체"},    # 삼성전자
         "066570": {"per": 10, "pbr": 0.9, "name": "가전/전장"}, # LG전자
+        "009150": {"per": 15, "pbr": 1.6, "name": "전자부품"},  # 삼성전기
+        "005380": {"per": 8,  "pbr": 0.7, "name": "자동차"},    # 현대자동차
     }
     sd = sector_data.get(code, {"per": 12, "pbr": 1.5, "name": "일반"})
 
@@ -338,6 +509,8 @@ def fetch_financial_data(yf_sym, code):
         "000660": {"eps": 180000, "bps": 950000},  # SK하이닉스
         "005930": {"eps": 20000,  "bps": 180000},  # 삼성전자
         "066570": {"eps": 18000,  "bps": 195000},  # LG전자
+        "009150": {"eps": 12000,  "bps": 120000},  # 삼성전기
+        "005380": {"eps": 45000,  "bps": 380000},  # 현대자동차
     }
     if not eps and code in fallback:
         eps = fallback[code]["eps"]
@@ -420,6 +593,8 @@ def fetch_news(code, name, limit=5):
                         "000660": ["SK하이닉스","하이닉스","HBM","반도체","메모리"],
                         "005930": ["삼성전자","삼성","갤럭시","파운드리","반도체"],
                         "066570": ["LG전자","LG","가전","전장","OLED"],
+                        "009150": ["삼성전기","MLCC","패키지기판","전자부품"],
+                        "005380": ["현대자동차","현대차","아이오닉","제네시스","전기차"],
                     }
                     kws = sector_kw.get(code, [name])
                     if not any(k in title for k in kws):
@@ -852,6 +1027,8 @@ def gen_text(code, op, rsi, wr, mfi, ft, obv, weekly, investor, short, vol_surge
         "000660": ["HBM 고객사 발주 지연 및 경쟁사 추격", "미중 수출규제 강화 시 공급망 차질", "원달러 급변동 시 환차손"],
         "005930": ["파운드리 TSMC와 기술 격차", "스마트폰 수요 회복 지연", "IT 투자 사이클 하강"],
         "066570": ["가전 수요 부진 및 中 업체 경쟁", "전장 EV 수요 둔화", "원자재·물류비 상승"],
+        "009150": ["IT 수요 둔화로 MLCC 단가 하락", "삼성전자 의존도 높아 수주 변동성 존재", "중국 경쟁사 저가 공세"],
+        "005380": ["미국·유럽 전기차 수요 둔화", "미국 관세 부과 시 수익성 악화", "원화 강세 시 수출 경쟁력 저하"],
     }
     notes = (
         ["피봇 S1 지지 확인 후 분할 매수", "OBV·외국인 수급 지속 확인", "주봉 신호와 일봉 일치 시 비중 확대"] if op == "매수" else
