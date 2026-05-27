@@ -31,7 +31,7 @@ jobs:
         env:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-        run: python scripts/fetch_stocks.py
+        run: python fetch_stocks.py
 
       - name: data.json 커밋 & 푸시
         run: |
