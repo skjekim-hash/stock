@@ -997,6 +997,15 @@ def fetch_news(code, name, limit=5):
 # ─────────────────────────────────────────
 # DART 공시 (공식 OpenDART API)
 # ─────────────────────────────────────────
+# DART corp_code 매핑 (종목코드 → DART 고유번호)
+DART_CORP_CODE = {
+    "000660": "00164779",  # SK하이닉스
+    "005930": "00126380",  # 삼성전자
+    "066570": "00401731",  # LG전자
+    "009150": "00164488",  # 삼성전기
+    "005380": "00164742",  # 현대자동차
+}
+
 def fetch_dart(code, limit=5):
     dart_list = []
     if not DART_API_KEY:
@@ -1006,9 +1015,16 @@ def fetch_dart(code, limit=5):
         from datetime import datetime, timedelta
         end = datetime.now(KST).strftime("%Y%m%d")
         start = (datetime.now(KST) - timedelta(days=90)).strftime("%Y%m%d")
-        url = (f"https://opendart.fss.or.kr/api/list.json"
-               f"?crtfc_key={DART_API_KEY}&stock_code={code}"
-               f"&bgn_de={start}&end_de={end}&page_count={limit}&sort=date&sort_mth=desc")
+        # corp_code 사용 (stock_code보다 안정적)
+        corp_code = DART_CORP_CODE.get(code, "")
+        if corp_code:
+            url = (f"https://opendart.fss.or.kr/api/list.json"
+                   f"?crtfc_key={DART_API_KEY}&corp_code={corp_code}"
+                   f"&bgn_de={start}&end_de={end}&page_count={limit}&sort=date&sort_mth=desc")
+        else:
+            url = (f"https://opendart.fss.or.kr/api/list.json"
+                   f"?crtfc_key={DART_API_KEY}&stock_code={code}"
+                   f"&bgn_de={start}&end_de={end}&page_count={limit}&sort=date&sort_mth=desc")
         d = http_json(url, timeout=10)
         if d.get("status") != "000":
             print(f"  DART 오류: {d.get('message','')}", file=sys.stderr)
