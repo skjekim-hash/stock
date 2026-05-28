@@ -491,6 +491,11 @@ function renderSummaryTable(stocks){
     var gstr=gp!==null?(gp>0?"+":"")+gp+"%":"—";
     var gc=gp!==null?(gp>5?"#00e5a0":gp<-5?"#ff4060":"#ffc940"):"#4a5878";
     var rc=s.rsi?(+s.rsi>70?"#ff4060":+s.rsi<30?"#00e5a0":"#ffc940"):"#4a5878";
+    var s1=(s.pivot&&+s.pivot.s1)?+s.pivot.s1:0;
+    var s1d=s1>0?Math.round((s1-s.price)/s.price*1000)/10:null;
+    var s1str=s1d!==null?(s1d>0?"+":"")+s1d+"%":"—";
+    // S1까지 가까울수록(±2% 이내) 강조, 이미 S1 아래면 초록(매수구간)
+    var s1c=s1d===null?"#4a5878":(s.price<=s1?"#00e5a0":Math.abs(s1d)<=2?"#ffc940":"#8090b0");
     var cid=s.code;
     rows+="<tr class='sum-row' data-id='"+cid+"'>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"
@@ -504,8 +509,8 @@ function renderSummaryTable(stocks){
       +  "<div style='font-size:9px;color:"+cc+";font-family:JetBrains Mono,monospace'>"+cp+"</div>"
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
-      +  "<div style='font-size:11px;color:#00d4ff;font-family:JetBrains Mono,monospace'>"+W(fv)+"</div>"
-      +  "<div style='font-size:9px;color:"+gc+";font-family:JetBrains Mono,monospace'>"+gstr+"</div>"
+      +  "<div style='font-size:11px;color:"+s1c+";font-family:JetBrains Mono,monospace'>"+W(s1)+"</div>"
+      +  "<div style='font-size:9px;color:"+s1c+";font-family:JetBrains Mono,monospace'>"+s1str+"</div>"
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
       +  "<span style='font-size:11px;font-weight:700;color:"+rc+";font-family:JetBrains Mono,monospace'>"+(s.rsi||"—")+"</span>"
@@ -541,7 +546,7 @@ function renderSummaryTable(stocks){
     +  "<th style='text-align:left'>종목</th>"
     +  "<th>의견</th>"
     +  "<th style='text-align:right'>현재가</th>"
-    +  "<th style='text-align:right;color:#00d4ff'>적정가</th>"
+    +  "<th style='text-align:right;color:#00d4ff'>지지가(S1)</th>"
     +  "<th>RSI</th>"
     +"</tr></thead>"
     +"<tbody>"+rows+"</tbody>"
@@ -550,7 +555,7 @@ function renderSummaryTable(stocks){
     +  "<span style='color:#00e5a0'>▲ 매수</span>"
     +  "<span style='color:#ffc940'>◆ 중립</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
-    +  "<span>| 적정가 괴리율 표시</span>"
+    +  "<span>| S1 = 1차 지지·분할매수 구간 (현재가 대비)</span>"
     +"</div></div>";
 }
 
