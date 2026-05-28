@@ -22,9 +22,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 패키지 설치
-        run: pip install pykrx --break-system-packages -q
-
       - name: 주식 데이터 수집
         env:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
