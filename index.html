@@ -148,15 +148,16 @@ body{
 }
 .summary-title{font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:.5px}
 .summary-hint{font-size:10px;color:var(--text3)}
-.sum-table{width:100%;border-collapse:collapse;min-width:300px}
+.sum-table{width:100%;border-collapse:collapse;min-width:0;table-layout:fixed}
 .sum-table th{
-  padding:6px 8px;
+  padding:6px 4px;
   font-size:10px;font-weight:700;
   color:var(--text3);
   text-align:center;
   border-bottom:1px solid var(--border);
   background:rgba(0,0,0,.3);
-  letter-spacing:.3px;
+  letter-spacing:0;
+  white-space:nowrap;
 }
 .sum-table th:first-child{text-align:left}
 .sum-table td{padding:10px 8px;border-bottom:1px solid rgba(22,32,64,.5)}
@@ -408,7 +409,7 @@ body{
 <div class="main" id="main">
   <div class="start" id="startScreen">
     <div class="start-icon">📊</div>
-    <div class="start-title">SK하이닉스 · 삼성전자 · LG전자<br>삼성전기 · 현대자동차</div>
+    <div class="start-title">SK하이닉스 · 삼성전자 · LG전자<br>삼성전기 · 현대차</div>
     <div class="start-desc">
       <b>KIS API</b> 통합시세 · 1분 자동 갱신<br>
       외국인·기관 수급 · 공매도 비율<br>
@@ -443,7 +444,7 @@ const STOCKS=[
   {code:"005930",name:"삼성전자",   emoji:"🟡"},
   {code:"066570",name:"LG전자",     emoji:"🔴"},
   {code:"009150",name:"삼성전기",   emoji:"🟠"},
-  {code:"005380",name:"현대자동차", emoji:"🟢"},
+  {code:"005380",name:"현대차", emoji:"🟢"},
 ];
 const OC={"매수":"#00e5a0","중립":"#ffc940","매도":"#ff4060"};
 const OI={"매수":"▲","중립":"◆","매도":"▼"};
@@ -492,22 +493,22 @@ function renderSummaryTable(stocks){
     var rc=s.rsi?(+s.rsi>70?"#ff4060":+s.rsi<30?"#00e5a0":"#ffc940"):"#4a5878";
     var cid=s.code;
     rows+="<tr class='sum-row' data-id='"+cid+"'>"
-      +"<td style='padding:9px 8px;border-bottom:1px solid rgba(22,32,64,.4)'>"
-      +  "<span style='font-size:12px;font-weight:700'>"+st.emoji+" "+st.name+"</span>"
+      +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"
+      +  "<span style='font-size:11px;font-weight:700'>"+st.emoji+" "+st.name+"</span>"
       +"</td>"
-      +"<td style='padding:9px 8px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center'>"
-      +  "<span style='color:"+oc+";font-weight:900;font-size:13px'>"+oi+" "+op+"</span>"
+      +"<td style='padding:9px 4px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
+      +  "<span style='color:"+oc+";font-weight:800;font-size:11px'>"+oi+" "+op+"</span>"
       +"</td>"
-      +"<td style='padding:9px 8px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right'>"
-      +  "<div style='font-size:12px;font-weight:700;font-family:JetBrains Mono,monospace'>"+W(s.price)+"</div>"
-      +  "<div style='font-size:10px;color:"+cc+";font-family:JetBrains Mono,monospace'>"+cp+"</div>"
+      +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
+      +  "<div style='font-size:11px;font-weight:700;font-family:JetBrains Mono,monospace'>"+W(s.price)+"</div>"
+      +  "<div style='font-size:9px;color:"+cc+";font-family:JetBrains Mono,monospace'>"+cp+"</div>"
       +"</td>"
-      +"<td style='padding:9px 8px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right'>"
-      +  "<div style='font-size:12px;color:#00d4ff;font-family:JetBrains Mono,monospace'>"+W(fv)+"</div>"
-      +  "<div style='font-size:10px;color:"+gc+";font-family:JetBrains Mono,monospace'>"+gstr+"</div>"
+      +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
+      +  "<div style='font-size:11px;color:#00d4ff;font-family:JetBrains Mono,monospace'>"+W(fv)+"</div>"
+      +  "<div style='font-size:9px;color:"+gc+";font-family:JetBrains Mono,monospace'>"+gstr+"</div>"
       +"</td>"
-      +"<td style='padding:9px 8px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center'>"
-      +  "<span style='font-size:12px;font-weight:700;color:"+rc+";font-family:JetBrains Mono,monospace'>"+(s.rsi||"—")+"</span>"
+      +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
+      +  "<span style='font-size:11px;font-weight:700;color:"+rc+";font-family:JetBrains Mono,monospace'>"+(s.rsi||"—")+"</span>"
       +"</td>"
       +"</tr>";
   }
@@ -527,8 +528,15 @@ function renderSummaryTable(stocks){
     +  "<span class='summary-title'>⚡ 빠른 판단 요약</span>"
     +  "<span class='summary-hint'>종목 클릭 → 상세</span>"
     +"</div>"
-    +"<div style='overflow-x:auto'>"
+    +"<div>"
     +"<table class='sum-table'>"
+    +"<colgroup>"
+    +  "<col style='width:27%'>"
+    +  "<col style='width:17%'>"
+    +  "<col style='width:23%'>"
+    +  "<col style='width:21%'>"
+    +  "<col style='width:12%'>"
+    +"</colgroup>"
     +"<thead><tr>"
     +  "<th style='text-align:left'>종목</th>"
     +  "<th>의견</th>"
