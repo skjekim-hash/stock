@@ -149,14 +149,23 @@ def fetch_kis_price(code):
         if not d:
             return None
         out = d.get("output", {})
-        price = to_n(out.get("stck_prpr") or out.get("stck_clpr") or 0)
-        prev  = to_n(out.get("stck_sdpr") or 0)  # 전일 종가
+        price = to_n(out.get("stck_prpr") or 0)
+        prev  = to_n(out.get("stck_sdpr") or 0)  # 기준가(전일 종가)
         if price > 0:
+            # 52주 고저는 w52_ 필드 사용 (stck_hgpr/lwpr는 당일 고저라 틀림)
+            high52 = to_n(out.get("w52_hgpr") or 0)
+            low52  = to_n(out.get("w52_lwpr") or 0)
+            change = to_n(out.get("prdy_vrss") or 0)        # 전일 대비
+            sign   = out.get("prdy_vrss_sign") or "3"        # 1상한2상승3보합4하한5하락
+            if sign in ("4", "5"):
+                change = -abs(change)
             return {
                 "price":    round(price),
-                "prevClose": round(prev) if prev else round(price),
-                "high52w":  round(to_n(out.get("stck_hgpr") or 0)),
-                "low52w":   round(to_n(out.get("stck_lwpr") or 0)),
+                "prevClose": round(prev) if prev else round(price - change),
+                "change":   round(change),
+                "changePct": round(to_n(out.get("prdy_ctrt") or 0), 2) * (-1 if sign in ("4","5") else 1),
+                "high52w":  round(high52),
+                "low52w":   round(low52),
                 "tradedAt": out.get("stck_bsop_date", ""),
                 "source":   "KIS API (통합시세)",
             }
@@ -1145,6 +1154,14 @@ def analyze_stock(stock, kospi):
     high52w = naver["high52w"]  if naver else round(meta_d.get("fiftyTwoWeekHigh", 0))
     low52w  = naver["low52w"]   if naver else round(meta_d.get("fiftyTwoWeekLow", 0))
     source  = naver["source"]   if naver else "Yahoo Finance"
+
+    # 52주 값이 비정상(0이거나 현재가보다 높은 최저가 등)이면 Yahoo로 보강
+    yf_high = round(meta_d.get("fiftyTwoWeekHigh", 0))
+    yf_low  = round(meta_d.get("fiftyTwoWeekLow", 0))
+    if high52w <= 0 or high52w < price:
+        high52w = max(yf_high, price)
+    if low52w <= 0 or low52w > price:
+        low52w = min(yf_low, price) if yf_low > 0 else low52w
 
     if price == 0:
         return None
