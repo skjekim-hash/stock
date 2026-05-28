@@ -1105,7 +1105,7 @@ def analyze_stock(stock, kospi):
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {
         "ratio": 0, "volume": 0, "comment": "공매도 데이터 없음"}
-    news     = fetch_news(code, name)
+    news     = []  # 뉴스 제거 (해외서버 RSS 차단 - DART 공시로 대체)
     dart     = fetch_dart(code)
     time.sleep(0.1)
 

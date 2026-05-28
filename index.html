@@ -648,16 +648,6 @@ function renderCard(s,idx){
     </div>`;
   }
 
-  // 뉴스
-  var newsHtml=(s.news||[]).map(n=>`
-    <div class="news-item">
-      <span class="news-sent" style="background:${n.sentiment==='긍정'?'rgba(0,229,160,.1)':n.sentiment==='부정'?'rgba(255,64,96,.1)':'rgba(255,201,64,.1)'};color:${n.sentiment==='긍정'?'#00e5a0':n.sentiment==='부정'?'#ff4060':'#ffc940'}">${n.sentiment}</span>
-      <div class="news-content">
-        <div class="news-title">${n.title}</div>
-        <div class="news-date">${n.date}</div>
-      </div>
-    </div>`).join("")||`<div class="no-data">뉴스 수집 중</div>`;
-
   // DART
   var dartHtml=(s.dart||[]).map(d=>`
     <div class="dart-item">
@@ -937,37 +927,28 @@ function renderCard(s,idx){
     </div>
   </div>
 
-  <!-- ⑧ 뉴스 -->
-  <div class="sec" style="border-left-color:#4090ff">
-    <div class="sec-head">
-      <span class="sec-num">08</span>
-      <span class="sec-title" style="color:#4090ff">최신 뉴스</span>
-    </div>
-    ${newsHtml}
-  </div>
-
-  <!-- ⑨ DART 공시 -->
+  <!-- ⑧ DART 공시 -->
   <div class="sec" style="border-left-color:#ffc940">
     <div class="sec-head">
-      <span class="sec-num">09</span>
+      <span class="sec-num">08</span>
       <span class="sec-title" style="color:#ffc940">DART 공시</span>
     </div>
     ${dartHtml}
   </div>
 
-  <!-- ⑩ RISK -->
+  <!-- ⑨ RISK -->
   <div class="sec" style="border-left-color:#ff4060">
     <div class="sec-head">
-      <span class="sec-num">10</span>
+      <span class="sec-num">09</span>
       <span class="sec-title" style="color:#ff4060">RISK</span>
     </div>
     ${B(s.risk,"#ff4060")}
   </div>
 
-  <!-- ⑪ 참고 사항 -->
+  <!-- ⑩ 참고 사항 -->
   <div class="sec" style="border-left-color:#00d4ff">
     <div class="sec-head">
-      <span class="sec-num">11</span>
+      <span class="sec-num">10</span>
       <span class="sec-title" style="color:#00d4ff">참고 사항</span>
     </div>
     ${B(s.notes,"#00d4ff")}
