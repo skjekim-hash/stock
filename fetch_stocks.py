@@ -18,13 +18,8 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError
 from urllib.parse import urlencode, quote
 
-# pykrx - KRX 전일 수급 데이터
-try:
-    from pykrx import stock as krx_stock
-    PYKRX_AVAILABLE = True
-except ImportError:
-    PYKRX_AVAILABLE = False
-    print("  pykrx 미설치 — 수급 데이터 없음", file=sys.stderr)
+# 수급 데이터는 KIS API(실전) 또는 네이버 금융에서 수집
+PYKRX_AVAILABLE = False
 
 # KIS API 설정 (GitHub Secrets에서 환경변수로 주입)
 import os
@@ -423,29 +418,11 @@ def fetch_kospi():
 # 증권사 목표주가 + 적정주가 (네이버 금융)
 # ─────────────────────────────────────────
 def fetch_target_price(code):
-    """증권사 목표주가 - FnGuide 컨센서스"""
+    """증권사 목표주가 - 네이버 컨센서스 → 실패 시 하드코딩 폴백
+    (FnGuide는 해외서버 406 차단으로 제외. 실전 API 연결 시 KIS로 대체 가능)"""
     result = {"consensus": 0, "high": 0, "low": 0, "avg": 0,
               "count": 0, "comment": "", "source": ""}
     try:
-        import re
-        # FnGuide 컨센서스 API
-        url = f"https://comp.fnguide.com/SVO2/json/SVD_Consensus.json?gicode=A{code}"
-        d = http_json(url, headers={"Referer": "https://comp.fnguide.com/"})
-        if isinstance(d, dict):
-            tp = to_n(d.get("TrgPrc") or d.get("targetPrice") or 0)
-            if tp >= 50000:
-                result["consensus"] = round(tp)
-                result["high"]      = round(to_n(d.get("TrgPrcHigh") or tp * 1.2))
-                result["low"]       = round(to_n(d.get("TrgPrcLow") or tp * 0.8))
-                result["avg"]       = result["consensus"]
-                result["count"]     = round(to_n(d.get("AnNum") or 1))
-                result["source"]    = "FnGuide 컨센서스"
-                return result
-    except Exception as e:
-        print(f"  FnGuide 목표주가 실패 ({code}): {e}", file=sys.stderr)
-
-    try:
-        import re
         # 네이버 모바일 API
         for ep in [
             f"https://m.stock.naver.com/api/stock/{code}/consensus",
@@ -469,8 +446,7 @@ def fetch_target_price(code):
                     result["source"]    = "네이버 컨센서스"
                     return result
             except: pass
-    except Exception as e:
-        print(f"  네이버 목표주가 실패 ({code}): {e}", file=sys.stderr)
+    except: pass
 
     # 최종 폴백: 증권사 컨센서스 하드코딩 (2026년 5월 기준)
     fallback = {
@@ -613,14 +589,10 @@ def fetch_news(code, name, limit=5):
     from email.utils import parsedate
 
     from urllib.parse import quote
-    # RSS 소스
+    # RSS 소스 (해외서버에서 접근 가능한 것만)
     rss_sources = [
-        # Yahoo Finance (안정적)
+        # Yahoo Finance (해외서버 안정적)
         f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={code}.KS&region=KR&lang=ko-KR",
-        # 연합뉴스 (해외서버 허용)
-        f"https://www.yna.co.kr/rss/news.xml",
-        # 한국경제
-        f"https://feeds.hankyung.com/apps/news.xml?category=stock",
     ]
 
     seen = set()
@@ -672,8 +644,8 @@ def fetch_news(code, name, limit=5):
                 })
                 if len(news_list) >= limit:
                     break
-        except Exception as e:
-            print(f"  RSS 실패 ({rss_url[-40:]}): {e}", file=sys.stderr)
+        except Exception:
+            pass  # RSS 차단/실패는 조용히 무시 (뉴스는 보조 정보)
 
     return news_list
 
