@@ -759,6 +759,118 @@ def calc_stoch(highs, lows, closes, p=14):
     return 50.0 if hh == ll else round((closes[-1] - ll) / (hh - ll) * 100, 1)
 
 
+def calc_stoch_rsi(closes, rsi_period=14, stoch_period=14, k=3, d=3):
+    """스토캐스틱 RSI - RSI에 스토캐스틱을 적용한 정밀 모멘텀 지표
+    일반 RSI보다 과매수·과매도 신호가 더 민감하고 빠르게 잡힘
+    반환: {"k": %K값, "d": %D값, "signal": 매수/매도/중립, "comment": 해석}"""
+    # 필요 데이터: RSI 안정화(rsi_period) + 스토캐스틱 윈도우(stoch_period) + K평활(d) + D평활(d)
+    min_required = rsi_period + stoch_period + d * 2 + 5
+    if len(closes) < min_required:
+        return None
+    # 충분한 RSI 시계열 만들기 (stoch_period + d*2 정도)
+    rsi_needed = stoch_period + d * 2
+    rsi_series = []
+    for i in range(rsi_needed):
+        end_idx = len(closes) - rsi_needed + i + 1
+        sub = closes[:end_idx]
+        r = calc_rsi(sub, rsi_period)
+        if r is not None:
+            rsi_series.append(r)
+    if len(rsi_series) < stoch_period + d * 2 - 1:
+        return None
+    # RSI 시계열에 Stoch 공식 적용 → raw %K 시계열
+    raw_k = []
+    for i in range(stoch_period - 1, len(rsi_series)):
+        window = rsi_series[i - stoch_period + 1: i + 1]
+        hh, ll = max(window), min(window)
+        kv = 50.0 if hh == ll else (rsi_series[i] - ll) / (hh - ll) * 100
+        raw_k.append(kv)
+    if len(raw_k) < d * 2:
+        return None
+    # %K = raw K의 d기간 평활, %D = %K의 d기간 평활
+    k_smoothed = []
+    for i in range(d - 1, len(raw_k)):
+        k_smoothed.append(sum(raw_k[i - d + 1: i + 1]) / d)
+    if len(k_smoothed) < d:
+        return None
+    k_val = k_smoothed[-1]
+    d_val = sum(k_smoothed[-d:]) / d
+
+    if k_val < 20 and d_val < 20:
+        signal, comment = "매수", f"과매도 구간({k_val:.0f}) — 반등 임박 신호"
+    elif k_val > 80 and d_val > 80:
+        signal, comment = "매도", f"과매수 구간({k_val:.0f}) — 단기 조정 주의"
+    elif k_val > d_val and k_val < 30:
+        signal, comment = "매수", "저점 골든크로스 — 매수 우위"
+    elif k_val < d_val and k_val > 70:
+        signal, comment = "매도", "고점 데드크로스 — 매도 우위"
+    else:
+        signal, comment = "중립", f"K {k_val:.0f} / D {d_val:.0f}"
+    return {"k": round(k_val, 1), "d": round(d_val, 1),
+            "signal": signal, "comment": comment}
+
+
+def detect_divergence(closes, highs, lows, lookback=20):
+    """다이버전스 감지 - 주가와 RSI의 방향 괴리를 잡아냄
+    강세 다이버전스: 주가는 신저점, RSI는 더 높음 → 바닥 반등 신호 (매수)
+    약세 다이버전스: 주가는 신고점, RSI는 더 낮음 → 천장 하락 신호 (매도)"""
+    if len(closes) < lookback + 14:
+        return None
+    # 최근 lookback 구간에서 두 개의 저점/고점 찾기
+    recent_low_idx = lows[-lookback:].index(min(lows[-lookback:])) + (len(lows) - lookback)
+    recent_high_idx = highs[-lookback:].index(max(highs[-lookback:])) + (len(highs) - lookback)
+    # 이전 구간의 저점/고점 (lookback 더 이전)
+    if recent_low_idx < 14 or recent_high_idx < 14:
+        return None
+    prev_window_lows = lows[max(0, recent_low_idx - lookback):recent_low_idx]
+    prev_window_highs = highs[max(0, recent_high_idx - lookback):recent_high_idx]
+    if not prev_window_lows or not prev_window_highs:
+        return None
+    prev_low_idx = prev_window_lows.index(min(prev_window_lows)) + max(0, recent_low_idx - lookback)
+    prev_high_idx = prev_window_highs.index(max(prev_window_highs)) + max(0, recent_high_idx - lookback)
+
+    # 각 시점의 RSI 계산
+    def rsi_at(idx):
+        if idx < 14: return None
+        return calc_rsi(closes[:idx + 1], 14)
+
+    rsi_recent_low = rsi_at(recent_low_idx)
+    rsi_prev_low   = rsi_at(prev_low_idx)
+    rsi_recent_high = rsi_at(recent_high_idx)
+    rsi_prev_high   = rsi_at(prev_high_idx)
+
+    bullish = False
+    bearish = False
+    comment = ""
+
+    # 강세 다이버전스: 주가는 더 낮은 저점, RSI는 더 높은 저점
+    if (rsi_recent_low is not None and rsi_prev_low is not None
+            and lows[recent_low_idx] < lows[prev_low_idx]
+            and rsi_recent_low > rsi_prev_low
+            and rsi_recent_low < 40):
+        bullish = True
+        comment = f"강세 다이버전스 — 주가 ↓ / RSI ↑ ({rsi_prev_low:.0f}→{rsi_recent_low:.0f}). 바닥권 반등 신호"
+
+    # 약세 다이버전스: 주가는 더 높은 고점, RSI는 더 낮은 고점
+    if (rsi_recent_high is not None and rsi_prev_high is not None
+            and highs[recent_high_idx] > highs[prev_high_idx]
+            and rsi_recent_high < rsi_prev_high
+            and rsi_recent_high > 60):
+        bearish = True
+        if comment:
+            comment += " | "
+        comment += f"약세 다이버전스 — 주가 ↑ / RSI ↓ ({rsi_prev_high:.0f}→{rsi_recent_high:.0f}). 천장권 하락 신호"
+
+    if not bullish and not bearish:
+        return None
+    return {
+        "bullish": bullish,
+        "bearish": bearish,
+        "signal": "매수" if bullish and not bearish else "매도" if bearish and not bullish else "혼조",
+        "comment": comment,
+    }
+
+
 def calc_sma(arr, p):
     if len(arr) < p:
         return None
@@ -997,7 +1109,8 @@ def contra_signal(rsi, macd, macd_sig, obv, patterns, fg_score, investor):
 # ─────────────────────────────────────────
 def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap,
-                  weekly_opinion, investor, short_ratio, news_list):
+                  weekly_opinion, investor, short_ratio, news_list,
+                  stoch_rsi=None, divergence=None):
     score = 0
 
     # 기술 지표 (일봉)
@@ -1008,6 +1121,16 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if mfi: score += 1 if mfi < 20 else -1 if mfi > 80 else 0
     if obv: score += 1 if obv["slope"] > 2 else -1 if obv["slope"] < -2 else 0
     if adx and adx["adx"] < 15: score = round(score * 0.7)
+
+    # 스토캐스틱 RSI (정밀 모멘텀)
+    if stoch_rsi:
+        if stoch_rsi["signal"] == "매수": score += 2
+        elif stoch_rsi["signal"] == "매도": score -= 2
+
+    # 다이버전스 (강한 반전 신호)
+    if divergence:
+        if divergence.get("bullish"): score += 3
+        if divergence.get("bearish"): score -= 3
 
     # 52주 위치
     if h52 > 0 and l52 > 0:
@@ -1147,6 +1270,8 @@ def analyze_stock(stock, kospi):
     rsi   = calc_rsi(closes_d)   if has_data else None
     macd, macd_sig, macd_hist = calc_macd(closes_d) if has_data else (None, None, None)
     stoch = calc_stoch(highs_d, lows_d, closes_d) if has_data else None
+    stoch_rsi = calc_stoch_rsi(closes_d) if has_data else None
+    divergence = detect_divergence(closes_d, highs_d, lows_d) if has_data else None
     wr    = calc_williams(highs_d, lows_d, closes_d) if has_data else None
     adx   = calc_adx(highs_d, lows_d, closes_d) if has_data else None
     mfi   = calc_mfi(highs_d, lows_d, closes_d, volumes_d) if has_data else None
@@ -1180,7 +1305,8 @@ def analyze_stock(stock, kospi):
     opinion, score = master_signal(
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
-        weekly["opinion"], investor, short.get("ratio", 0), news
+        weekly["opinion"], investor, short.get("ratio", 0), news,
+        stoch_rsi, divergence
     )
     pt = price_targets(price, opinion, rsi or 50, pivot)
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
@@ -1234,6 +1360,8 @@ def analyze_stock(stock, kospi):
         "stoch": stoch or 50,
         "stochComment": ("데이터 부족" if stoch is None else
                          "과매도 — 반등 임박" if stoch < 20 else "과매수 — 조정 주의" if stoch > 80 else "중립"),
+        "stochRsi": stoch_rsi,
+        "divergence": divergence,
         "wr": wr, "wrComment": ("데이터 부족" if wr is None else
                                 "과매도 — 매수 고려" if wr < -80 else "과매수 — 매도 고려" if wr > -20 else "중립"),
         "mfi": mfi, "mfiComment": ("데이터 부족" if mfi is None else
