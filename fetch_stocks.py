@@ -763,22 +763,21 @@ def calc_stoch_rsi(closes, rsi_period=14, stoch_period=14, k=3, d=3):
     """스토캐스틱 RSI - RSI에 스토캐스틱을 적용한 정밀 모멘텀 지표
     일반 RSI보다 과매수·과매도 신호가 더 민감하고 빠르게 잡힘
     반환: {"k": %K값, "d": %D값, "signal": 매수/매도/중립, "comment": 해석}"""
-    # 필요 데이터: RSI 안정화(rsi_period) + 스토캐스틱 윈도우(stoch_period) + K평활(d) + D평활(d)
-    min_required = rsi_period + stoch_period + d * 2 + 5
-    if len(closes) < min_required:
+    # 데이터 최소 35개만 있으면 시도 (60일이 안 와도 작동하도록)
+    if len(closes) < 35:
+        print(f"  StochRSI: 데이터 {len(closes)}개 부족 (35개 필요)", file=sys.stderr)
         return None
-    # 충분한 RSI 시계열 만들기 (stoch_period + d*2 정도)
-    rsi_needed = stoch_period + d * 2
+    # RSI 시계열 생성 - 가능한 최대한
     rsi_series = []
-    for i in range(rsi_needed):
-        end_idx = len(closes) - rsi_needed + i + 1
-        sub = closes[:end_idx]
+    for i in range(rsi_period, len(closes)):
+        sub = closes[:i + 1]
         r = calc_rsi(sub, rsi_period)
         if r is not None:
             rsi_series.append(r)
-    if len(rsi_series) < stoch_period + d * 2 - 1:
+    if len(rsi_series) < stoch_period + d:
+        print(f"  StochRSI: RSI 시계열 {len(rsi_series)}개 부족", file=sys.stderr)
         return None
-    # RSI 시계열에 Stoch 공식 적용 → raw %K 시계열
+    # raw %K 시계열
     raw_k = []
     for i in range(stoch_period - 1, len(rsi_series)):
         window = rsi_series[i - stoch_period + 1: i + 1]
@@ -786,8 +785,9 @@ def calc_stoch_rsi(closes, rsi_period=14, stoch_period=14, k=3, d=3):
         kv = 50.0 if hh == ll else (rsi_series[i] - ll) / (hh - ll) * 100
         raw_k.append(kv)
     if len(raw_k) < d * 2:
+        print(f"  StochRSI: raw_k {len(raw_k)}개 부족 ({d*2} 필요)", file=sys.stderr)
         return None
-    # %K = raw K의 d기간 평활, %D = %K의 d기간 평활
+    # %K = raw K의 d평활, %D = %K의 d평활
     k_smoothed = []
     for i in range(d - 1, len(raw_k)):
         k_smoothed.append(sum(raw_k[i - d + 1: i + 1]) / d)
