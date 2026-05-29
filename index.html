@@ -742,6 +742,12 @@ function renderCard(s,idx){
       <div class="tf-note">${mo.comment||""}</div>
     </div>
     ${s.patterns?.length?`<div style="margin-top:10px">${s.patterns.map(p=>`<span class="ptag" style="background:${p.color}15;color:${p.color};border:1px solid ${p.color}35">${p.name} (${p.type})</span>`).join("")}</div>`:""}
+    ${s.divergence?`<div style="margin-top:12px;padding:10px 12px;border-radius:11px;background:${s.divergence.bullish?'rgba(0,229,160,.08)':'rgba(255,64,96,.08)'};border:1px solid ${s.divergence.bullish?'rgba(0,229,160,.3)':'rgba(255,64,96,.3)'}">
+      <div style="font-size:11px;font-weight:800;color:${s.divergence.bullish?'#00e5a0':'#ff4060'};margin-bottom:4px">
+        ${s.divergence.bullish?'🔔 강세 다이버전스 감지':'⚠️ 약세 다이버전스 감지'}
+      </div>
+      <div style="font-size:11px;color:#8090b0;line-height:1.5">${s.divergence.comment}</div>
+    </div>`:""}
   </div>
 
   <!-- ③ 목표주가 · 적정주가 -->
@@ -880,6 +886,15 @@ function renderCard(s,idx){
       </div>
     </div>
     <div style="font-size:10px;color:#4a5878;margin-bottom:10px">${s.wrComment} | ${s.mfiComment}</div>
+    ${s.stochRsi?`<div class="irow">
+      <span class="irow-l">스토캐스틱 RSI</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.stochRsi.signal==='매수'?'#00e5a0':s.stochRsi.signal==='매도'?'#ff4060':'#ffc940'}">
+          K ${s.stochRsi.k} / D ${s.stochRsi.d}
+        </div>
+        <div class="irow-n">${s.stochRsi.comment}</div>
+      </div>
+    </div>`:""}
     <div class="sec-sub">추세</div>
     <div class="ind-grid3" style="margin-bottom:4px">
       <div class="ind-cell"><div class="ind-l">MACD%</div><div class="ind-v" style="color:${mc}">${F3(s.macd)}</div></div>
