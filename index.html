@@ -489,6 +489,10 @@ function renderSummaryTable(stocks){
     var op=s.opinion||"중립";
     var oc=OC[op]||"#ffc940";
     var oi=OI[op]||"◆";
+    // 중립이면서 소량 진입 가능 종목은 별표로 표시
+    var ce=s.cautiousEntry&&s.cautiousEntry.entry;
+    var opLabel=op+(ce?" ★":"");
+    var opColor=ce?"#00d4ff":oc;  // 진입 가능 종목은 시안색으로 강조
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
     var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
@@ -508,7 +512,7 @@ function renderSummaryTable(stocks){
       +  "<span style='font-size:11px;font-weight:700'>"+st.emoji+" "+st.name+"</span>"
       +"</td>"
       +"<td style='padding:9px 4px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
-      +  "<span style='color:"+oc+";font-weight:800;font-size:11px'>"+oi+" "+op+"</span>"
+      +  "<span style='color:"+opColor+";font-weight:800;font-size:11px'>"+oi+" "+opLabel+"</span>"
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
       +  "<div style='font-size:11px;font-weight:700;font-family:JetBrains Mono,monospace'>"+W(s.price)+"</div>"
@@ -561,6 +565,7 @@ function renderSummaryTable(stocks){
     +  "<span style='color:#00e5a0'>▲ 매수</span>"
     +  "<span style='color:#ffc940'>◆ 중립</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
+    +  "<span style='color:#00d4ff'>★ 소량 진입 검토</span>"
     +  "<span>| S1 = 1차 지지·분할매수 구간 (현재가 대비)</span>"
     +"</div></div>";
 }
@@ -753,6 +758,19 @@ function renderCard(s,idx){
         ${s.divergence.bullish?'🔔 강세 다이버전스 감지':'⚠️ 약세 다이버전스 감지'}
       </div>
       <div style="font-size:11px;color:#8090b0;line-height:1.5">${s.divergence.comment}</div>
+    </div>`:""}
+    ${s.cautiousEntry&&s.cautiousEntry.entry?`<div style="margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25)">
+      <div style="font-size:11px;font-weight:800;color:#00d4ff;margin-bottom:4px">
+        ★ 소량 진입 검토 가능
+      </div>
+      <div style="font-size:11px;color:#8090b0;line-height:1.5;margin-bottom:6px">${s.cautiousEntry.reason}</div>
+      <div style="font-size:10px;color:#4a5878;line-height:1.6">
+        매수 신호:
+        ${s.cautiousEntry.signals.map(sig=>`<span style="display:inline-block;background:rgba(0,212,255,.1);color:#00d4ff;border-radius:8px;padding:1px 7px;margin:2px 3px 0 0;font-size:10px">${sig}</span>`).join("")}
+      </div>
+      ${s.cautiousEntry.stopLoss>0?`<div style="font-size:10px;color:#ff4060;margin-top:6px;font-family:'JetBrains Mono',monospace">
+        ⚠️ 손절선: ${W(s.cautiousEntry.stopLoss)} — 하이닉스급 고가주는 1주, 일반주는 1~2주 권장
+      </div>`:""}
     </div>`:""}
   </div>
 

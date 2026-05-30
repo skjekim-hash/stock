@@ -1387,6 +1387,63 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     return opinion, score
 
 
+def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
+                          psar, investor, cci, price, pivot):
+    """중립 의견에서 '소량 진입 가능' 여부 판정
+    조건: 의견=중립 AND 점수 +2~+5 AND 다음 신호 중 2개 이상 매수
+      - 일목균형표 매수
+      - 스토캐스틱 RSI 매수
+      - 강세 다이버전스
+      - 파라볼릭 SAR 상승
+      - CCI 매수
+      - 외국인·기관 수급 매수 우세
+    반환: {"entry": True/False, "signals": [...], "reason": "...", "stopLoss": int}"""
+    result = {"entry": False, "signals": [], "reason": "", "stopLoss": 0}
+
+    # 중립 의견이 아니거나 점수가 약한 매수 구간(+2~+5)이 아니면 대상 아님
+    if opinion != "중립" or score < 2 or score > 5:
+        return result
+
+    matched = []
+    if ichimoku and ichimoku.get("signal") == "매수":
+        matched.append("일목균형표 " + ("강세" if "강한" in ichimoku.get("comment", "") else "매수"))
+    if stoch_rsi and stoch_rsi.get("signal") == "매수":
+        matched.append("스토캐스틱 RSI 매수")
+    if divergence and divergence.get("bullish"):
+        matched.append("강세 다이버전스")
+    if psar and psar.get("signal") == "매수":
+        matched.append("파라볼릭 SAR 상승")
+    if cci and cci.get("signal") == "매수":
+        matched.append("CCI " + ("극단 과매도" if "극단" in cci.get("comment", "") else "과매도"))
+    if investor:
+        f = investor.get("foreign", 0)
+        inst = investor.get("institution", 0)
+        if (f != 0 or inst != 0) and (f > 0 or inst > 0):
+            matched.append(f"수급 매수 우세(외국인 {f:+,} / 기관 {inst:+,})")
+
+    # 매도 신호가 동시에 강하게 있으면 제외 (혼조 회피)
+    bearish_count = 0
+    if ichimoku and ichimoku.get("signal") == "매도": bearish_count += 1
+    if stoch_rsi and stoch_rsi.get("signal") == "매도": bearish_count += 1
+    if divergence and divergence.get("bearish"): bearish_count += 1
+    if psar and psar.get("signal") == "매도": bearish_count += 1
+
+    if len(matched) >= 2 and bearish_count < 2:
+        result["entry"] = True
+        result["signals"] = matched
+        # 손절선: 파라볼릭 SAR 우선, 없으면 S1
+        if psar and psar.get("psar"):
+            result["stopLoss"] = psar["psar"]
+            result["reason"] = f"중립이지만 매수 신호 {len(matched)}개 확인 — 소량 진입 검토 가능"
+        elif pivot and pivot.get("s1"):
+            result["stopLoss"] = pivot["s1"]
+            result["reason"] = f"중립이지만 매수 신호 {len(matched)}개 확인 — 소량 진입 검토 가능"
+        else:
+            result["stopLoss"] = round(price * 0.95)
+            result["reason"] = f"중립이지만 매수 신호 {len(matched)}개 확인 — 소량 진입 검토 가능"
+    return result
+
+
 def price_targets(price, op, rsi, pivot):
     if op == "중립": return {"sp": 0, "sl": "해당없음", "tp": 0, "tp2": 0, "stop": 0}
     if op == "매수":
@@ -1529,6 +1586,8 @@ def analyze_stock(stock, kospi):
         stoch_rsi, divergence,
         ichimoku, cci, psar, value_surge
     )
+    cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
+                                      divergence, psar, investor, cci, price, pivot)
     pt = price_targets(price, opinion, rsi or 50, pivot)
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
                                    weekly, investor, short, vol_surge, breakout)
@@ -1587,6 +1646,7 @@ def analyze_stock(stock, kospi):
         "cci": cci,
         "psar": psar,
         "valueSurge": value_surge,
+        "cautiousEntry": cautious,
         "wr": wr, "wrComment": ("데이터 부족" if wr is None else
                                 "과매도 — 매수 고려" if wr < -80 else "과매수 — 매도 고려" if wr > -20 else "중립"),
         "mfi": mfi, "mfiComment": ("데이터 부족" if mfi is None else
