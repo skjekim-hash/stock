@@ -1148,17 +1148,21 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if weekly_opinion == "매수": score += 2
     elif weekly_opinion == "매도": score -= 2
 
-    # 외국인·기관 수급
+    # 외국인·기관 수급 — 데이터가 실제로 있을 때만 점수에 반영
+    # (모의투자 API 한계로 수급 데이터가 0인 경우 점수에 영향 주지 않음)
     if investor:
         f, inst = investor.get("foreign", 0), investor.get("institution", 0)
-        if f > 0 and inst > 0: score += 2
-        elif f > 0 or inst > 0: score += 1
-        elif f < 0 and inst < 0: score -= 2
-        elif f < 0 or inst < 0: score -= 1
+        if f != 0 or inst != 0:  # 실제 데이터가 있을 때만
+            if f > 0 and inst > 0: score += 2
+            elif f > 0 or inst > 0: score += 1
+            elif f < 0 and inst < 0: score -= 2
+            elif f < 0 or inst < 0: score -= 1
 
-    # 공매도
-    if short_ratio > 5: score -= 1
-    elif short_ratio < 1: score += 1
+    # 공매도 — 데이터가 실제로 있을 때만 점수에 반영
+    # (0%는 "공매도 매우 낮음"이 아니라 "데이터 없음" 의미)
+    if short_ratio > 0:
+        if short_ratio > 5: score -= 1
+        elif short_ratio < 1: score += 1
 
     # 뉴스 감성
     if news_list:
@@ -1167,7 +1171,9 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
 
-    opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
+    # 임계값: 기술 지표 위주로 판단하도록 완화
+    # (이전: +6/-5, 외부 데이터 ±4점 전제. 지금: 순수 기술 분석 기준)
+    opinion = "매수" if score >= 4 else "매도" if score <= -3 else "중립"
     return opinion, score
 
 
