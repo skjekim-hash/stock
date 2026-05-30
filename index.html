@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="주식분석">
+<meta name="theme-color" content="#03060f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>주식 AI 분석</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -1076,6 +1082,16 @@ async function loadData(){
 
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 60*1000);
 document.getElementById("mktBadge").textContent=kst().status;
+</script>
+<script>
+// PWA 서비스 워커 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then((reg) => console.log('SW 등록됨:', reg.scope))
+      .catch((err) => console.warn('SW 등록 실패:', err));
+  });
+}
 </script>
 </body>
 </html>

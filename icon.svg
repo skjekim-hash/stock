@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 배경 (둥근 사각형) -->
+  <rect width="512" height="512" rx="96" fill="#03060f"/>
+  <!-- 안전 영역(maskable) 안에 들어가도록 중앙 배치 -->
+  <g transform="translate(96, 96)">
+    <!-- 상승 차트 막대 (왼쪽부터 점점 높아짐) -->
+    <rect x="0"   y="200" width="48" height="120" rx="6" fill="#4090ff"/>
+    <rect x="60"  y="140" width="48" height="180" rx="6" fill="#00d4ff"/>
+    <rect x="120" y="80"  width="48" height="240" rx="6" fill="#00e5a0"/>
+    <rect x="180" y="40"  width="48" height="280" rx="6" fill="#00e5a0"/>
+    <rect x="240" y="0"   width="48" height="320" rx="6" fill="#ffc940"/>
+    <!-- 상승 화살표 -->
+    <path d="M 8 280 L 280 16" stroke="#00e5a0" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.6"/>
+    <polygon points="280,16 268,40 256,28" fill="#00e5a0" opacity="0.8"/>
+  </g>
+</svg>
