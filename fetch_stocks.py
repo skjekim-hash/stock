@@ -871,6 +871,187 @@ def detect_divergence(closes, highs, lows, lookback=20):
     }
 
 
+def calc_ichimoku(highs, lows, closes):
+    """일목균형표 - 한국 차트에서 강력한 추세·지지·저항 지표
+    전환선·기준선 교차, 구름대(선행스팬1·2) 돌파가 핵심 신호
+    반환: tenkan, kijun, senkou_a, senkou_b, signal, comment"""
+    if len(closes) < 52:
+        return None
+
+    def mid(h_window, l_window):
+        return (max(h_window) + min(l_window)) / 2
+
+    # 전환선 (9일): (9일 최고 + 9일 최저) / 2
+    tenkan = mid(highs[-9:], lows[-9:])
+    # 기준선 (26일): (26일 최고 + 26일 최저) / 2
+    kijun = mid(highs[-26:], lows[-26:])
+    # 선행스팬1 (전환선+기준선)/2, 26일 앞으로 그림
+    senkou_a = (tenkan + kijun) / 2
+    # 선행스팬2 (52일 최고+최저)/2
+    senkou_b = mid(highs[-52:], lows[-52:])
+
+    price = closes[-1]
+    cloud_top = max(senkou_a, senkou_b)
+    cloud_bot = min(senkou_a, senkou_b)
+
+    # 신호 판정
+    if price > cloud_top and tenkan > kijun:
+        signal = "매수"
+        comment = "구름대 위 + 전환선>기준선 — 강한 상승 추세"
+    elif price > cloud_top:
+        signal = "매수"
+        comment = "구름대 위 — 상승 우위"
+    elif price < cloud_bot and tenkan < kijun:
+        signal = "매도"
+        comment = "구름대 아래 + 전환선<기준선 — 강한 하락 추세"
+    elif price < cloud_bot:
+        signal = "매도"
+        comment = "구름대 아래 — 하락 우위"
+    else:
+        signal = "중립"
+        comment = "구름대 내부 — 방향성 미정 (변곡점 임박)"
+
+    return {
+        "tenkan": round(tenkan),
+        "kijun": round(kijun),
+        "senkouA": round(senkou_a),
+        "senkouB": round(senkou_b),
+        "cloudTop": round(cloud_top),
+        "cloudBot": round(cloud_bot),
+        "signal": signal,
+        "comment": comment,
+    }
+
+
+def calc_cci(highs, lows, closes, p=20):
+    """CCI (Commodity Channel Index) - 가격이 이동평균에서 얼마나 이탈했는지 측정
+    +100 이상 과매수, -100 이하 과매도. 추세 이탈을 빠르게 잡음
+    반환: value, signal, comment"""
+    if len(closes) < p:
+        return None
+    typical = [(h + l + c) / 3 for h, l, c in zip(highs[-p:], lows[-p:], closes[-p:])]
+    sma_tp = sum(typical) / p
+    mad = sum(abs(t - sma_tp) for t in typical) / p
+    if mad == 0:
+        return {"value": 0, "signal": "중립", "comment": "변동성 없음"}
+    cci = (typical[-1] - sma_tp) / (0.015 * mad)
+
+    if cci > 200:
+        signal, comment = "매도", f"극단 과매수({cci:.0f}) — 강한 조정 신호"
+    elif cci > 100:
+        signal, comment = "매도", f"과매수({cci:.0f}) — 조정 주의"
+    elif cci < -200:
+        signal, comment = "매수", f"극단 과매도({cci:.0f}) — 강한 반등 신호"
+    elif cci < -100:
+        signal, comment = "매수", f"과매도({cci:.0f}) — 반등 임박"
+    else:
+        signal, comment = "중립", f"중립 구간({cci:.0f})"
+    return {"value": round(cci, 1), "signal": signal, "comment": comment}
+
+
+def calc_psar(highs, lows, closes, af_start=0.02, af_step=0.02, af_max=0.20):
+    """파라볼릭 SAR (Stop And Reverse) - 추세 전환점 표시
+    점이 가격 아래면 상승 추세, 위면 하락 추세. 손절선으로 활용
+    반환: psar(현재 SAR값), trend(상승/하락), signal, comment"""
+    if len(closes) < 10:
+        return None
+    # 초기값
+    trend_up = closes[1] > closes[0]
+    psar = lows[0] if trend_up else highs[0]
+    ep = highs[1] if trend_up else lows[1]  # 극값(Extreme Point)
+    af = af_start
+
+    for i in range(2, len(closes)):
+        prev_psar = psar
+        # SAR 업데이트
+        psar = prev_psar + af * (ep - prev_psar)
+
+        if trend_up:
+            psar = min(psar, lows[i - 1], lows[i - 2] if i >= 2 else lows[i - 1])
+            if lows[i] < psar:
+                # 추세 전환 (상승 → 하락)
+                trend_up = False
+                psar = ep
+                ep = lows[i]
+                af = af_start
+            else:
+                if highs[i] > ep:
+                    ep = highs[i]
+                    af = min(af + af_step, af_max)
+        else:
+            psar = max(psar, highs[i - 1], highs[i - 2] if i >= 2 else highs[i - 1])
+            if highs[i] > psar:
+                # 추세 전환 (하락 → 상승)
+                trend_up = True
+                psar = ep
+                ep = highs[i]
+                af = af_start
+            else:
+                if lows[i] < ep:
+                    ep = lows[i]
+                    af = min(af + af_step, af_max)
+
+    # 최근 5일 안에 전환됐는지 확인 (신호 강도)
+    recent_flip = False
+    if len(closes) >= 6:
+        # 마지막 5봉 동안 trend가 바뀌었는지는 별도 계산이 필요하지만
+        # 단순화: 현재 psar과 가격이 가까우면 전환 임박
+        gap_pct = abs(closes[-1] - psar) / closes[-1] * 100
+        recent_flip = gap_pct < 1.5
+
+    trend = "상승" if trend_up else "하락"
+    if trend_up:
+        signal = "매수"
+        comment = f"상승 추세 유지 (손절선 ₩{round(psar):,})"
+        if recent_flip:
+            comment += " — 전환 주의"
+    else:
+        signal = "매도"
+        comment = f"하락 추세 (저항선 ₩{round(psar):,})"
+        if recent_flip:
+            comment += " — 상승 전환 가능성"
+
+    return {
+        "psar": round(psar),
+        "trend": trend,
+        "signal": signal,
+        "comment": comment,
+        "nearFlip": recent_flip,
+    }
+
+
+def calc_value_surge(closes, volumes, p=20):
+    """거래대금 급증 - 가격×거래량으로 실제 자금 유입 측정
+    단순 거래량 급증보다 세력 진입 포착이 정확함
+    반환: ratio, surge(여부), comment"""
+    if len(closes) < p + 1:
+        return None
+    # 거래대금 = 가격 × 거래량
+    values = [c * v for c, v in zip(closes, volumes)]
+    recent = values[-1]
+    avg = sum(values[-p - 1:-1]) / p
+    if avg == 0:
+        return {"ratio": 1.0, "surge": False, "comment": "데이터 부족"}
+    ratio = recent / avg
+
+    if ratio > 3.0:
+        comment = f"거래대금 급증 ({ratio:.1f}배) — 강한 세력 진입"
+        surge = True
+    elif ratio > 2.0:
+        comment = f"거래대금 증가 ({ratio:.1f}배) — 자금 유입 가시화"
+        surge = True
+    elif ratio > 1.5:
+        comment = f"거래대금 소폭 증가 ({ratio:.1f}배)"
+        surge = False
+    elif ratio < 0.5:
+        comment = f"거래대금 감소 ({ratio:.1f}배) — 관심 이탈"
+        surge = False
+    else:
+        comment = f"거래대금 평이 ({ratio:.1f}배)"
+        surge = False
+    return {"ratio": round(ratio, 2), "surge": surge, "comment": comment}
+
+
 def calc_sma(arr, p):
     if len(arr) < p:
         return None
@@ -1110,7 +1291,8 @@ def contra_signal(rsi, macd, macd_sig, obv, patterns, fg_score, investor):
 def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap,
                   weekly_opinion, investor, short_ratio, news_list,
-                  stoch_rsi=None, divergence=None):
+                  stoch_rsi=None, divergence=None,
+                  ichimoku=None, cci=None, psar=None, value_surge=None):
     score = 0
 
     # 기술 지표 (일봉)
@@ -1131,6 +1313,34 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if divergence:
         if divergence.get("bullish"): score += 3
         if divergence.get("bearish"): score -= 3
+
+    # 일목균형표 (추세·구름대)
+    if ichimoku:
+        if ichimoku["signal"] == "매수":
+            # 강한 상승(구름대 위+전환선>기준선)이면 +2, 약한 상승은 +1
+            score += 2 if "강한" in ichimoku["comment"] else 1
+        elif ichimoku["signal"] == "매도":
+            score -= 2 if "강한" in ichimoku["comment"] else 1
+
+    # CCI (추세 이탈)
+    if cci:
+        if cci["signal"] == "매수":
+            score += 2 if "극단" in cci["comment"] else 1
+        elif cci["signal"] == "매도":
+            score -= 2 if "극단" in cci["comment"] else 1
+
+    # 파라볼릭 SAR (추세 방향)
+    if psar:
+        if psar["signal"] == "매수": score += 1
+        elif psar["signal"] == "매도": score -= 1
+
+    # 거래대금 급증 (세력 진입)
+    if value_surge and value_surge["surge"]:
+        # 상승 추세에서 거래대금 급증이면 매수 가중, 하락 추세면 매도 가중
+        if rsi and rsi > 50:
+            score += 1
+        elif rsi and rsi < 50:
+            score -= 1
 
     # 52주 위치
     if h52 > 0 and l52 > 0:
@@ -1171,9 +1381,9 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
 
-    # 임계값: 기술 지표 위주로 판단하도록 완화
-    # (이전: +6/-5, 외부 데이터 ±4점 전제. 지금: 순수 기술 분석 기준)
-    opinion = "매수" if score >= 4 else "매도" if score <= -3 else "중립"
+    # 임계값: 1+2단계 지표 모두 반영. 기술 분석 위주, 외부 데이터 0이면 무시
+    # (1단계까지는 +4/-3, 2단계 지표 추가로 ±점수 폭이 커져서 +6/-5로 조정)
+    opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
     return opinion, score
 
 
@@ -1278,6 +1488,10 @@ def analyze_stock(stock, kospi):
     stoch = calc_stoch(highs_d, lows_d, closes_d) if has_data else None
     stoch_rsi = calc_stoch_rsi(closes_d) if has_data else None
     divergence = detect_divergence(closes_d, highs_d, lows_d) if has_data else None
+    ichimoku = calc_ichimoku(highs_d, lows_d, closes_d) if has_data else None
+    cci = calc_cci(highs_d, lows_d, closes_d) if has_data else None
+    psar = calc_psar(highs_d, lows_d, closes_d) if has_data else None
+    value_surge = calc_value_surge(closes_d, volumes_d) if has_data else None
     wr    = calc_williams(highs_d, lows_d, closes_d) if has_data else None
     adx   = calc_adx(highs_d, lows_d, closes_d) if has_data else None
     mfi   = calc_mfi(highs_d, lows_d, closes_d, volumes_d) if has_data else None
@@ -1312,7 +1526,8 @@ def analyze_stock(stock, kospi):
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
-        stoch_rsi, divergence
+        stoch_rsi, divergence,
+        ichimoku, cci, psar, value_surge
     )
     pt = price_targets(price, opinion, rsi or 50, pivot)
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
@@ -1368,6 +1583,10 @@ def analyze_stock(stock, kospi):
                          "과매도 — 반등 임박" if stoch < 20 else "과매수 — 조정 주의" if stoch > 80 else "중립"),
         "stochRsi": stoch_rsi,
         "divergence": divergence,
+        "ichimoku": ichimoku,
+        "cci": cci,
+        "psar": psar,
+        "valueSurge": value_surge,
         "wr": wr, "wrComment": ("데이터 부족" if wr is None else
                                 "과매도 — 매수 고려" if wr < -80 else "과매수 — 매도 고려" if wr > -20 else "중립"),
         "mfi": mfi, "mfiComment": ("데이터 부족" if mfi is None else

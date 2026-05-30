@@ -895,6 +895,15 @@ function renderCard(s,idx){
         <div class="irow-n">${s.stochRsi.comment}</div>
       </div>
     </div>`:""}
+    ${s.cci?`<div class="irow">
+      <span class="irow-l">CCI (20)</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.cci.signal==='매수'?'#00e5a0':s.cci.signal==='매도'?'#ff4060':'#ffc940'}">
+          ${s.cci.value>0?'+':''}${s.cci.value}
+        </div>
+        <div class="irow-n">${s.cci.comment}</div>
+      </div>
+    </div>`:""}
     <div class="sec-sub">추세</div>
     <div class="ind-grid3" style="margin-bottom:4px">
       <div class="ind-cell"><div class="ind-l">MACD%</div><div class="ind-v" style="color:${mc}">${F3(s.macd)}</div></div>
@@ -916,6 +925,40 @@ function renderCard(s,idx){
         <div class="irow-n">5일 기울기 ${s.obv?.slope>0?"+":""}${s.obv?.slope}%</div>
       </div>
     </div>
+    ${s.psar?`<div class="irow">
+      <span class="irow-l">파라볼릭 SAR</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.psar.trend==='상승'?'#00e5a0':'#ff4060'}">
+          ${s.psar.trend} ${s.psar.nearFlip?'⚠️':''}
+        </div>
+        <div class="irow-n">${s.psar.comment}</div>
+      </div>
+    </div>`:""}
+    ${s.valueSurge?`<div class="irow">
+      <span class="irow-l">거래대금</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.valueSurge.surge?'#00e5a0':s.valueSurge.ratio<0.5?'#ff4060':'#8090b0'}">
+          ${s.valueSurge.ratio}x ${s.valueSurge.surge?'🔥':''}
+        </div>
+        <div class="irow-n">${s.valueSurge.comment}</div>
+      </div>
+    </div>`:""}
+    ${s.ichimoku?`<div class="sec-sub" style="margin-top:10px">일목균형표</div>
+    <div style="padding:10px 12px;border-radius:11px;background:${s.ichimoku.signal==='매수'?'rgba(0,229,160,.06)':s.ichimoku.signal==='매도'?'rgba(255,64,96,.06)':'rgba(255,201,64,.06)'};border:1px solid ${s.ichimoku.signal==='매수'?'rgba(0,229,160,.2)':s.ichimoku.signal==='매도'?'rgba(255,64,96,.2)':'rgba(255,201,64,.2)'};margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;color:#8090b0">현재가 vs 구름대</span>
+        <span style="font-size:12px;font-weight:800;color:${s.ichimoku.signal==='매수'?'#00e5a0':s.ichimoku.signal==='매도'?'#ff4060':'#ffc940'}">${s.ichimoku.signal}</span>
+      </div>
+      <div style="font-size:10px;color:#8090b0;line-height:1.5;margin-bottom:8px">${s.ichimoku.comment}</div>
+      <div class="grid2">
+        <div class="stat"><div class="stat-l">전환선 (9)</div><div class="stat-v">${W(s.ichimoku.tenkan)}</div></div>
+        <div class="stat"><div class="stat-l">기준선 (26)</div><div class="stat-v">${W(s.ichimoku.kijun)}</div></div>
+      </div>
+      <div class="grid2">
+        <div class="stat"><div class="stat-l">구름대 상단</div><div class="stat-v" style="color:#ff4060">${W(s.ichimoku.cloudTop)}</div></div>
+        <div class="stat"><div class="stat-l">구름대 하단</div><div class="stat-v" style="color:#00e5a0">${W(s.ichimoku.cloudBot)}</div></div>
+      </div>
+    </div>`:""}
     <div class="sec-sub" style="margin-top:8px">공포·탐욕 지수</div>
     <div class="fg-wrap">
       <div class="fg-row">
