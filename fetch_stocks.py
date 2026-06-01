@@ -1489,9 +1489,20 @@ def analyze_stock(stock, kospi):
     print(f"\n▶ {name} ({code}) 분석 중...", file=sys.stderr)
 
     # 데이터 수집
-    # KIS API 우선 (통합시세·당일수급) → 네이버 폴백
-    kis_price = fetch_kis_price(code) if KIS_AVAILABLE else None
-    naver     = kis_price or fetch_naver_price(code)
+    # 가격 우선순위: 실전 KIS > 네이버 > 모의 KIS
+    #   - 실전 KIS: NXT 포함 통합시세 + 실시간
+    #   - 네이버: NXT 포함 통합시세 + 실시간 (모의 KIS보다 정확)
+    #   - 모의 KIS: NXT 미반영 + 지연 → 마지막 폴백
+    is_real_kis = KIS_AVAILABLE and "openapivts" not in KIS_BASE_URL
+    if is_real_kis:
+        # 실전 키: KIS 우선
+        kis_price = fetch_kis_price(code)
+        naver = kis_price or fetch_naver_price(code)
+    else:
+        # 모의 키 또는 KIS 미사용: 네이버 우선
+        naver = fetch_naver_price(code)
+        if not naver and KIS_AVAILABLE:
+            naver = fetch_kis_price(code)
 
     kis_inv   = fetch_kis_investor(code) if KIS_AVAILABLE else None
     investor  = kis_inv or fetch_investor_flow(code) or {
