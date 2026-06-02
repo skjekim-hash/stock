@@ -1,12 +1,8 @@
 name: 주식 데이터 자동 수집
 
 on:
-  schedule:
-    # KST 08:00~20:00 커버 (5분 간격)
-    # 1분(*) 간격은 GitHub이 부하 시 자주 스킵 → 5분(*/5)이 더 안정적으로 실행됨
-    # UTC 기준: 23시(=KST 08시)는 일~목, 0~11시(=KST 09~20시)는 월~금
-    - cron: '*/5 23 * * 0-4'
-    - cron: '*/5 0-11 * * 1-5'
+  # 갱신 트리거는 외부 스케줄러(cron-job.org)가 5분마다 workflow_dispatch로 호출함
+  # GitHub 자체 schedule cron은 부하 시 지연·스킵이 잦아 제거하고 외부 트리거로 일원화
   workflow_dispatch:
 
 jobs:
