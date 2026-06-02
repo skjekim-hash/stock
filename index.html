@@ -403,7 +403,7 @@ body{
   </div>
   <div class="hdr-badges">
     <span class="badge" id="mktBadge">--</span>
-    <span class="badge badge-green">⚡ 1분 자동 갱신</span>
+    <span class="badge badge-green">⚡ 5분 자동 갱신</span>
     <span class="badge badge-blue" id="kospiBar">KOSPI --</span>
     <span class="badge" id="updBadge" style="display:none"></span>
   </div>
@@ -417,7 +417,7 @@ body{
     <div class="start-icon">📊</div>
     <div class="start-title">SK하이닉스 · 삼성전자 · LG전자<br>삼성전기 · 현대차</div>
     <div class="start-desc">
-      <b>KIS API</b> 통합시세 · 1분 자동 갱신<br>
+      <b>KIS API</b> 통합시세 · 5분 자동 갱신<br>
       외국인·기관 수급 · 공매도 비율<br>
       RSI · MACD · ADX · 볼린저 · 피봇<br>
       주봉·월봉 멀티타임프레임 · 역발상 신호
@@ -1098,7 +1098,7 @@ async function loadData(){
   }
 }
 
-setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 60*1000);
+setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 90*1000);
 document.getElementById("mktBadge").textContent=kst().status;
 </script>
 <script>
