@@ -1358,16 +1358,6 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if weekly_opinion == "매수": score += 2
     elif weekly_opinion == "매도": score -= 2
 
-    # 외국인·기관 수급 — 데이터가 실제로 있을 때만 점수에 반영
-    # (모의투자 API 한계로 수급 데이터가 0인 경우 점수에 영향 주지 않음)
-    if investor:
-        f, inst = investor.get("foreign", 0), investor.get("institution", 0)
-        if f != 0 or inst != 0:  # 실제 데이터가 있을 때만
-            if f > 0 and inst > 0: score += 2
-            elif f > 0 or inst > 0: score += 1
-            elif f < 0 and inst < 0: score -= 2
-            elif f < 0 or inst < 0: score -= 1
-
     # 공매도 — 데이터가 실제로 있을 때만 점수에 반영
     # (0%는 "공매도 매우 낮음"이 아니라 "데이터 없음" 의미)
     if short_ratio > 0:
@@ -1415,11 +1405,6 @@ def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
         matched.append("파라볼릭 SAR 상승")
     if cci and cci.get("signal") == "매수":
         matched.append("CCI " + ("극단 과매도" if "극단" in cci.get("comment", "") else "과매도"))
-    if investor:
-        f = investor.get("foreign", 0)
-        inst = investor.get("institution", 0)
-        if (f != 0 or inst != 0) and (f > 0 or inst > 0):
-            matched.append(f"수급 매수 우세(외국인 {f:+,} / 기관 {inst:+,})")
 
     # 매도 신호가 동시에 강하게 있으면 제외 (혼조 회피)
     bearish_count = 0
@@ -1549,10 +1534,12 @@ def analyze_stock(stock, kospi):
         if not naver and KIS_AVAILABLE:
             naver = fetch_kis_price(code)
 
-    kis_inv   = fetch_kis_investor(code) if KIS_AVAILABLE else None
-    investor  = kis_inv or fetch_investor_flow(code) or {
+    # 수급: 실전 KIS API만 신뢰 (모의는 0). 네이버 HTML 파싱은 부정확하여 제거함.
+    # 수급 데이터는 사용자가 네이버/증권사 앱에서 직접 확인하는 것을 권장.
+    kis_inv   = fetch_kis_investor(code) if is_real_kis else None
+    investor  = kis_inv or {
         "foreign": 0, "institution": 0, "individual": 0,
-        "foreignTrend": "중립", "comment": "수급 데이터 없음"}
+        "foreignTrend": "중립", "comment": "수급은 네이버·증권사 앱에서 직접 확인"}
 
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {

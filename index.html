@@ -447,7 +447,7 @@ body{
 
   <div id="results" style="display:none"></div>
   <div class="footer" id="footer" style="display:none">
-    주가: KIS API (통합시세) · 지표: 60일 OHLCV · 수급: KIS API<br>
+    주가: 네이버·KIS 통합시세 · 지표: 60일 OHLCV<br>
     본 분석은 참고용입니다. 투자 판단과 책임은 투자자 본인에게 있습니다.
   </div>
 </div>
@@ -594,9 +594,6 @@ function renderCard(s,idx){
   var kstInfo=kst();
   var rs=s.relativeStrength;
   var rsColor=rs?.strong?"#00e5a0":"#ff4060";
-  var inv=s.investor||{};
-  var f=inv.foreign||0, inst=inv.institution||0, indv=inv.individual||0;
-  var fc_c={매수우세:"#00e5a0",매도우세:"#ff4060",중립:"#ffc940"}[s.ft]||"#4a5878";
   var rc=+s.rsi>70?"#ff4060":+s.rsi<30?"#00e5a0":"#ffc940";
   var mc=(+s.macd)>=(+s.macdSignal)?"#00e5a0":"#ff4060";
   var rsiPct=Math.min(Math.max(+s.rsi||50,0),100);
@@ -842,7 +839,7 @@ function renderCard(s,idx){
     </div>`:""}
   </div>
 
-  <!-- ⑤ 수급 분석 -->
+  <!-- ⑤ 거래 · 강도 -->
   <div class="sec" style="border-left-color:#00e5a0">
     <div class="sec-head">
       <span class="sec-num">05</span>
