@@ -1444,6 +1444,51 @@ def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
     return result
 
 
+def assess_overheat_warning(rsi, stoch_rsi, price, high52w, fair_value, fg_score):
+    """과열 경고 - 무리한 추격매수를 막는 브레이크
+    4개 위험 조건 중 충족 개수로 경고 단계 판정:
+      1. 다중 과매수: RSI 70+ AND 스토캐스틱 RSI K 80+
+      2. 52주 고점 근접: 현재가가 52주 고점의 95% 이상
+      3. 적정주가 과도 이탈: 적정주가보다 15% 이상 비쌈
+      4. 시장 극단적 탐욕: 공포탐욕지수 80+
+    반환: {"level": none/주의/경고, "reasons": [...], "color": ..., "title": ...}"""
+    reasons = []
+
+    # 1. 다중 과매수
+    if rsi and rsi >= 70:
+        k = stoch_rsi.get("k") if stoch_rsi else None
+        if k is not None and k >= 80:
+            reasons.append(f"다중 과매수 (RSI {rsi:.0f} · 스토캐스틱 {k:.0f})")
+        elif rsi >= 75:
+            reasons.append(f"RSI 과매수 ({rsi:.0f})")
+
+    # 2. 52주 고점 근접
+    if high52w and high52w > 0:
+        pos = price / high52w * 100
+        if pos >= 95:
+            reasons.append(f"52주 고점 근접 ({pos:.0f}%)")
+
+    # 3. 적정주가 과도 이탈 (고평가)
+    if fair_value and fair_value > 0:
+        overpriced = (price - fair_value) / fair_value * 100
+        if overpriced >= 15:
+            reasons.append(f"적정가 대비 {overpriced:.0f}% 고평가")
+
+    # 4. 시장 극단적 탐욕
+    if fg_score is not None and fg_score >= 80:
+        reasons.append(f"시장 극단적 탐욕 ({fg_score})")
+
+    n = len(reasons)
+    if n >= 3:
+        return {"level": "경고", "reasons": reasons, "color": "#ff4060",
+                "title": "🚫 고위험 구간 — 신규 매수 자제"}
+    elif n >= 2:
+        return {"level": "주의", "reasons": reasons, "color": "#ffc940",
+                "title": "⚠️ 단기 과열 — 신규 진입 신중히"}
+    else:
+        return {"level": "none", "reasons": reasons, "color": "", "title": ""}
+
+
 def price_targets(price, op, rsi, pivot):
     if op == "중립": return {"sp": 0, "sl": "해당없음", "tp": 0, "tp2": 0, "stop": 0}
     if op == "매수":
@@ -1599,6 +1644,8 @@ def analyze_stock(stock, kospi):
     )
     cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
                                       divergence, psar, investor, cci, price, pivot)
+    overheat = assess_overheat_warning(rsi, stoch_rsi, price, high52w,
+                                       fair.get("fair_value", 0), fg["score"])
     pt = price_targets(price, opinion, rsi or 50, pivot)
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
                                    weekly, investor, short, vol_surge, breakout)
@@ -1658,6 +1705,7 @@ def analyze_stock(stock, kospi):
         "psar": psar,
         "valueSurge": value_surge,
         "cautiousEntry": cautious,
+        "overheat": overheat,
         "wr": wr, "wrComment": ("데이터 부족" if wr is None else
                                 "과매도 — 매수 고려" if wr < -80 else "과매수 — 매도 고려" if wr > -20 else "중립"),
         "mfi": mfi, "mfiComment": ("데이터 부족" if mfi is None else

@@ -740,6 +740,13 @@ function renderCard(s,idx){
       <span class="op-ico" style="color:${oc}">${oi}</span>
       <span class="op-txt" style="color:${oc}">${op}</span>
     </div>
+    ${s.overheat&&s.overheat.level!=="none"?`<div style="margin:10px 0;padding:12px 14px;border-radius:12px;background:${s.overheat.color}14;border:1.5px solid ${s.overheat.color}50">
+      <div style="font-size:13px;font-weight:800;color:${s.overheat.color};margin-bottom:6px">${s.overheat.title}</div>
+      <div style="font-size:11px;color:#a8b4c8;line-height:1.6">
+        ${s.overheat.reasons.map(r=>`<span style="display:inline-block;background:${s.overheat.color}1a;color:${s.overheat.color};border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:10px">${r}</span>`).join("")}
+      </div>
+      ${s.overheat.level==="경고"?`<div style="font-size:10px;color:#8090b0;margin-top:8px;line-height:1.5">여러 위험 신호가 겹친 구간입니다. 신규 진입보다 조정 후 지지선 매수를 권장합니다.</div>`:""}
+    </div>`:""}
     <div class="score-wrap">
       <div class="score-row">
         <span class="score-lbl">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
