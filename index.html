@@ -499,8 +499,11 @@ function renderSummaryTable(stocks){
     var oi=OI[op]||"◆";
     // 중립이면서 소량 진입 가능 종목은 별표로 표시
     var ce=s.cautiousEntry&&s.cautiousEntry.entry;
-    var opLabel=op+(ce?" ★":"");
-    var opColor=ce?"#00d4ff":oc;  // 진입 가능 종목은 시안색으로 강조
+    // 과열 경고가 최우선 (브레이크 역할). 경고>주의>소량진입 순
+    var ohLevel=s.overheat?s.overheat.level:"none";
+    var ohIcon=ohLevel==="경고"?" 🚫":ohLevel==="주의"?" ⚠️":"";
+    var opLabel=op+ohIcon+(ce&&ohLevel==="none"?" ★":"");
+    var opColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ffc940":ce?"#00d4ff":oc;
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
     var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
@@ -574,6 +577,8 @@ function renderSummaryTable(stocks){
     +  "<span style='color:#ffc940'>◆ 중립</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
     +  "<span style='color:#00d4ff'>★ 소량 진입 검토</span>"
+    +  "<span style='color:#ffc940'>⚠️ 과열 주의</span>"
+    +  "<span style='color:#ff4060'>🚫 고위험</span>"
     +  "<span>| S1 = 1차 지지·분할매수 구간 (현재가 대비)</span>"
     +"</div></div>";
 }
