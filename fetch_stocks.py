@@ -1380,7 +1380,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
 def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
                           psar, investor, cci, price, pivot):
     """중립 의견에서 '소량 진입 가능' 여부 판정
-    조건: 의견=중립 AND 점수 +2~+5 AND 다음 신호 중 2개 이상 매수
+    조건: 의견=중립 AND 점수 +2~+5 AND 다음 신호 중 3개 이상 매수
       - 일목균형표 매수
       - 스토캐스틱 RSI 매수
       - 강세 다이버전스
@@ -1413,7 +1413,7 @@ def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
     if divergence and divergence.get("bearish"): bearish_count += 1
     if psar and psar.get("signal") == "매도": bearish_count += 1
 
-    if len(matched) >= 2 and bearish_count < 2:
+    if len(matched) >= 3 and bearish_count < 2:
         result["entry"] = True
         result["signals"] = matched
         # 손절선: 파라볼릭 SAR 우선, 없으면 S1
