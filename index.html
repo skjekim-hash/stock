@@ -228,6 +228,13 @@ body{
 .guide-item{font-size:11px;color:#a8b4c8;line-height:1.65;margin-bottom:9px}
 .guide-item b{color:#e0e6f0}
 .guide-item i{color:#8090b0;font-style:normal;font-size:10px}
+.rec-btn{display:block;width:calc(100% - 24px);margin:12px 12px 4px;padding:13px;background:#00d4ff12;color:#00d4ff;border:1.5px solid #00d4ff35;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
+.rec-btn:active{background:#00d4ff20}
+.jrnl-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-end;justify-content:center}
+.jrnl-sheet{background:#03060f;border-top:1px solid #1a2540;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:18px}
+.jrnl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:0;background:#03060f;padding-bottom:8px}
+.jrnl-title{font-size:16px;font-weight:800;color:#e0e6f0}
+.jrnl-x{background:#1a2540;color:#8090b0;border:none;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer}
 
 /* ── PRICE SECTION ── */
 .price-big{
@@ -408,6 +415,7 @@ body{
       <span id="btnIcon">✦</span>
       <span id="btnText">분석 보기</span>
     </button>
+    <button onclick="openJournal()" style="margin-top:8px;background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;width:100%">📝 매매 기록</button>
   </div>
   <div class="hdr-badges">
     <span class="badge" id="mktBadge">--</span>
@@ -1036,6 +1044,8 @@ function renderCard(s,idx){
     </div>
   </details>
 
+  <button class="rec-btn" onclick="recordEntry('${s.code}')">📝 이 시점으로 진입 기록</button>
+
   </div>
 </div>`;
 }
@@ -1074,6 +1084,7 @@ async function loadData(){
     }
 
     hideAll();
+    window.__stocks = data.stocks;
     document.getElementById("results").innerHTML=
       renderSummaryTable(data.stocks)+
       data.stocks.map((s,i)=>renderCard(s,i)).join("");
@@ -1100,6 +1111,185 @@ async function loadData(){
 
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 90*1000);
 document.getElementById("mktBadge").textContent=kst().status;
+
+/* ───────── 매매 기록 (localStorage 기반) ───────── */
+const JOURNAL_KEY = "stock_journal_v1";
+
+function loadJournal(){
+  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveJournal(arr){
+  try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(arr)); }
+  catch(e){ alert("저장 실패: 저장 공간이 부족하거나 브라우저 설정을 확인하세요."); }
+}
+
+// 진입 기록 (카드 버튼에서 호출)
+function recordEntry(code){
+  const s = (window.__stocks||[]).find(x=>x.code===code);
+  if(!s){ alert("종목 데이터를 찾을 수 없습니다. 새로고침 후 다시 시도하세요."); return; }
+  // 실제 매수가 입력 (기본값 = 현재가)
+  const px = prompt(`실제 매수가를 입력하세요\n(${s.name} 현재가 ₩${s.price.toLocaleString()})`, s.price);
+  if(px===null) return;  // 취소
+  const entryPrice = parseFloat(String(px).replace(/,/g,""));
+  if(!entryPrice || entryPrice<=0){ alert("올바른 가격을 입력하세요."); return; }
+  const snap = {
+    code: s.code, name: s.name, price: s.price, opinion: s.opinion, score: s.score,
+    star: !!(s.cautiousEntry&&s.cautiousEntry.entry),
+    overheat: s.overheat?s.overheat.level:"none",
+    rsi: s.rsi, stochRsi: s.stochRsi?s.stochRsi.signal:null,
+    ichimoku: s.ichimoku?s.ichimoku.signal:null,
+    divergence: s.divergence?(s.divergence.bullish?"강세":s.divergence.bearish?"약세":"없음"):"없음",
+    psar: s.psar?s.psar.trend:null, cci: s.cci?s.cci.signal:null,
+    pos52: (s.high52w&&s.high52w>0)?Math.round(s.price/s.high52w*100):null
+  };
+  const now = new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
+  const entry = {
+    id: Date.now(),
+    enteredAt: now.toISOString().slice(0,16).replace("T"," "),
+    enteredTs: now.getTime(),  // 보유기간 계산용
+    ...snap,
+    entryPrice: entryPrice,   // 실제 매수가 (화면 현재가와 별개)
+    screenPrice: snap.price,  // 진입 시점 화면 현재가 (참고)
+    exitPrice: null, exitAt: null, exitTs: null, returnPct: null, exitReason: null,
+    heldDays: null,
+    status: "보유"
+  };
+  const arr = loadJournal();
+  arr.unshift(entry);
+  saveJournal(arr);
+  alert(`📝 진입 기록 완료\n${snap.name} · 매수가 ₩${entryPrice.toLocaleString()}\n의견 ${snap.opinion}(${snap.score>0?"+":""}${snap.score}) ${snap.star?"★":""} ${snap.overheat!=="none"?snap.overheat:""}\n\n'매매 기록'에서 청산 결과를 입력하세요.`);
+}
+
+// 기록 화면 렌더
+function renderJournal(){
+  const arr = loadJournal();
+  const box = document.getElementById("journalBody");
+  if(!arr.length){
+    box.innerHTML = `<div style="text-align:center;color:#4a5878;padding:40px 0;font-size:13px">아직 기록이 없습니다.<br>종목 카드 하단의 '📝 진입 기록' 버튼을 눌러보세요.</div>`;
+    return;
+  }
+  // 통계 (청산 완료 건만)
+  const closed = arr.filter(e=>e.returnPct!==null);
+  let statsHtml = "";
+  if(closed.length>=3){
+    const wins = closed.filter(e=>e.returnPct>0);
+    const winRate = Math.round(wins.length/closed.length*100);
+    const avgRet = (closed.reduce((s,e)=>s+e.returnPct,0)/closed.length).toFixed(2);
+    // 보유기간 분석
+    const withDays = closed.filter(e=>e.heldDays!==null);
+    let holdHtml = "";
+    if(withDays.length){
+      const avgHold = (withDays.reduce((s,e)=>s+e.heldDays,0)/withDays.length).toFixed(1);
+      const quick = withDays.filter(e=>e.heldDays<=3);
+      const long = withDays.filter(e=>e.heldDays>=7);
+      const quickAvg = quick.length?(quick.reduce((s,e)=>s+e.returnPct,0)/quick.length).toFixed(1):null;
+      const longAvg = long.length?(long.reduce((s,e)=>s+e.returnPct,0)/long.length).toFixed(1):null;
+      holdHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1a2540">
+        <div style="font-size:10px;color:#8090b0;margin-bottom:6px">보유기간 (평균 ${avgHold}일)</div>
+        ${quick.length?`<div style="font-size:11px;color:#a8b4c8;margin-bottom:3px">빠른 익절(3일↓) ${quick.length}건 · 평균 <b style="color:${quickAvg>0?'#00e5a0':'#ff4060'}">${quickAvg>0?'+':''}${quickAvg}%</b></div>`:""}
+        ${long.length?`<div style="font-size:11px;color:#a8b4c8">장기 보유(7일↑) ${long.length}건 · 평균 <b style="color:${longAvg>0?'#00e5a0':'#ff4060'}">${longAvg>0?'+':''}${longAvg}%</b> <span style="color:#ffc940;font-size:10px">⚠️ 물림 의심</span></div>`:""}
+      </div>`;
+    }
+    // 수익 케이스 공통 신호 집계
+    const sig = {};
+    const tally=(e)=>{
+      if(e.star) sig["★ 소량진입"]=(sig["★ 소량진입"]||0)+1;
+      if(e.stochRsi==="매수") sig["스토캐스틱 매수"]=(sig["스토캐스틱 매수"]||0)+1;
+      if(e.ichimoku==="매수") sig["일목 매수"]=(sig["일목 매수"]||0)+1;
+      if(e.divergence==="강세") sig["강세 다이버전스"]=(sig["강세 다이버전스"]||0)+1;
+      if(e.psar==="상승") sig["SAR 상승"]=(sig["SAR 상승"]||0)+1;
+      if(e.cci==="매수") sig["CCI 매수"]=(sig["CCI 매수"]||0)+1;
+      if(e.overheat!=="none") sig["과열경고 있었음"]=(sig["과열경고 있었음"]||0)+1;
+    };
+    wins.forEach(tally);
+    const sigSorted = Object.entries(sig).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    statsHtml = `<div style="background:#070c16;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:#00e5a0;margin-bottom:10px">📊 통계 (청산 ${closed.length}건)</div>
+      <div style="display:flex;gap:16px;margin-bottom:12px">
+        <div><div style="font-size:10px;color:#8090b0">승률</div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
+        <div><div style="font-size:10px;color:#8090b0">평균 수익률</div><div style="font-size:18px;font-weight:800;color:${avgRet>0?"#00e5a0":"#ff4060"}">${avgRet>0?"+":""}${avgRet}%</div></div>
+      </div>
+      <div style="font-size:10px;color:#8090b0;margin-bottom:6px">수익 케이스에서 자주 나온 신호</div>
+      <div>${sigSorted.map(([k,v])=>`<span style="display:inline-block;background:#00e5a015;color:#00e5a0;border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:10px">${k} ${v}회</span>`).join("")||"<span style='color:#4a5878;font-size:11px'>데이터 부족</span>"}</div>
+      ${holdHtml}
+    </div>`;
+  } else if(closed.length>0){
+    statsHtml = `<div style="text-align:center;color:#8090b0;font-size:11px;padding:8px;margin-bottom:8px">청산 ${closed.length}건 — 통계는 3건부터 표시됩니다</div>`;
+  }
+
+  const rows = arr.map(e=>{
+    const held = e.status==="보유";
+    const retColor = e.returnPct===null?"#8090b0":e.returnPct>0?"#00e5a0":"#ff4060";
+    return `<div style="background:#0a1020;border:1px solid ${held?'#1a2540':retColor+'40'};border-radius:11px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-weight:800;font-size:13px">${e.name}</span>
+        <span style="font-size:11px;color:${held?'#ffc940':retColor};font-weight:700">${held?"보유중":(e.returnPct>0?"+":"")+e.returnPct+"%"}</span>
+      </div>
+      <div style="font-size:10px;color:#8090b0;line-height:1.6">
+        진입 ${e.enteredAt} · 매수 ₩${e.entryPrice.toLocaleString()}<br>
+        의견 ${e.opinion}(${e.score>0?"+":""}${e.score}) ${e.star?"★":""} ${e.overheat!=="none"?e.overheat:""} · RSI ${e.rsi||"—"}
+        ${[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).length?"<br>매수신호: "+[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).join(" · "):""}
+        ${e.exitAt?`<br>청산 ${e.exitAt} · ₩${(e.exitPrice||0).toLocaleString()} · ${e.exitReason||""}${e.heldDays?` · ${e.heldDays}일 보유${e.heldDays>=7?" ⚠️":""}`:""}`:""}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        ${held?`<button onclick="closeTradePrompt(${e.id})" style="flex:1;background:#00e5a015;color:#00e5a0;border:1px solid #00e5a030;border-radius:8px;padding:7px;font-size:11px;font-weight:700">청산 입력</button>`:""}
+        <button onclick="deleteTrade(${e.id})" style="background:#ff406015;color:#ff4060;border:1px solid #ff406030;border-radius:8px;padding:7px 12px;font-size:11px">삭제</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  box.innerHTML = statsHtml + rows;
+}
+
+function closeTradePrompt(id){
+  const arr = loadJournal();
+  const e = arr.find(x=>x.id===id);
+  if(!e) return;
+  const px = prompt(`청산가를 입력하세요 (매수가 ₩${e.entryPrice.toLocaleString()}):`);
+  if(px===null) return;
+  const exitPrice = parseFloat(String(px).replace(/,/g,""));
+  if(!exitPrice){ alert("올바른 가격을 입력하세요."); return; }
+  const reason = prompt("청산 이유 (익절/손절/신호변화 등):", "익절") || "";
+  const now = new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
+  e.exitPrice = exitPrice;
+  e.exitAt = now.toISOString().slice(0,10);
+  e.exitTs = now.getTime();
+  e.returnPct = Math.round((exitPrice-e.entryPrice)/e.entryPrice*1000)/10;
+  e.exitReason = reason;
+  // 보유기간 계산 (일 단위, 최소 1일)
+  if(e.enteredTs){
+    e.heldDays = Math.max(1, Math.round((e.exitTs-e.enteredTs)/(1000*60*60*24)));
+  }
+  e.status = "청산";
+  saveJournal(arr);
+  renderJournal();
+}
+
+function deleteTrade(id){
+  if(!confirm("이 기록을 삭제할까요?")) return;
+  saveJournal(loadJournal().filter(x=>x.id!==id));
+  renderJournal();
+}
+
+function exportJournal(){
+  const arr = loadJournal();
+  if(!arr.length){ alert("내보낼 기록이 없습니다."); return; }
+  const blob = new Blob([JSON.stringify(arr,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `매매기록_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function openJournal(){
+  document.getElementById("journalModal").style.display="flex";
+  renderJournal();
+}
+function closeJournal(){
+  document.getElementById("journalModal").style.display="none";
+}
 </script>
 <script>
 // PWA 서비스 워커 등록
@@ -1111,5 +1301,17 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<div class="jrnl-modal" id="journalModal">
+  <div class="jrnl-sheet">
+    <div class="jrnl-head">
+      <span class="jrnl-title">📝 매매 기록</span>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportJournal()" style="background:#1a2540;color:#8090b0;border:none;border-radius:8px;padding:0 12px;height:32px;font-size:11px;cursor:pointer">백업</button>
+        <button class="jrnl-x" onclick="closeJournal()">✕</button>
+      </div>
+    </div>
+    <div id="journalBody"></div>
+  </div>
+</div>
 </body>
 </html>
