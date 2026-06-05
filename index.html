@@ -538,9 +538,11 @@ function renderSummaryTable(stocks){
     var ce=s.cautiousEntry&&s.cautiousEntry.entry;
     // 과열 경고가 최우선 (브레이크 역할). 경고>주의>소량진입 순
     var ohLevel=s.overheat?s.overheat.level:"none";
-    var ohIcon=ohLevel==="경고"?" 🚫":ohLevel==="주의"?" ⚠️":"";
-    var opLabel=op+ohIcon+(ce&&ohLevel==="none"?" ★":"");
-    var opColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ff8c40":ce?"#00d4ff":oc;
+    var ohIcon=ohLevel==="경고"?"🚫":ohLevel==="주의"?"⚠️":"";
+    var ohColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ff8c40":"";
+    var ceIcon=ce&&ohLevel==="none"?"★":"";
+    var opLabel=op;
+    var opColor=oc;
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
     var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
@@ -560,7 +562,7 @@ function renderSummaryTable(stocks){
       +  "<span style='font-size:11px;font-weight:700'>"+st.emoji+" "+st.name+"</span>"
       +"</td>"
       +"<td style='padding:9px 4px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
-      +  "<span style='color:"+opColor+";font-weight:800;font-size:11px'>"+oi+" "+opLabel+"</span>"
+      +  "<span style='color:"+opColor+";font-weight:800;font-size:11px'>"+oi+" "+opLabel+"</span>"+(ohIcon?"<span style='color:"+ohColor+";margin-left:3px;font-size:11px'>"+ohIcon+"</span>":"")+(ceIcon?"<span style='color:#00d4ff;margin-left:3px;font-size:11px'>"+ceIcon+"</span>":"")
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
       +  "<div style='font-size:11px;font-weight:700;font-family:JetBrains Mono,monospace'>"+W(s.price)+"</div>"
@@ -581,7 +583,11 @@ function renderSummaryTable(stocks){
       (function(id){
         rs[i].onclick=function(){
           var el=document.getElementById("card-"+id);
-          if(el) el.scrollIntoView({behavior:"smooth"});
+          if(el){
+            var hdrH=(document.querySelector(".hdr")||{}).offsetHeight||80;
+            var top=el.getBoundingClientRect().top+window.pageYOffset-hdrH-6;
+            window.scrollTo({top:top,behavior:"smooth"});
+          }
         };
       })(rs[i].getAttribute("data-id"));
     }
