@@ -192,7 +192,7 @@ body::before{
 .sum-legend span{font-size:10px;color:var(--text3)}
 
 /* ── CARD ── */
-.card{margin-bottom:18px;animation:fadeUp .4s ease;border-radius:20px;overflow:visible}
+.card{margin-bottom:18px;animation:fadeUp .4s ease;border-radius:20px;overflow:visible;scroll-margin-top:85px}
 .card-hdr{
   background:var(--glass-bg);
   backdrop-filter:blur(var(--glass-blur));
@@ -201,7 +201,6 @@ body::before{
   border-bottom:1px solid rgba(255,255,255,0.04);
   border-radius:20px 20px 0 0;
   padding:14px 16px 12px;
-  position:sticky;top:75px;z-index:50;
 }
 .card-hdr-inner{display:flex;justify-content:space-between;align-items:flex-start}
 .card-name-wrap{}
@@ -541,7 +540,7 @@ function renderSummaryTable(stocks){
     var ohLevel=s.overheat?s.overheat.level:"none";
     var ohIcon=ohLevel==="경고"?" 🚫":ohLevel==="주의"?" ⚠️":"";
     var opLabel=op+ohIcon+(ce&&ohLevel==="none"?" ★":"");
-    var opColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ffc940":ce?"#00d4ff":oc;
+    var opColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ff8c40":ce?"#00d4ff":oc;
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
     var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
@@ -615,7 +614,7 @@ function renderSummaryTable(stocks){
     +  "<span style='color:#ffc940'>◆ 중립</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
     +  "<span style='color:#00d4ff'>★ 소량 진입 검토</span>"
-    +  "<span style='color:#ffc940'>⚠️ 과열 주의</span>"
+    +  "<span style='color:#ff8c40'>⚠️ 과열 주의</span>"
     +  "<span style='color:#ff4060'>🚫 고위험</span>"
     +  "<span>| S1 = 1차 지지·분할매수 구간 (현재가 대비)</span>"
     +"</div></div>";
@@ -708,7 +707,7 @@ function renderCard(s,idx){
         </div>
         <div class="card-hdr-icons">
           ${ce?`<span style="color:#00d4ff;font-size:13px;font-weight:800">★</span>`:""}
-          ${ohLevel==="경고"?`<span style="font-size:13px">🚫</span>`:ohLevel==="주의"?`<span style="font-size:13px">⚠️</span>`:""}
+          ${ohLevel==="경고"?`<span style="font-size:13px">🚫</span>`:ohLevel==="주의"?`<span style="font-size:13px;color:#ff8c40">⚠️</span>`:""}
         </div>
       </div>
     </div>
