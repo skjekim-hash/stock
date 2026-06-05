@@ -629,6 +629,10 @@ function renderCard(s,idx){
   var oi=OI[op]||"◆";
   var up=(+s.change||0)>=0;
   var cc=up?"#00e5a0":"#ff4060";
+  var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
+  var ce=s.cautiousEntry&&s.cautiousEntry.entry;
+  var ohLevel=s.overheat?s.overheat.level:"none";
+  var opLabel={매수:"매수",중립:"중립",매도:"매도"}[op]||op;
   var kstInfo=kst();
   var rs=s.relativeStrength;
   var rsColor=rs?.strong?"#00e5a0":"#ff4060";
