@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-06-06 01:35:12 KST",
-  "updatedTime": "01:35",
+  "updatedAt": "2026-06-06 01:37:22 KST",
+  "updatedTime": "01:37",
   "kospi": {
     "price": 8160.59,
     "change": -478.82,
@@ -18,23 +18,18 @@
       "score": -2,
       "source": "네이버 금융",
       "tradedAt": "2026-06-05",
-      "targetPrice_consensus": 2800000,
-      "targetPrice_high": 3000000,
-      "targetPrice_low": 2300000,
-      "targetPrice_count": 15,
-      "targetPrice_source": "증권사 컨센서스 (2026.05)",
-      "fairValue": 1935000,
-      "fairValueGap": -6.5,
-      "fairValueComment": "적정가 대비 6.5% 고평가 — 주의",
+      "fairValue": 235800,
+      "fairValueGap": -88.6,
+      "fairValueComment": "적정가 대비 88.6% 고평가 — 주의",
       "fairValueDetail": {
-        "per_fair": 2160000,
-        "pbr_fair": 1710000,
+        "per_fair": 324000,
+        "pbr_fair": 147600,
         "sector": "반도체",
         "sector_per": 12,
         "sector_pbr": 1.8
       },
-      "eps": 180000,
-      "bps": 950000,
+      "eps": 27000,
+      "bps": 82000,
       "boll": {
         "upper": 2471084,
         "mid": 1978500,
@@ -47,13 +42,13 @@
       "targetPrice2": 0,
       "stopLoss": 0,
       "rsi": 76.1,
-      "rsiComment": "강한 과매수 — 조정 경계",
+      "rsiComment": "강한 과매수",
       "macd": 11.395,
       "macdSignal": 10.479,
       "macdHist": 0.916,
       "macdComment": "골든크로스 — 상승 모멘텀",
       "stoch": 84.8,
-      "stochComment": "과매수 — 조정 주의",
+      "stochComment": "과매수 조정 주의",
       "stochRsi": {
         "k": 68.8,
         "d": 70.8,
@@ -64,7 +59,7 @@
         "bullish": false,
         "bearish": true,
         "signal": "매도",
-        "comment": "약세 다이버전스 — 주가 ↑ / RSI ↓ (82→82). 천장권 하락 신호"
+        "comment": "약세 다이버전스 — 주가 ↑ / RSI ↓ (82→82)"
       },
       "ichimoku": {
         "tenkan": 2101500,
@@ -79,7 +74,7 @@
       "cci": {
         "value": 103.5,
         "signal": "매도",
-        "comment": "과매수(104) — 조정 주의"
+        "comment": "과매수(104)"
       },
       "psar": {
         "psar": 1893362,
@@ -100,15 +95,16 @@
         "stopLoss": 0
       },
       "overheat": {
-        "level": "none",
+        "level": "주의",
         "reasons": [
-          "RSI 과매수 (76)"
+          "RSI 과매수 (76)",
+          "적정가 대비 778% 고평가"
         ],
-        "color": "",
-        "title": ""
+        "color": "#ffc940",
+        "title": "⚠️ 단기 과열"
       },
       "wr": -15.2,
-      "wrComment": "과매수 — 매도 고려",
+      "wrComment": "과매수",
       "mfi": 52.3,
       "mfiComment": "중립",
       "adx": {
@@ -136,7 +132,7 @@
       "patterns": [],
       "contra": {
         "signals": [
-          "⚠️ MACD 상승 + RSI 과매수 → AI 매수신호 과잉 주의"
+          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의"
         ],
         "action": "현 신호 유효",
         "strength": 0
@@ -159,7 +155,7 @@
       "short": {
         "ratio": 0,
         "volume": 0,
-        "comment": "공매도 데이터 준비 중"
+        "comment": "공매도 데이터 없음"
       },
       "weekly": {
         "opinion": "중립",
@@ -178,14 +174,14 @@
       },
       "relativeStrength": {
         "rs": -4.38,
-        "comment": "KOSPI 대비 -4.38%p 약세 — 시장 언더퍼폼",
+        "comment": "KOSPI 대비 -4.38%p 약세",
         "strong": false
       },
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
         "position": 85,
-        "comment": "52주 고저 중간 위치 (85%)"
+        "comment": "52주 중간 위치 (85%)"
       },
       "volSurge": {
         "surge": false,
@@ -231,15 +227,11 @@
         }
       ],
       "basis": [
-        "RSI 76.1 · Williams%R -15.2 · MFI 52.3 — 다중 과매수, 조정 경계",
-        "외국인 0주 · 기관 0주 순매수 · OBV 상승 — 수급 혼조",
-        "주봉 중립 (주봉 RSI 75.6 · MACD 골든크로스) · 공매도 0% · 85%"
+        "RSI 76.1 · Williams%R -15.2 · MFI 52.3 — 다중 과매수 주의",
+        "외국인 0주 · 기관 0주 · OBV 상승",
+        "주봉 중립 · 공매도 0% · 85%"
       ],
-      "risk": [
-        "HBM 고객사 발주 지연 및 경쟁사 추격",
-        "미중 수출규제 강화 시 공급망 차질",
-        "원달러 급변동 시 환차손"
-      ],
+      "risk": [],
       "notes": [
         "주봉·일봉 동시 매수 신호 확인 후 진입",
         "외국인 순매수 전환 시 진입 검토",
@@ -258,23 +250,18 @@
       "score": 0,
       "source": "네이버 금융",
       "tradedAt": "2026-06-05",
-      "targetPrice_consensus": 420000,
-      "targetPrice_high": 500000,
-      "targetPrice_low": 350000,
-      "targetPrice_count": 20,
-      "targetPrice_source": "증권사 컨센서스 (2026.05)",
-      "fairValue": 275000,
-      "fairValueGap": -16.4,
-      "fairValueComment": "적정가 대비 16.4% 고평가 — 주의",
+      "fairValue": 67000,
+      "fairValueGap": -79.6,
+      "fairValueComment": "적정가 대비 79.6% 고평가 — 주의",
       "fairValueDetail": {
-        "per_fair": 280000,
-        "pbr_fair": 270000,
+        "per_fair": 56000,
+        "pbr_fair": 78000,
         "sector": "반도체",
         "sector_per": 14,
         "sector_pbr": 1.5
       },
-      "eps": 20000,
-      "bps": 180000,
+      "eps": 4000,
+      "bps": 52000,
       "boll": {
         "upper": 351493,
         "mid": 296450,
@@ -287,13 +274,13 @@
       "targetPrice2": 0,
       "stopLoss": 0,
       "rsi": 73.3,
-      "rsiComment": "강한 과매수 — 조정 경계",
+      "rsiComment": "강한 과매수",
       "macd": 8.343,
       "macdSignal": 6.909,
       "macdHist": 1.434,
       "macdComment": "골든크로스 — 상승 모멘텀",
       "stoch": 82.9,
-      "stochComment": "과매수 — 조정 주의",
+      "stochComment": "과매수 조정 주의",
       "stochRsi": {
         "k": 85.8,
         "d": 71.2,
@@ -314,7 +301,7 @@
       "cci": {
         "value": 189.4,
         "signal": "매도",
-        "comment": "과매수(189) — 조정 주의"
+        "comment": "과매수(189)"
       },
       "psar": {
         "psar": 296582,
@@ -338,13 +325,13 @@
         "level": "주의",
         "reasons": [
           "다중 과매수 (RSI 73 · 스토캐스틱 86)",
-          "적정가 대비 20% 고평가"
+          "적정가 대비 391% 고평가"
         ],
         "color": "#ffc940",
-        "title": "⚠️ 단기 과열 — 신규 진입 신중히"
+        "title": "⚠️ 단기 과열"
       },
       "wr": -17.1,
-      "wrComment": "과매수 — 매도 고려",
+      "wrComment": "과매수",
       "mfi": 56.1,
       "mfiComment": "중립",
       "adx": {
@@ -378,7 +365,7 @@
       ],
       "contra": {
         "signals": [
-          "⚠️ MACD 상승 + RSI 과매수 → AI 매수신호 과잉 주의"
+          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의"
         ],
         "action": "현 신호 유효",
         "strength": 0
@@ -401,7 +388,7 @@
       "short": {
         "ratio": 0,
         "volume": 0,
-        "comment": "공매도 데이터 준비 중"
+        "comment": "공매도 데이터 없음"
       },
       "weekly": {
         "opinion": "중립",
@@ -427,7 +414,7 @@
         "nearHigh": false,
         "nearLow": false,
         "position": 87,
-        "comment": "52주 고저 중간 위치 (87%)"
+        "comment": "52주 중간 위치 (87%)"
       },
       "volSurge": {
         "surge": false,
@@ -473,15 +460,11 @@
         }
       ],
       "basis": [
-        "RSI 73.3 · Williams%R -17.1 · MFI 56.1 — 다중 과매수, 조정 경계",
-        "외국인 0주 · 기관 0주 순매수 · OBV 상승 — 수급 혼조",
-        "주봉 중립 (주봉 RSI 78.7 · MACD 골든크로스) · 공매도 0% · 87%"
+        "RSI 73.3 · Williams%R -17.1 · MFI 56.1 — 다중 과매수 주의",
+        "외국인 0주 · 기관 0주 · OBV 상승",
+        "주봉 중립 · 공매도 0% · 87%"
       ],
-      "risk": [
-        "파운드리 TSMC와 기술 격차",
-        "스마트폰 수요 회복 지연",
-        "IT 투자 사이클 하강"
-      ],
+      "risk": [],
       "notes": [
         "주봉·일봉 동시 매수 신호 확인 후 진입",
         "외국인 순매수 전환 시 진입 검토",
@@ -500,23 +483,18 @@
       "score": 4,
       "source": "네이버 금융",
       "tradedAt": "2026-06-05",
-      "targetPrice_consensus": 280000,
-      "targetPrice_high": 320000,
-      "targetPrice_low": 240000,
-      "targetPrice_count": 12,
-      "targetPrice_source": "증권사 컨센서스 (2026.05)",
-      "fairValue": 177750,
-      "fairValueGap": -41.3,
-      "fairValueComment": "적정가 대비 41.3% 고평가 — 주의",
+      "fairValue": 93500,
+      "fairValueGap": -69.1,
+      "fairValueComment": "적정가 대비 69.1% 고평가 — 주의",
       "fairValueDetail": {
-        "per_fair": 180000,
-        "pbr_fair": 175500,
+        "per_fair": 70000,
+        "pbr_fair": 117000,
         "sector": "가전/전장",
         "sector_per": 10,
         "sector_pbr": 0.9
       },
-      "eps": 18000,
-      "bps": 195000,
+      "eps": 7000,
+      "bps": 130000,
       "boll": {
         "upper": 367353,
         "mid": 230195,
@@ -556,7 +534,7 @@
       "cci": {
         "value": 145.5,
         "signal": "매도",
-        "comment": "과매수(146) — 조정 주의"
+        "comment": "과매수(146)"
       },
       "psar": {
         "psar": 200902,
@@ -579,7 +557,7 @@
       "overheat": {
         "level": "none",
         "reasons": [
-          "적정가 대비 70% 고평가"
+          "적정가 대비 224% 고평가"
         ],
         "color": "",
         "title": ""
@@ -640,7 +618,7 @@
       "short": {
         "ratio": 0,
         "volume": 0,
-        "comment": "공매도 데이터 준비 중"
+        "comment": "공매도 데이터 없음"
       },
       "weekly": {
         "opinion": "중립",
@@ -659,14 +637,14 @@
       },
       "relativeStrength": {
         "rs": -2.08,
-        "comment": "KOSPI 대비 -2.08%p 약세 — 시장 언더퍼폼",
+        "comment": "KOSPI 대비 -2.08%p 약세",
         "strong": false
       },
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
         "position": 63,
-        "comment": "52주 고저 중간 위치 (63%)"
+        "comment": "52주 중간 위치 (63%)"
       },
       "volSurge": {
         "surge": false,
@@ -713,14 +691,10 @@
       ],
       "basis": [
         "RSI 66.9 · Williams%R -41.9 · MFI 72.1 — 지표 중립권",
-        "외국인 0주 · 기관 0주 순매수 · OBV 상승 — 수급 혼조",
-        "주봉 중립 (주봉 RSI 80.2 · MACD 골든크로스) · 공매도 0% · 63%"
+        "외국인 0주 · 기관 0주 · OBV 상승",
+        "주봉 중립 · 공매도 0% · 63%"
       ],
-      "risk": [
-        "가전 수요 부진 및 中 업체 경쟁",
-        "전장 EV 수요 둔화",
-        "원자재·물류비 상승"
-      ],
+      "risk": [],
       "notes": [
         "주봉·일봉 동시 매수 신호 확인 후 진입",
         "외국인 순매수 전환 시 진입 검토",
@@ -739,23 +713,18 @@
       "score": 3,
       "source": "네이버 금융",
       "tradedAt": "2026-06-05",
-      "targetPrice_consensus": 180000,
-      "targetPrice_high": 210000,
-      "targetPrice_low": 150000,
-      "targetPrice_count": 10,
-      "targetPrice_source": "증권사 컨센서스 (2026.05)",
-      "fairValue": 186000,
-      "fairValueGap": -89.4,
-      "fairValueComment": "적정가 대비 89.4% 고평가 — 주의",
+      "fairValue": 159000,
+      "fairValueGap": -91.0,
+      "fairValueComment": "적정가 대비 91.0% 고평가 — 주의",
       "fairValueDetail": {
-        "per_fair": 180000,
-        "pbr_fair": 192000,
+        "per_fair": 150000,
+        "pbr_fair": 168000,
         "sector": "전자부품",
         "sector_per": 15,
         "sector_pbr": 1.6
       },
-      "eps": 12000,
-      "bps": 120000,
+      "eps": 10000,
+      "bps": 105000,
       "boll": {
         "upper": 2111940,
         "mid": 1299950,
@@ -795,7 +764,7 @@
       "cci": {
         "value": 86.7,
         "signal": "중립",
-        "comment": "중립 구간(87)"
+        "comment": "중립(87)"
       },
       "psar": {
         "psar": 1659000,
@@ -818,7 +787,7 @@
       "overheat": {
         "level": "none",
         "reasons": [
-          "적정가 대비 845% 고평가"
+          "적정가 대비 1005% 고평가"
         ],
         "color": "",
         "title": ""
@@ -875,7 +844,7 @@
       "short": {
         "ratio": 0,
         "volume": 0,
-        "comment": "공매도 데이터 준비 중"
+        "comment": "공매도 데이터 없음"
       },
       "weekly": {
         "opinion": "중립",
@@ -894,14 +863,14 @@
       },
       "relativeStrength": {
         "rs": 7.93,
-        "comment": "KOSPI 대비 +7.93%p 강세 — 시장 아웃퍼폼",
+        "comment": "KOSPI 대비 +7.93%p 강세",
         "strong": true
       },
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
         "position": 79,
-        "comment": "52주 고저 중간 위치 (79%)"
+        "comment": "52주 중간 위치 (79%)"
       },
       "volSurge": {
         "surge": false,
@@ -912,14 +881,10 @@
       "dart": [],
       "basis": [
         "RSI 67.8 · Williams%R -37.5 · MFI 67.6 — 지표 중립권",
-        "외국인 0주 · 기관 0주 순매수 · OBV 하락 — 수급 혼조",
-        "주봉 중립 (주봉 RSI 77.5 · MACD 골든크로스) · 공매도 0% · 79%"
+        "외국인 0주 · 기관 0주 · OBV 하락",
+        "주봉 중립 · 공매도 0% · 79%"
       ],
-      "risk": [
-        "IT 수요 둔화로 MLCC 단가 하락",
-        "삼성전자 의존도 높아 수주 변동성 존재",
-        "중국 경쟁사 저가 공세"
-      ],
+      "risk": [],
       "notes": [
         "주봉·일봉 동시 매수 신호 확인 후 진입",
         "외국인 순매수 전환 시 진입 검토",
@@ -938,23 +903,18 @@
       "score": 2,
       "source": "네이버 금융",
       "tradedAt": "2026-06-05",
-      "targetPrice_consensus": 280000,
-      "targetPrice_high": 320000,
-      "targetPrice_low": 240000,
-      "targetPrice_count": 12,
-      "targetPrice_source": "증권사 컨센서스 (2026.05)",
-      "fairValue": 313000,
-      "fairValueGap": -55.3,
-      "fairValueComment": "적정가 대비 55.3% 고평가 — 주의",
+      "fairValue": 259500,
+      "fairValueGap": -62.9,
+      "fairValueComment": "적정가 대비 62.9% 고평가 — 주의",
       "fairValueDetail": {
-        "per_fair": 360000,
-        "pbr_fair": 266000,
+        "per_fair": 288000,
+        "pbr_fair": 231000,
         "sector": "자동차",
         "sector_per": 8,
         "sector_pbr": 0.7
       },
-      "eps": 45000,
-      "bps": 380000,
+      "eps": 36000,
+      "bps": 330000,
       "boll": {
         "upper": 770461,
         "mid": 663900,
@@ -967,7 +927,7 @@
       "targetPrice2": 0,
       "stopLoss": 0,
       "rsi": 59.0,
-      "rsiComment": "중립 구간",
+      "rsiComment": "중립",
       "macd": 6.017,
       "macdSignal": 5.655,
       "macdHist": 0.362,
@@ -984,7 +944,7 @@
         "bullish": false,
         "bearish": true,
         "signal": "매도",
-        "comment": "약세 다이버전스 — 주가 ↑ / RSI ↓ (76→69). 천장권 하락 신호"
+        "comment": "약세 다이버전스 — 주가 ↑ / RSI ↓ (76→69)"
       },
       "ichimoku": {
         "tenkan": 695000,
@@ -999,7 +959,7 @@
       "cci": {
         "value": 64.8,
         "signal": "중립",
-        "comment": "중립 구간(65)"
+        "comment": "중립(65)"
       },
       "psar": {
         "psar": 589814,
@@ -1011,7 +971,7 @@
       "valueSurge": {
         "ratio": 0.44,
         "surge": false,
-        "comment": "거래대금 감소 (0.4배) — 관심 이탈"
+        "comment": "거래대금 감소 (0.4배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -1022,7 +982,7 @@
       "overheat": {
         "level": "none",
         "reasons": [
-          "적정가 대비 124% 고평가"
+          "적정가 대비 170% 고평가"
         ],
         "color": "",
         "title": ""
@@ -1077,7 +1037,7 @@
       "short": {
         "ratio": 0,
         "volume": 0,
-        "comment": "공매도 데이터 준비 중"
+        "comment": "공매도 데이터 없음"
       },
       "weekly": {
         "opinion": "중립",
@@ -1096,14 +1056,14 @@
       },
       "relativeStrength": {
         "rs": 5.54,
-        "comment": "KOSPI 대비 +5.54%p 강세 — 시장 아웃퍼폼",
+        "comment": "KOSPI 대비 +5.54%p 강세",
         "strong": true
       },
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
         "position": 86,
-        "comment": "52주 고저 중간 위치 (86%)"
+        "comment": "52주 중간 위치 (86%)"
       },
       "volSurge": {
         "surge": false,
@@ -1150,14 +1110,10 @@
       ],
       "basis": [
         "RSI 59.0 · Williams%R -39.0 · MFI 62.6 — 지표 중립권",
-        "외국인 0주 · 기관 0주 순매수 · OBV 상승 — 수급 혼조",
-        "주봉 중립 (주봉 RSI 67.7 · MACD 골든크로스) · 공매도 0% · 86%"
+        "외국인 0주 · 기관 0주 · OBV 상승",
+        "주봉 중립 · 공매도 0% · 86%"
       ],
-      "risk": [
-        "미국·유럽 전기차 수요 둔화",
-        "미국 관세 부과 시 수익성 악화",
-        "원화 강세 시 수출 경쟁력 저하"
-      ],
+      "risk": [],
       "notes": [
         "주봉·일봉 동시 매수 신호 확인 후 진입",
         "외국인 순매수 전환 시 진입 검토",
