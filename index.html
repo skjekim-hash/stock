@@ -72,6 +72,9 @@ body{
 }
 .btn-main:disabled{opacity:.4;cursor:not-allowed}
 .btn-main:active{transform:scale(.97)}
+.hdr-btns{display:flex;gap:6px;align-items:center}
+.btn-jrnl{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.btn-jrnl:active{transform:scale(.97)}
 .spin{animation:spin .7s linear infinite;display:inline-block}
 
 .hdr-badges{display:flex;flex-wrap:wrap;gap:6px}
@@ -228,8 +231,9 @@ body{
 .guide-item{font-size:11px;color:#a8b4c8;line-height:1.65;margin-bottom:9px}
 .guide-item b{color:#e0e6f0}
 .guide-item i{color:#8090b0;font-style:normal;font-size:10px}
-.rec-btn{display:block;width:calc(100% - 24px);margin:12px 12px 4px;padding:13px;background:#00d4ff12;color:#00d4ff;border:1.5px solid #00d4ff35;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer}
-.rec-btn:active{background:#00d4ff20}
+.card-name-row{display:flex;align-items:center;gap:10px}
+.rec-mini{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff35;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.rec-mini:active{transform:scale(.95)}
 .jrnl-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-end;justify-content:center}
 .jrnl-sheet{background:#03060f;border-top:1px solid #1a2540;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:18px}
 .jrnl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:0;background:#03060f;padding-bottom:8px}
@@ -411,11 +415,13 @@ body{
       <div class="hdr-label">KRX · AI ANALYSIS v3.0</div>
       <div class="hdr-title">국내 주식 분석</div>
     </div>
-    <button class="btn-main" id="mainBtn" onclick="loadData()">
-      <span id="btnIcon">✦</span>
-      <span id="btnText">분석 보기</span>
-    </button>
-    <button onclick="openJournal()" style="margin-top:8px;background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;width:100%">📝 매매 기록</button>
+    <div class="hdr-btns">
+      <button class="btn-main" id="mainBtn" onclick="loadData()">
+        <span id="btnIcon">✦</span>
+        <span id="btnText">분석 보기</span>
+      </button>
+      <button class="btn-jrnl" onclick="openJournal()">📝 기록</button>
+    </div>
   </div>
   <div class="hdr-badges">
     <span class="badge" id="mktBadge">--</span>
@@ -689,7 +695,10 @@ function renderCard(s,idx){
   <div class="card-hdr">
     <div class="card-name-wrap">
       <div class="card-code">${st.emoji} KRX · ${s.code}</div>
-      <div class="card-name">${st.name}</div>
+      <div class="card-name-row">
+        <span class="card-name">${st.name}</span>
+        <button class="rec-mini" onclick="recordEntry('${s.code}')">📝 진입</button>
+      </div>
     </div>
     ${rs?`<span class="rs-badge" style="background:${rsColor}10;color:${rsColor};border:1px solid ${rsColor}30">
       KOSPI ${rs.rs>0?"+":""}${rs.rs}%p
@@ -1044,8 +1053,6 @@ function renderCard(s,idx){
     </div>
   </details>
 
-  <button class="rec-btn" onclick="recordEntry('${s.code}')">📝 이 시점으로 진입 기록</button>
-
   </div>
 </div>`;
 }
@@ -1128,13 +1135,15 @@ function saveJournal(arr){
 function recordEntry(code){
   const s = (window.__stocks||[]).find(x=>x.code===code);
   if(!s){ alert("종목 데이터를 찾을 수 없습니다. 새로고침 후 다시 시도하세요."); return; }
+  const meta = STOCKS.find(x=>x.code===code) || {};
+  const stockName = meta.name || s.name || code;
   // 실제 매수가 입력 (기본값 = 현재가)
-  const px = prompt(`실제 매수가를 입력하세요\n(${s.name} 현재가 ₩${s.price.toLocaleString()})`, s.price);
+  const px = prompt(`실제 매수가를 입력하세요\n(${stockName} 현재가 ₩${s.price.toLocaleString()})`, s.price);
   if(px===null) return;  // 취소
   const entryPrice = parseFloat(String(px).replace(/,/g,""));
   if(!entryPrice || entryPrice<=0){ alert("올바른 가격을 입력하세요."); return; }
   const snap = {
-    code: s.code, name: s.name, price: s.price, opinion: s.opinion, score: s.score,
+    code: s.code, name: stockName, price: s.price, opinion: s.opinion, score: s.score,
     star: !!(s.cautiousEntry&&s.cautiousEntry.entry),
     overheat: s.overheat?s.overheat.level:"none",
     rsi: s.rsi, stochRsi: s.stochRsi?s.stochRsi.signal:null,
