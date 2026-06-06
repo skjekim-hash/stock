@@ -247,11 +247,13 @@ def fetch_market_signal():
     - ^SOX  필라델피아 반도체지수: 반도체주(하이닉스·삼성전자) 직접 선행
     - NQ=F  나스닥100 선물: 기술주 전반 분위기
     - KRW=X 원/달러 환율: 외국인 수급 (원화 약세=환율↑=매도 경향)
+    - ^VIX  공포지수: 시장 변동성·위험회피 심리 (급등=공포)
     종합 점수가 음(-)이면 매수 신호를 보수적으로 누르는 브레이크로 활용."""
     targets = [
         ("^SOX",  "필라델피아 반도체", "sox"),
         ("NQ=F",  "나스닥 선물",       "nasdaq"),
         ("KRW=X", "원/달러 환율",      "fx"),
+        ("^VIX",  "공포지수(VIX)",     "vix"),
     ]
     out = {}
     for sym, name, key in targets:
@@ -269,22 +271,29 @@ def fetch_market_signal():
             except Exception as e:
                 print(f"  시장지표 실패 ({sym}/{base}): {e}", file=sys.stderr)
 
-    # 종합 점수: SOX·나스닥 상승=우호(+), 환율 상승(원화 약세)=비우호(-)
+    # 종합 점수: SOX·나스닥 상승=우호(+), 환율·VIX 상승=비우호(-)
+    # VIX는 일일 변동폭이 커서(±5~10%) 가중치를 작게(0.3) 둠
     score = 0.0
     if "sox"    in out: score += out["sox"]["pct"]    * 1.5
     if "nasdaq" in out: score += out["nasdaq"]["pct"] * 1.0
     if "fx"     in out: score -= out["fx"]["pct"]     * 1.0
+    if "vix"    in out: score -= out["vix"]["pct"]    * 0.3
 
     if   score >=  1.5: mood, label = "favorable", "우호적"
     elif score <= -1.5: mood, label = "adverse",   "비우호적"
     else:               mood, label = "neutral",   "중립"
 
     # 행동 제안형 한두 줄 해설 (지표 조합에 따라 자동 선택)
-    fx_pct  = out.get("fx", {}).get("pct", 0)      # 환율 +면 원화 약세(악재)
-    sox_pct = out.get("sox", {}).get("pct", 0)
-    fx_spike = fx_pct >= 1.0                         # 원/달러 1%+ 급등
+    fx_pct   = out.get("fx",  {}).get("pct", 0)     # 환율 +면 원화 약세(악재)
+    sox_pct  = out.get("sox", {}).get("pct", 0)
+    vix_val  = out.get("vix", {}).get("price", 0)   # VIX 절대수준
+    vix_pct  = out.get("vix", {}).get("pct", 0)
+    fx_spike  = fx_pct >= 1.0                        # 원/달러 1%+ 급등
+    vix_fear  = vix_val >= 30 or vix_pct >= 15       # 공포 국면
     if mood == "adverse":
-        if fx_spike:
+        if vix_fear:
+            advice = "공포지수 급등. 변동성이 큰 날이라 급반등·급락이 섞일 수 있어요. 무리한 진입보다 관망, 사더라도 아주 잘게 나누세요."
+        elif fx_spike:
             advice = "미국 약세 + 원화 급락. 하락이 며칠 이어질 수 있어요. 분할매수는 평소보다 더 잘게, 첫 지지선에 다 담지 마세요."
         elif sox_pct <= -2:
             advice = "반도체 약세. 하이닉스·삼성전자 갭하락 가능. 추격 진입 자제, 지지선 확인 후 분할매수."
@@ -297,7 +306,7 @@ def fetch_market_signal():
 
     out["summary"] = {"mood": mood, "label": label, "score": round(score, 1), "advice": advice}
     parts = []
-    for k in ("sox", "nasdaq", "fx"):
+    for k in ("sox", "nasdaq", "fx", "vix"):
         if k in out:
             parts.append(f"{out[k]['name']} {'+' if out[k]['pct']>=0 else ''}{out[k]['pct']}%")
     print(f"  🌐 시장 분위기: {label} (score {round(score,1)}) — {' / '.join(parts)}", file=sys.stderr)
