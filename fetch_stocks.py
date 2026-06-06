@@ -279,7 +279,23 @@ def fetch_market_signal():
     elif score <= -1.5: mood, label = "adverse",   "비우호적"
     else:               mood, label = "neutral",   "중립"
 
-    out["summary"] = {"mood": mood, "label": label, "score": round(score, 1)}
+    # 행동 제안형 한두 줄 해설 (지표 조합에 따라 자동 선택)
+    fx_pct  = out.get("fx", {}).get("pct", 0)      # 환율 +면 원화 약세(악재)
+    sox_pct = out.get("sox", {}).get("pct", 0)
+    fx_spike = fx_pct >= 1.0                         # 원/달러 1%+ 급등
+    if mood == "adverse":
+        if fx_spike:
+            advice = "미국 약세 + 원화 급락. 하락이 며칠 이어질 수 있어요. 분할매수는 평소보다 더 잘게, 첫 지지선에 다 담지 마세요."
+        elif sox_pct <= -2:
+            advice = "반도체 약세. 하이닉스·삼성전자 갭하락 가능. 추격 진입 자제, 지지선 확인 후 분할매수."
+        else:
+            advice = "미국 기술주 약세. 갭하락 가능성. 한 번에 사지 말고 나눠서 대응하세요."
+    elif mood == "favorable":
+        advice = "미국 기술주 강세. 갭상승 가능성. 추격매수는 신중히, 눌림목 기다리는 것도 방법이에요."
+    else:
+        advice = "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요."
+
+    out["summary"] = {"mood": mood, "label": label, "score": round(score, 1), "advice": advice}
     parts = []
     for k in ("sox", "nasdaq", "fx"):
         if k in out:
