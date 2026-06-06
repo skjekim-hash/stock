@@ -822,7 +822,7 @@ function renderCard(s,idx){
     </div>`:""}
   </div>
 
-  <!-- ③ 적정주가 (PER 기준) -->
+  <!-- ③ 적정주가 (증권사 목표주가 기준) -->
   ${s.fairValue>0?`<div class="sec" style="border-left-color:#00d4ff">
     <div class="sec-head">
       <span class="sec-num">03</span>
@@ -831,25 +831,20 @@ function renderCard(s,idx){
     <div class="fv-box">
       <div class="fv-main">
         <div>
-          <div class="fv-lbl">${s.fairValueDetail?.basis==='PBR'?'PBR 기준 적정주가':'PER 기준 적정주가'}</div>
+          <div class="fv-lbl">${s.fairValueDetail?.basis==='목표주가'?'증권사 목표주가':s.fairValueDetail?.basis==='PBR'?'PBR 기준 적정주가':'PER 기준 적정주가'}</div>
           <div class="fv-val">${W(s.fairValue)}</div>
         </div>
         <div style="text-align:right">
           <div class="fv-gap" style="color:${+s.fairValueGap>5?'#00e5a0':+s.fairValueGap<-5?'#ff4060':'#ffc940'}">${+s.fairValueGap>0?'+':''}${s.fairValueGap}%</div>
-          <div style="font-size:10px;color:${+s.fairValueGap>5?'#00e5a0':+s.fairValueGap<-5?'#ff4060':'#ffc940'}">${+s.fairValueGap>5?'저평가':+s.fairValueGap<-5?'고평가':'적정'}</div>
+          <div style="font-size:10px;color:${+s.fairValueGap>5?'#00e5a0':+s.fairValueGap<-5?'#ff4060':'#ffc940'}">${s.fairValueDetail?.basis==='목표주가'?(+s.fairValueGap>5?'상승여력':+s.fairValueGap<-5?'하락위험':'근접'):(+s.fairValueGap>5?'저평가':+s.fairValueGap<-5?'고평가':'적정')}</div>
         </div>
       </div>
-      <div class="grid2" style="margin-top:8px">
-        ${s.fairValueDetail?.basis==='PBR'
-          ? `<div class="stat"><div class="stat-l">현재 PBR</div><div class="stat-v">${s.fairValueDetail?.current_pbr||'—'}배</div></div>
-             <div class="stat"><div class="stat-l">업종 평균 PBR</div><div class="stat-v" style="color:#00d4ff">${s.fairValueDetail?.sector_pbr}배</div></div>`
-          : `<div class="stat"><div class="stat-l">현재 PER</div><div class="stat-v">${s.fairValueDetail?.current_per||'—'}배</div></div>
-             <div class="stat"><div class="stat-l">업종 평균 PER</div><div class="stat-v" style="color:#00d4ff">${s.fairValueDetail?.sector_per}배</div></div>`
-        }
-      </div>
-      ${s.fairValueDetail?.basis!=='PBR' && s.fairValueDetail?.pbr_fair?`<div class="stat" style="margin-top:6px;opacity:.65"><div class="stat-l">참고 · PBR 적정가 (PBR ${s.fairValueDetail.sector_pbr}배)</div><div class="stat-v">${W(s.fairValueDetail.pbr_fair)}</div></div>`:''}
+      ${(s.fairValueDetail?.current_per||s.fairValueDetail?.cns_per)?`<div class="grid2" style="margin-top:8px">
+        ${s.fairValueDetail?.current_per?`<div class="stat"><div class="stat-l">현재 PER</div><div class="stat-v">${s.fairValueDetail.current_per}배</div></div>`:''}
+        ${s.fairValueDetail?.cns_per?`<div class="stat"><div class="stat-l">추정 PER (선반영)</div><div class="stat-v" style="color:#00d4ff">${s.fairValueDetail.cns_per}배</div></div>`:''}
+      </div>`:''}
       <div class="fv-note" style="margin-top:6px">${s.fairValueComment||''}</div>
-      ${s.eps?`<div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace">EPS ${W(s.eps)} · 업종: ${s.fairValueDetail?.sector||''}</div>`:''}
+      <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace">${s.eps?`EPS ${W(s.eps)} · `:''}${s.fairValueDetail?.recomm?`투자의견 ${s.fairValueDetail.recomm}/5 · `:''}업종: ${s.fairValueDetail?.sector||''}</div>
     </div>
   </div>`:''}
 
