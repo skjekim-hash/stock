@@ -242,6 +242,51 @@ def fetch_kospi():
     return {"price": 0, "change": 0, "changePct": 0}
 
 
+def fetch_market_signal():
+    """미국 선행지표로 '오늘의 시장 분위기' 판단 (전일 밤 → 오늘 아침 갭 선행)
+    - ^SOX  필라델피아 반도체지수: 반도체주(하이닉스·삼성전자) 직접 선행
+    - NQ=F  나스닥100 선물: 기술주 전반 분위기
+    - KRW=X 원/달러 환율: 외국인 수급 (원화 약세=환율↑=매도 경향)
+    종합 점수가 음(-)이면 매수 신호를 보수적으로 누르는 브레이크로 활용."""
+    targets = [
+        ("^SOX",  "필라델피아 반도체", "sox"),
+        ("NQ=F",  "나스닥 선물",       "nasdaq"),
+        ("KRW=X", "원/달러 환율",      "fx"),
+    ]
+    out = {}
+    for sym, name, key in targets:
+        for base in ["query1", "query2"]:
+            try:
+                d = http_json(f"https://{base}.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=5d")
+                meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
+                cur  = meta.get("regularMarketPrice") or 0
+                prev = meta.get("chartPreviousClose") or meta.get("previousClose") or 0
+                if cur and prev:
+                    pct = round((cur - prev) / prev * 100, 2)
+                    out[key] = {"name": name, "price": round(cur, 2), "pct": pct}
+                    break
+            except Exception as e:
+                print(f"  시장지표 실패 ({sym}/{base}): {e}", file=sys.stderr)
+
+    # 종합 점수: SOX·나스닥 상승=우호(+), 환율 상승(원화 약세)=비우호(-)
+    score = 0.0
+    if "sox"    in out: score += out["sox"]["pct"]    * 1.5
+    if "nasdaq" in out: score += out["nasdaq"]["pct"] * 1.0
+    if "fx"     in out: score -= out["fx"]["pct"]     * 1.0
+
+    if   score >=  1.5: mood, label = "favorable", "우호적"
+    elif score <= -1.5: mood, label = "adverse",   "비우호적"
+    else:               mood, label = "neutral",   "중립"
+
+    out["summary"] = {"mood": mood, "label": label, "score": round(score, 1)}
+    parts = []
+    for k in ("sox", "nasdaq", "fx"):
+        if k in out:
+            parts.append(f"{out[k]['name']} {'+' if out[k]['pct']>=0 else ''}{out[k]['pct']}%")
+    print(f"  🌐 시장 분위기: {label} (score {round(score,1)}) — {' / '.join(parts)}", file=sys.stderr)
+    return out
+
+
 # ─── 적정주가 ──────────────────────────────────────────────────────────────
 def fetch_naver_financial(code):
     """네이버 integration API에서 재무지표 + 컨센서스 목표주가 수집
@@ -925,7 +970,7 @@ def gen_text(code, op, rsi, wr, mfi, ft, obv, weekly, investor, short, vol_surge
 
 
 # ─── 종목 분석 메인 ─────────────────────────────────────────────────────────
-def analyze_stock(stock, kospi):
+def analyze_stock(stock, kospi, market=None):
     code, name = stock["code"], stock["name"]
     print(f"\n▶ {name} ({code}) 분석 중...", file=sys.stderr)
 
@@ -1015,6 +1060,16 @@ def analyze_stock(stock, kospi):
         weekly["opinion"], investor, short.get("ratio", 0), news,
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge
     )
+    # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
+    market_brake = ""
+    if market and opinion == "매수":
+        if market.get("summary", {}).get("mood") == "adverse":
+            score -= 2
+            if score < 6:
+                opinion = "중립"
+                market_brake = "시장 비우호적 — 매수 신호 보류"
+            else:
+                market_brake = "시장 비우호적 — 신중 진입 권장"
     cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
                                      divergence, psar, investor, cci, price, pivot)
     overheat = assess_overheat_warning(rsi, stoch_rsi, price, high52w,
@@ -1039,6 +1094,7 @@ def analyze_stock(stock, kospi):
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        "marketBrake": market_brake,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
         "fairValue": fair.get("fair_value", 0),
         "fairValueGap": fair.get("gap", 0),
@@ -1092,11 +1148,12 @@ def main():
     print(f"📊 수집 시작: {now.strftime('%Y-%m-%d %H:%M:%S KST')}", file=sys.stderr)
     kospi = fetch_kospi()
     print(f"  KOSPI: {kospi['price']} ({'+' if kospi['changePct'] >= 0 else ''}{kospi['changePct']}%)", file=sys.stderr)
+    market = fetch_market_signal()
 
     stocks_data = []
     for stock in STOCKS:
         try:
-            result = analyze_stock(stock, kospi)
+            result = analyze_stock(stock, kospi, market)
             if result: stocks_data.append(result)
             else: print(f"  ⚠ {stock['name']} 데이터 없음", file=sys.stderr)
         except Exception as e:
@@ -1107,6 +1164,7 @@ def main():
         "updatedAt": now.strftime("%Y-%m-%d %H:%M:%S KST"),
         "updatedTime": now.strftime("%H:%M"),
         "kospi": kospi,
+        "market": market,
         "stocks": stocks_data,
     }
     with open("data.json", "w", encoding="utf-8") as f:
