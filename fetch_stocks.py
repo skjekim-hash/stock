@@ -279,6 +279,18 @@ def fetch_market_signal():
     if "fx"     in out: score -= out["fx"]["pct"]     * 1.0
     if "vix"    in out: score -= out["vix"]["pct"]    * 0.3
 
+    # 절대 수준 감점: 환율·VIX는 '레벨' 자체가 위험 신호 (변동률과 별개)
+    # ── 시장 상황 따라 조정하세요 ─────────────────────
+    FX_WARN,  FX_DANGER  = 1500, 1550   # 원/달러 경계 / 위험 (1500 아래 안정)
+    VIX_FEAR, VIX_PANIC  = 30,   40     # VIX 공포 / 패닉
+    # ────────────────────────────────────────────────
+    fx_price  = out.get("fx",  {}).get("price", 0)
+    vix_price = out.get("vix", {}).get("price", 0)
+    if   fx_price >= FX_DANGER: score -= 2
+    elif fx_price >= FX_WARN:   score -= 1
+    if   vix_price >= VIX_PANIC: score -= 2
+    elif vix_price >= VIX_FEAR:  score -= 1
+
     if   score >=  1.5: mood, label = "favorable", "우호적"
     elif score <= -1.5: mood, label = "adverse",   "비우호적"
     else:               mood, label = "neutral",   "중립"
