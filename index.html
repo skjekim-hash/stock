@@ -164,6 +164,7 @@ body::before{
 .mb-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .mb-label{font-size:12px;font-weight:800}
 .mb-parts{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.mb-advice{font-size:11px;color:#c0ccdc;line-height:1.5;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)}
 .summary{
   background:var(--bg2);
   border:1px solid var(--border);
@@ -551,7 +552,9 @@ function renderMarketBanner(m){
     +"<div class='mb-top'>"
     +"<span class='mb-label' style='color:"+c+"'>"+icon+" 미국 선행 "+sm.label+"</span>"
     +"<span class='mb-parts'>"+parts.join(" · ")+"</span>"
-    +"</div></div>";
+    +"</div>"
+    +(sm.advice?"<div class='mb-advice'>"+sm.advice+"</div>":"")
+    +"</div>";
 }
 
 function renderSummaryTable(stocks){
