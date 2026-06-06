@@ -244,14 +244,18 @@ def fetch_kospi():
 
 # ─── 적정주가 ──────────────────────────────────────────────────────────────
 def fetch_naver_financial(code):
-    """네이버 금융에서 EPS·BPS 수집 (원화, 최신, 환율 불필요)"""
+    """네이버 금융에서 EPS·BPS·PER·PBR 수집 (원화, 최신, 환율 불필요)"""
     try:
         d = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
         eps = round(to_n(d.get("eps") or d.get("EPS") or 0))
         bps = round(to_n(d.get("bps") or d.get("BPS") or 0))
+        # PER/PBR — 필드명 대소문자 모두 대비
+        per = to_n(d.get("per") or d.get("PER") or d.get("pbr") and None or 0)
+        per = to_n(d.get("per") or d.get("PER") or 0)
+        pbr = to_n(d.get("pbr") or d.get("PBR") or 0)
         if eps > 0 or bps > 0:
-            print(f"  ✅ 네이버 재무 ({code}): EPS {eps:,} BPS {bps:,}", file=sys.stderr)
-            return eps, bps
+            print(f"  ✅ 네이버 재무 ({code}): EPS {eps:,} BPS {bps:,} PER {per} PBR {pbr}", file=sys.stderr)
+            return eps, bps, (per if per > 0 else None), (pbr if pbr > 0 else None)
     except Exception as e:
         print(f"  네이버 재무 basic 실패 ({code}): {e}", file=sys.stderr)
 
@@ -265,21 +269,23 @@ def fetch_naver_financial(code):
                 bps_v = to_n(item.get("bps") or item.get("BPS") or 0)
                 if eps_v > 0 or bps_v > 0:
                     print(f"  ✅ 네이버 재무 폴백 ({code}/{ep}): EPS {round(eps_v):,} BPS {round(bps_v):,}", file=sys.stderr)
-                    return round(eps_v), round(bps_v)
+                    return round(eps_v), round(bps_v), None, None
         except: pass
 
-    return None, None
+    return None, None, None, None
 
 
 def fetch_financial_data(yf_sym, code):
-    """EPS·BPS 수집 — 네이버 1순위 / Yahoo 2순위 / fallback 3순위"""
+    """EPS·BPS·현재PER·현재PBR 수집 — 네이버 1순위 / Yahoo 2순위 / fallback 3순위"""
 
     # 1순위: 네이버 금융 (원화, 최신, 가장 정확)
-    n_eps, n_bps = fetch_naver_financial(code)
+    n_eps, n_bps, n_per, n_pbr = fetch_naver_financial(code)
     eps = n_eps
     bps = n_bps
+    current_per = n_per   # 시장이 현재 부여한 PER (있으면 역산에 사용)
+    current_pbr = n_pbr   # 시장이 현재 부여한 PBR
     if eps and bps:
-        return eps, bps
+        return eps, bps, current_per, current_pbr
 
     # 2순위: Yahoo Finance (달러 → 원화 환산)
     try:
@@ -296,7 +302,7 @@ def fetch_financial_data(yf_sym, code):
             bps = round(val * 1350) if abs(val) < 1000 else round(val)
         if eps and bps:
             print(f"  ✅ Yahoo 재무 ({yf_sym}): EPS {eps:,} BPS {bps:,}", file=sys.stderr)
-            return eps, bps
+            return eps, bps, current_per, current_pbr
     except Exception as e:
         print(f"  Yahoo 재무 실패 ({yf_sym}): {e}", file=sys.stderr)
 
@@ -314,24 +320,40 @@ def fetch_financial_data(yf_sym, code):
         if not bps: bps = f["bps"]
         print(f"  ⚠ fallback 사용 ({code}): EPS {eps:,} BPS {bps:,}", file=sys.stderr)
 
-    return eps, bps
+    return eps, bps, current_per, current_pbr
 
 
-def calc_fair_value(code, price, eps=None, bps=None, growth=None):
-    """PER·PBR 기반 적정주가 계산"""
+def calc_fair_value(code, price, eps=None, bps=None, growth=None,
+                    current_per=None, current_pbr=None):
+    """PER·PBR 기반 적정주가 계산
+    - current_per/current_pbr이 있으면: 적정가 = price × (업종평균PER ÷ 현재PER) 역산
+    - 없으면: EPS/BPS × 업종평균PER/PBR 직접 계산
+    """
     sector_data = {
-        "000660": {"per": 12, "pbr": 1.8, "name": "반도체"},
-        "005930": {"per": 14, "pbr": 1.5, "name": "반도체"},
-        "066570": {"per": 10, "pbr": 0.9, "name": "가전/전장"},
-        "009150": {"per": 15, "pbr": 1.6, "name": "전자부품"},
-        "005380": {"per":  8, "pbr": 0.7, "name": "자동차"},
+        "000660": {"per": 20, "pbr": 2.0, "name": "반도체"},    # 하이닉스 — 메모리 사이클 고PER
+        "005930": {"per": 15, "pbr": 1.4, "name": "반도체"},    # 삼성전자
+        "066570": {"per": 18, "pbr": 1.0, "name": "가전/전장"}, # LG전자
+        "009150": {"per": 18, "pbr": 1.6, "name": "전자부품"},  # 삼성전기
+        "005380": {"per": 10, "pbr": 0.7, "name": "자동차"},    # 현대차
     }
-    sd = sector_data.get(code, {"per": 12, "pbr": 1.5, "name": "일반"})
+    sd = sector_data.get(code, {"per": 15, "pbr": 1.5, "name": "일반"})
     results = {}
-    if eps and eps > 0:
+
+    # ── PER 적정가 ──────────────────────────────────────────────────────────
+    if current_per and current_per > 0:
+        # 역산: 시장 현재 PER 기준, 업종 평균 PER로 조정
+        results["per_fair"] = round(price * sd["per"] / current_per)
+        print(f"  📐 PER 역산 ({code}): {price:,} × {sd['per']} ÷ {current_per} = {results['per_fair']:,}", file=sys.stderr)
+    elif eps and eps > 0:
         results["per_fair"] = round(eps * sd["per"])
-    if bps and bps > 0:
+
+    # ── PBR 적정가 ──────────────────────────────────────────────────────────
+    if current_pbr and current_pbr > 0:
+        results["pbr_fair"] = round(price * sd["pbr"] / current_pbr)
+        print(f"  📐 PBR 역산 ({code}): {price:,} × {sd['pbr']} ÷ {current_pbr} = {results['pbr_fair']:,}", file=sys.stderr)
+    elif bps and bps > 0:
         results["pbr_fair"] = round(bps * sd["pbr"])
+
     vals = [v for k, v in results.items() if k.endswith("_fair")]
     results["fair_value"] = round(sum(vals) / len(vals)) if vals else 0
     if results["fair_value"] > 0 and price > 0:
@@ -938,8 +960,8 @@ def analyze_stock(stock, kospi):
 
     if price == 0: return None
 
-    eps, bps = fetch_financial_data(stock["yf"], code)
-    fair     = calc_fair_value(code, price, eps, bps)
+    eps, bps, current_per, current_pbr = fetch_financial_data(stock["yf"], code)
+    fair     = calc_fair_value(code, price, eps, bps, current_per=current_per, current_pbr=current_pbr)
 
     rsi   = calc_rsi(closes_d)   if has_data else None
     macd, macd_sig, macd_hist = calc_macd(closes_d) if has_data else (None, None, None)
