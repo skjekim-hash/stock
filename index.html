@@ -545,7 +545,14 @@ function renderMarketBanner(m){
   [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"],["vix","VIX"]].forEach(function(p){
     var k=p[0], lbl=p[1];
     if(m[k]&&typeof m[k].pct==="number"){
-      parts.push(lbl+" "+(m[k].pct>=0?"+":"")+m[k].pct+"%");
+      var pctStr=(m[k].pct>=0?"+":"")+m[k].pct+"%";
+      // 환율·VIX는 절대 수준이 중요 → 수치도 함께 표시
+      if((k==="fx"||k==="vix")&&m[k].price){
+        var lvl=k==="fx"?Math.round(m[k].price):m[k].price;
+        parts.push(lbl+" "+lvl+" ("+pctStr+")");
+      } else {
+        parts.push(lbl+" "+pctStr);
+      }
     }
   });
   return "<div class='market-banner' style='border-color:"+c+"44'>"
@@ -1087,8 +1094,8 @@ function renderCard(s,idx){
       </div>
       <div class="guide-item"><b>필라델피아 반도체(SOX)</b> — 미국 반도체 종목 지수. 하이닉스·삼성전자가 거의 그대로 따라갑니다. 내리면 우리 반도체주 갭하락 가능.</div>
       <div class="guide-item"><b>나스닥 선물</b> — 미국 기술주 전반의 밤사이 분위기. 오르면 위험선호, 내리면 위험회피.</div>
-      <div class="guide-item"><b>원/달러 환율</b> — 오르면 원화 약세 → 외국인이 환차손 우려로 한국 주식을 파는 경향. 하루 1% 넘게 급등하면 특히 부담.</div>
-      <div class="guide-item"><b>공포지수(VIX)</b> — 미국 시장의 <i>변동성·불안 심리</i>를 나타내는 '공포지수'. 평소 15~20에서 움직이다가, 시장이 급락·불안하면 30~40으로 치솟습니다. <b>오르면 공포(비우호), 내리면 안정.</b> 급등한 날은 급반등·급락이 섞여 변동성이 크니 무리한 진입을 피합니다. <i>※ 한국판인 V-KOSPI도 있지만, 한국 장이 열린 뒤 따라 움직이는 후행 지표라 선행 신호로는 미국 VIX를 사용합니다.</i></div>
+      <div class="guide-item"><b>원/달러 환율</b> — 오르면 원화 약세 → 외국인이 환차손 우려로 한국 주식을 파는 경향. <b>수치(레벨)와 변동률 둘 다 중요</b>해요. 1,500원 아래는 안정, 1,500~1,550원은 경계, 1,550원 위는 위험 구간으로 보고, 하루 1% 넘게 급등하면 단기 충격 신호.</div>
+      <div class="guide-item"><b>공포지수(VIX)</b> — 미국 시장의 <i>변동성·불안 심리</i>를 나타내는 '공포지수'. <b>수치와 변동률 둘 다</b> 봅니다. 평소 15~20에서 움직이다가 30 넘으면 공포, 40 위는 패닉. <b>오르면 비우호, 내리면 안정.</b> 절대 수치가 낮아도 하루 변동률이 크게 튀면(예: +30%) 갑자기 불안해졌다는 신호라 무리한 진입을 피합니다. <i>※ 한국판인 V-KOSPI도 있지만, 한국 장이 열린 뒤 따라 움직이는 후행 지표라 선행 신호로는 미국 VIX를 사용합니다.</i></div>
       <div class="guide-item" style="color:#8090b0;font-size:10px">
         이 지표들을 종합해 <b style="color:#00e5a0">🟢 우호적</b> / <b style="color:#ffc940">🟡 중립</b> / <b style="color:#ff4060">🔴 비우호적</b>으로 판정하고, 비우호적인 날은 매수 신호를 보수적으로 누릅니다(경계선 매수는 보류, 강한 매수는 '신중 진입').
       </div>
