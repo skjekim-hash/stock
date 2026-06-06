@@ -244,34 +244,32 @@ def fetch_kospi():
 
 # ─── 적정주가 ──────────────────────────────────────────────────────────────
 def fetch_naver_financial(code):
-    """네이버 금융에서 EPS·BPS·PER·PBR 수집 (원화, 최신, 환율 불필요)
+    """네이버 금융 integration API에서 EPS·BPS·PER·PBR 수집
+    - totalInfos 배열에서 code가 per/pbr/eps/bps인 항목을 찾음
+    - 값에 붙은 단위("20.00배", "103,521원")는 숫자만 추출
     반환: (eps, bps, per, pbr) — 없으면 해당 값 None"""
+    def pnum(s):
+        # "20.00배", "103,521원", "8.71배" → 숫자만
+        m = re.search(r'-?[\d,]+\.?\d*', str(s or ""))
+        return float(m.group().replace(",", "")) if m else 0.0
+
     try:
-        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/basic")
-        eps = round(to_n(d.get("eps") or d.get("EPS") or 0))
-        bps = round(to_n(d.get("bps") or d.get("BPS") or 0))
-        per = round(to_n(d.get("per") or d.get("PER") or 0), 1)
-        pbr = round(to_n(d.get("pbr") or d.get("PBR") or 0), 2)
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/integration")
+        infos = d.get("totalInfos") or []
+        vals = {}
+        for it in infos:
+            c = (it.get("code") or "").lower()
+            if c in ("per", "pbr", "eps", "bps"):
+                vals[c] = pnum(it.get("value"))
+        eps = round(vals.get("eps", 0))
+        bps = round(vals.get("bps", 0))
+        per = round(vals.get("per", 0), 2)
+        pbr = round(vals.get("pbr", 0), 2)
         if eps > 0 or bps > 0 or per > 0 or pbr > 0:
             print(f"  ✅ 네이버 재무 ({code}): EPS {eps:,} BPS {bps:,} PER {per} PBR {pbr}", file=sys.stderr)
             return (eps or None), (bps or None), (per or None), (pbr or None)
     except Exception as e:
-        print(f"  네이버 재무 basic 실패 ({code}): {e}", file=sys.stderr)
-
-    # finance 엔드포인트 폴백
-    for ep in ["finance/summary", "finance"]:
-        try:
-            d = http_json(f"https://m.stock.naver.com/api/stock/{code}/{ep}")
-            items = d if isinstance(d, list) else (d.get("list") or d.get("data") or [d])
-            for item in items:
-                eps_v = to_n(item.get("eps") or item.get("EPS") or 0)
-                bps_v = to_n(item.get("bps") or item.get("BPS") or 0)
-                per_v = to_n(item.get("per") or item.get("PER") or 0)
-                pbr_v = to_n(item.get("pbr") or item.get("PBR") or 0)
-                if eps_v > 0 or bps_v > 0 or per_v > 0 or pbr_v > 0:
-                    print(f"  ✅ 네이버 재무 폴백 ({code}/{ep}): EPS {round(eps_v):,} BPS {round(bps_v):,} PER {round(per_v,1)} PBR {round(pbr_v,2)}", file=sys.stderr)
-                    return (round(eps_v) or None), (round(bps_v) or None), (round(per_v,1) or None), (round(pbr_v,2) or None)
-        except: pass
+        print(f"  네이버 integration 실패 ({code}): {e}", file=sys.stderr)
 
     return None, None, None, None
 
@@ -363,7 +361,17 @@ def calc_fair_value(code, price, eps=None, bps=None,
         results["pbr_fair"] = round(bps * sd["pbr"])
 
     vals = [v for k, v in results.items() if k.endswith("_fair")]
-    results["fair_value"] = round(sum(vals) / len(vals)) if vals else 0
+    # 대표 적정가: PER 우선 (이익 기반, 직관적). 적자 등으로 PER이 없으면 PBR 폴백.
+    # PBR 적정가(pbr_fair)는 참고치로 results에 그대로 보존돼 화면에 함께 표시됨.
+    if results.get("per_fair"):
+        results["fair_value"] = results["per_fair"]
+        results["fair_basis"] = "PER"
+    elif results.get("pbr_fair"):
+        results["fair_value"] = results["pbr_fair"]
+        results["fair_basis"] = "PBR"
+    else:
+        results["fair_value"] = 0
+        results["fair_basis"] = ""
 
     if results["fair_value"] > 0 and price > 0:
         gap = round((results["fair_value"] - price) / price * 100, 1)
@@ -1048,6 +1056,9 @@ def analyze_stock(stock, kospi):
             "sector": fair.get("sector", ""),
             "sector_per": fair.get("sector_per", 0),
             "sector_pbr": fair.get("sector_pbr", 0),
+            "current_per": fair.get("current_per", 0),
+            "current_pbr": fair.get("current_pbr", 0),
+            "basis": fair.get("fair_basis", ""),
         },
         "eps": eps or 0, "bps": bps or 0,
         "boll": {"upper": round(boll["upper"]) if boll else 0,
