@@ -542,7 +542,7 @@ function renderMarketBanner(m){
   var c=sm.mood==="favorable"?"#00e5a0":sm.mood==="adverse"?"#ff4060":"#ffc940";
   var icon=sm.mood==="favorable"?"🟢":sm.mood==="adverse"?"🔴":"🟡";
   var parts=[];
-  [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"]].forEach(function(p){
+  [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"],["vix","VIX"]].forEach(function(p){
     var k=p[0], lbl=p[1];
     if(m[k]&&typeof m[k].pct==="number"){
       parts.push(lbl+" "+(m[k].pct>=0?"+":"")+m[k].pct+"%");
