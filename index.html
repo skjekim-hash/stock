@@ -163,8 +163,8 @@ body::before{
 }
 .mb-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .mb-label{font-size:12px;font-weight:800}
-.mb-parts{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.mb-advice{font-size:11px;color:#c0ccdc;line-height:1.5;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)}
+.mb-parts{font-size:11.5px;color:#c8d4e4;font-family:'JetBrains Mono',monospace;line-height:1.7}
+.mb-advice{font-size:11.5px;color:#d8e0ec;line-height:1.55;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-weight:600}
 .summary{
   background:var(--bg2);
   border:1px solid var(--border);
@@ -541,26 +541,37 @@ function renderMarketBanner(m){
   var sm=m.summary;
   var c=sm.mood==="favorable"?"#00e5a0":sm.mood==="adverse"?"#ff4060":"#ffc940";
   var icon=sm.mood==="favorable"?"🟢":sm.mood==="adverse"?"🔴":"🟡";
+  // 지표별 색: 좋으면 초록, 나쁘면 빨강
+  // sox·nasdaq은 내리면 악재(빨강), fx·vix는 오르면 악재(빨강)
   var parts=[];
   [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"],["vix","VIX"]].forEach(function(p){
     var k=p[0], lbl=p[1];
     if(m[k]&&typeof m[k].pct==="number"){
-      var pctStr=(m[k].pct>=0?"+":"")+m[k].pct+"%";
-      // 환율·VIX는 절대 수준이 중요 → 수치도 함께 표시
+      var pct=m[k].pct;
+      var pctStr=(pct>=0?"+":"")+pct+"%";
+      var bad=(k==="fx"||k==="vix")?pct>0:pct<0;
+      var col=Math.abs(pct)<0.3?"#9ab":bad?"#ff5470":"#00e5a0";
+      var txt;
       if((k==="fx"||k==="vix")&&m[k].price){
         var lvl=k==="fx"?Math.round(m[k].price):m[k].price;
-        parts.push(lbl+" "+lvl+" ("+pctStr+")");
+        txt=lbl+" "+lvl+" ("+pctStr+")";
       } else {
-        parts.push(lbl+" "+pctStr);
+        txt=lbl+" "+pctStr;
       }
+      parts.push("<span style='color:"+col+";font-weight:700'>"+txt+"</span>");
     }
   });
-  return "<div class='market-banner' style='border-color:"+c+"44'>"
+  // 비우호적이면 배너를 경고처럼 강조 (배경·테두리 진하게)
+  var adverse=sm.mood==="adverse";
+  var boxStyle=adverse
+    ? "border-color:"+c+";background:linear-gradient(135deg,rgba(255,64,96,.12),rgba(255,64,96,.04));box-shadow:0 0 0 1px "+c+"55"
+    : "border-color:"+c+"44";
+  return "<div class='market-banner' style='"+boxStyle+"'>"
     +"<div class='mb-top'>"
-    +"<span class='mb-label' style='color:"+c+"'>"+icon+" 미국 선행 "+sm.label+"</span>"
-    +"<span class='mb-parts'>"+parts.join(" · ")+"</span>"
+    +"<span class='mb-label' style='color:"+c+";font-size:13px'>"+icon+" 미국 선행 "+sm.label+"</span>"
+    +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
-    +(sm.advice?"<div class='mb-advice'>"+sm.advice+"</div>":"")
+    +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
     +"</div>";
 }
 
