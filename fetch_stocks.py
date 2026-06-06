@@ -258,7 +258,7 @@ def fetch_market_signal():
         enc = quote(sym, safe="")  # ^SOX, NQ=F 등 특수문자 인코딩
         for base in ["query1", "query2"]:
             try:
-                d = http_json(f"https://{base}.finance.yahoo.com/v8/finance/chart/{enc}?interval=1d&range=5d", timeout=5)
+                d = http_json(f"https://{base}.finance.yahoo.com/v8/finance/chart/{enc}?interval=1d&range=1d", timeout=5)
                 meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
                 cur  = meta.get("regularMarketPrice") or 0
                 prev = meta.get("chartPreviousClose") or meta.get("previousClose") or 0
