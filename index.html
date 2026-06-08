@@ -462,7 +462,7 @@ body::before{
   </div>
   <div class="hdr-badges">
     <span class="badge" id="mktBadge">--</span>
-    <span class="badge badge-green">⚡ 5분 자동 갱신</span>
+    <span class="badge badge-green">5분 자동 갱신</span>
     <span class="badge badge-blue" id="kospiBar">KOSPI --</span>
     <span class="badge" id="updBadge" style="display:none"></span>
   </div>
@@ -1214,7 +1214,7 @@ async function loadData(){
       data.stocks.map((s,i)=>renderCard(s,i)).join("");
     document.getElementById("results").style.display="";
     document.getElementById("footer").style.display="";
-    document.getElementById("updBadge").textContent=`수집 ${data.updatedTime||data.updatedAt}`;
+    document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
     document.getElementById("updBadge").style.display="";
 
   }catch(e){
