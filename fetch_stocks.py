@@ -28,6 +28,7 @@ STOCKS = [
     {"code": "066570", "yf": "066570.KS", "name": "LG전자",     "emoji": "🔴"},
     {"code": "009150", "yf": "009150.KS", "name": "삼성전기",   "emoji": "🟠"},
     {"code": "005380", "yf": "005380.KS", "name": "현대자동차", "emoji": "🟢"},
+    {"code": "105560", "yf": "105560.KS", "name": "KB금융",     "emoji": "🟣"},
 ]
 KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
@@ -388,6 +389,7 @@ def fetch_financial_data(yf_sym, code):
         "066570": {"eps":  7000,  "bps": 130000},
         "009150": {"eps": 10000,  "bps": 105000},
         "005380": {"eps": 36000,  "bps": 330000},
+        "105560": {"eps": 15116,  "bps": 164669},
     }
     if code in fallback:
         if not fin.get("eps"): fin["eps"] = fallback[code]["eps"]
@@ -407,6 +409,7 @@ def calc_fair_value(code, price, fin):
         "066570": {"per": 18, "pbr": 1.2, "name": "가전/전장"},
         "009150": {"per": 18, "pbr": 1.8, "name": "전자부품"},
         "005380": {"per": 10, "pbr": 0.8, "name": "자동차"},
+        "105560": {"per": 9,  "pbr": 0.9, "name": "은행"},
     }
     sd = sector_data.get(code, {"per": 15, "pbr": 1.5, "name": "일반"})
 
