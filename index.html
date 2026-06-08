@@ -96,6 +96,7 @@ body::before{
   border:1px solid var(--border);
   color:var(--text2);
   font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
 }
 .badge-green{background:rgba(0,229,160,.07);border-color:rgba(0,229,160,.2);color:var(--green)}
 .badge-blue{background:rgba(64,144,255,.07);border-color:rgba(64,144,255,.2);color:var(--blue)}
@@ -1213,7 +1214,7 @@ async function loadData(){
       data.stocks.map((s,i)=>renderCard(s,i)).join("");
     document.getElementById("results").style.display="";
     document.getElementById("footer").style.display="";
-    document.getElementById("updBadge").textContent=`수집: ${data.updatedAt||data.updatedTime}`;
+    document.getElementById("updBadge").textContent=`수집 ${data.updatedTime||data.updatedAt}`;
     document.getElementById("updBadge").style.display="";
 
   }catch(e){
