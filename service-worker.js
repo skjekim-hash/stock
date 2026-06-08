@@ -4,7 +4,7 @@
 //   - 정적 파일(html/css/svg/manifest): 캐시 우선, 백그라운드에서 갱신
 //   - 그 외: 네트워크 우선
 
-const CACHE_VERSION = 'v2026-06-07-kb';
+const CACHE_VERSION = 'v2026-06-08-flow';
 const STATIC_CACHE  = `stock-static-${CACHE_VERSION}`;
 const DATA_CACHE    = `stock-data-${CACHE_VERSION}`;
 

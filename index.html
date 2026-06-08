@@ -924,6 +924,21 @@ function renderCard(s,idx){
       <span class="sec-num">04</span>
       <span class="sec-title" style="color:#00e5a0">거래 · 강도</span>
     </div>
+    ${s.investor&&(s.investor.foreign||s.investor.institution)?`<div class="sec-sub">수급 (전일 마감)</div>
+    <div class="irow">
+      <span class="irow-l">외국인</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.investor.foreign>0?"#00e5a0":s.investor.foreign<0?"#ff4060":"#8090b0"}">${s.investor.foreign>0?"+":""}${(s.investor.foreign||0).toLocaleString()}주</div>
+        <div class="irow-n">${s.investor.foreignTrend||""}</div>
+      </div>
+    </div>
+    <div class="irow">
+      <span class="irow-l">기관</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.investor.institution>0?"#00e5a0":s.investor.institution<0?"#ff4060":"#8090b0"}">${s.investor.institution>0?"+":""}${(s.investor.institution||0).toLocaleString()}주</div>
+        <div class="irow-n">${s.investor.holdRatio?"외인보유 "+s.investor.holdRatio:""}</div>
+      </div>
+    </div>`:""}
     <div class="sec-sub">거래량</div>
     <div class="irow">
       <span class="irow-l">거래량 비율</span>
