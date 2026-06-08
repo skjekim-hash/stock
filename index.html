@@ -543,15 +543,19 @@ function B(items,color){
 function renderFlowBars(daily){
   if(!daily||!daily.length) return "";
   var mx=Math.max.apply(null,daily.map(function(v){return Math.abs(v)}))||1;
+  var H=16;
   var bars=daily.map(function(v){
-    var h=Math.max(8,Math.round(Math.abs(v)/mx*30)); // 8~30px
+    var h=Math.max(3,Math.round(Math.abs(v)/mx*H));
     var col=v>0?"#00e5a0":v<0?"#ff4060":"#566";
-    var up=v>=0;
-    return "<div style='flex:1;display:flex;flex-direction:column;justify-content:"+(up?"flex-end":"flex-start")+";height:34px'>"
-      +"<div style='height:"+h+"px;background:"+col+";border-radius:2px;opacity:.85'></div>"
+    var top = v>0 ? "<div style='height:"+h+"px;width:100%;background:"+col+";border-radius:2px 2px 0 0;opacity:.9'></div>" : "";
+    var bot = v<0 ? "<div style='height:"+h+"px;width:100%;background:"+col+";border-radius:0 0 2px 2px;opacity:.9'></div>" : "";
+    return "<div style='flex:1;display:flex;flex-direction:column;align-items:center'>"
+      +"<div style='height:"+H+"px;display:flex;flex-direction:column;justify-content:flex-end;width:65%'>"+top+"</div>"
+      +"<div style='height:1px;width:100%;background:rgba(255,255,255,.18)'></div>"
+      +"<div style='height:"+H+"px;display:flex;flex-direction:column;justify-content:flex-start;width:65%'>"+bot+"</div>"
       +"</div>";
   }).join("");
-  return "<div class='flow-bars'>"+bars+"</div>";
+  return "<div style='display:flex;align-items:stretch;gap:2px'>"+bars+"</div>";
 }
 
 function renderMarketBanner(m){
@@ -950,14 +954,18 @@ function renderCard(s,idx){
       </div>
     </div>
     ${s.investor.daily&&s.investor.daily.length>=2?`<div class="irow" style="display:block">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span class="irow-l">최근 ${s.investor.days||5}일 외국인${s.investor.date?` <span style="color:#8090b0;font-size:10px">(~${s.investor.date})</span>`:""}</span>
-        <span class="irow-v" style="color:${s.investor.foreign5>0?"#00e5a0":s.investor.foreign5<0?"#ff4060":"#8090b0"};font-size:11px">누적 ${s.investor.foreign5>0?"+":""}${(s.investor.foreign5||0).toLocaleString()}주</span>
       </div>
-      ${renderFlowBars(s.investor.daily)}
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
-        <span class="irow-n" style="font-size:9px">과거 → 최근</span>
-        <span class="irow-n" style="color:${(s.investor.flowLabel||'').includes('매수')?'#00e5a0':(s.investor.flowLabel||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:700">${s.investor.flowLabel||""}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:42%">${renderFlowBars(s.investor.daily)}
+          <div style="text-align:center;font-size:8px;color:#667;margin-top:1px">과거 → 최근</div>
+        </div>
+        <div style="flex:1;border-left:1px solid rgba(255,255,255,.08);padding-left:10px">
+          <div style="color:${(s.investor.flowLabel||'').includes('매수')?'#00e5a0':(s.investor.flowLabel||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:800;font-size:12px">${s.investor.flowLabel||"—"}</div>
+          <div style="font-size:10px;color:#8090b0;margin-top:2px">누적 <span style="color:${s.investor.foreign5>0?"#00e5a0":s.investor.foreign5<0?"#ff4060":"#8090b0"}">${s.investor.foreign5>0?"+":""}${(s.investor.foreign5||0).toLocaleString()}주</span></div>
+          ${s.investor.holdRatio?`<div style="font-size:10px;color:#8090b0">외인보유 ${s.investor.holdRatio}</div>`:""}
+        </div>
       </div>
     </div>`:""}
     <div class="irow">
