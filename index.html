@@ -165,6 +165,9 @@ body::before{
 .mb-label{font-size:12px;font-weight:800}
 .mb-parts{font-size:11.5px;color:#c8d4e4;font-family:'JetBrains Mono',monospace;line-height:1.7}
 .mb-advice{font-size:11.5px;color:#d8e0ec;line-height:1.55;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-weight:600}
+.flow-bars{display:flex;align-items:flex-end;gap:3px;height:34px;padding:4px 0}
+.flow-bar{flex:1;min-width:6px;border-radius:2px;position:relative;display:flex;align-items:center;justify-content:center}
+.flow-mid{height:1px;background:rgba(255,255,255,.12);margin:2px 0}
 .summary{
   background:var(--bg2);
   border:1px solid var(--border);
@@ -537,6 +540,20 @@ function B(items,color){
 }
 
 /* ── SUMMARY TABLE ── */
+function renderFlowBars(daily){
+  if(!daily||!daily.length) return "";
+  var mx=Math.max.apply(null,daily.map(function(v){return Math.abs(v)}))||1;
+  var bars=daily.map(function(v){
+    var h=Math.max(8,Math.round(Math.abs(v)/mx*30)); // 8~30px
+    var col=v>0?"#00e5a0":v<0?"#ff4060":"#566";
+    var up=v>=0;
+    return "<div style='flex:1;display:flex;flex-direction:column;justify-content:"+(up?"flex-end":"flex-start")+";height:34px'>"
+      +"<div style='height:"+h+"px;background:"+col+";border-radius:2px;opacity:.85'></div>"
+      +"</div>";
+  }).join("");
+  return "<div class='flow-bars'>"+bars+"</div>";
+}
+
 function renderMarketBanner(m){
   if(!m||!m.summary) return "";
   var sm=m.summary;
@@ -932,6 +949,17 @@ function renderCard(s,idx){
         <div class="irow-n">${s.investor.foreignTrend||""}</div>
       </div>
     </div>
+    ${s.investor.daily&&s.investor.daily.length>=2?`<div class="irow" style="display:block">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span class="irow-l">최근 ${s.investor.days||5}일 외국인</span>
+        <span class="irow-v" style="color:${s.investor.foreign5>0?"#00e5a0":s.investor.foreign5<0?"#ff4060":"#8090b0"};font-size:11px">누적 ${s.investor.foreign5>0?"+":""}${(s.investor.foreign5||0).toLocaleString()}주</span>
+      </div>
+      ${renderFlowBars(s.investor.daily)}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+        <span class="irow-n" style="font-size:9px">과거 → 최근</span>
+        <span class="irow-n" style="color:${(s.investor.flowLabel||'').includes('매수')?'#00e5a0':(s.investor.flowLabel||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:700">${s.investor.flowLabel||""}</span>
+      </div>
+    </div>`:""}
     <div class="irow">
       <span class="irow-l">기관</span>
       <div class="irow-r">
