@@ -341,6 +341,24 @@ def fetch_naver_investor(code):
         inst    = round(to_n(latest.get("organPureBuyQuant")))
         indiv   = round(to_n(latest.get("individualPureBuyQuant")))
         hold    = latest.get("foreignerHoldRatio", "")
+        # 최근 5일 누적 순매수 (추세 파악 — 하루치 노이즈 보정)
+        n = min(5, len(trends))
+        foreign5 = round(sum(to_n(t.get("foreignerPureBuyQuant")) for t in trends[:n]))
+        inst5    = round(sum(to_n(t.get("organPureBuyQuant"))      for t in trends[:n]))
+        # 일별 외국인 순매수 (과거→최근 순서로, 미니 막대그래프용)
+        daily = [round(to_n(t.get("foreignerPureBuyQuant"))) for t in trends[:n]][::-1]
+        # 흐름 해석: 최근 절반 vs 이전 절반 비교
+        flow_label = ""
+        if len(daily) >= 4:
+            half = len(daily) // 2
+            early = sum(daily[:half])      # 이전
+            late  = sum(daily[half:])      # 최근
+            if   late > 0 and early <= 0: flow_label = "최근 매수 전환"
+            elif late < 0 and early >= 0: flow_label = "최근 매도 전환"
+            elif late > 0 and early > 0:  flow_label = "꾸준히 매수"
+            elif late < 0 and early < 0:  flow_label = "꾸준히 매도"
+            elif late > early:            flow_label = "매수세 강화"
+            elif late < early:            flow_label = "매수세 약화"
         # 외국인 연속 순매수(+)/순매도(-) 일수
         streak = 0
         for t in trends:
@@ -363,8 +381,10 @@ def fetch_naver_investor(code):
         datestr = f"{bd[4:6]}/{bd[6:8]}" if len(bd) == 8 else "전일"
         comment = (f"외국인 {'+' if foreign>=0 else ''}{foreign:,}주 · "
                    f"기관 {'+' if inst>=0 else ''}{inst:,}주 ({datestr} 기준)")
-        print(f"  ✅ 네이버 수급 ({code}): {trend} (외국인 {foreign:+,}주)", file=sys.stderr)
+        print(f"  ✅ 네이버 수급 ({code}): {trend} (당일 {foreign:+,} / 5일누적 {foreign5:+,})", file=sys.stderr)
         return {"foreign": foreign, "institution": inst, "individual": indiv,
+                "foreign5": foreign5, "inst5": inst5, "days": n,
+                "daily": daily, "flowLabel": flow_label,
                 "foreignTrend": trend, "comment": comment,
                 "holdRatio": hold, "streak": streak, "date": datestr}
     except Exception as e:
