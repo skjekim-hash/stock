@@ -454,7 +454,6 @@ body::before{
     </div>
     <div class="hdr-btns">
       <button class="btn-main" id="mainBtn" onclick="loadData()">
-        <span id="btnIcon">✦</span>
         <span id="btnText">분석 보기</span>
       </button>
       <button class="btn-jrnl" onclick="openJournal()">📝 기록</button>
@@ -1180,8 +1179,6 @@ async function loadData(){
   loading=true;
   const btn=document.getElementById("mainBtn");
   btn.disabled=true;
-  document.getElementById("btnIcon").className="spin";
-  document.getElementById("btnIcon").textContent="↻";
   document.getElementById("btnText").textContent="불러오는 중...";
   document.getElementById("mktBadge").textContent=kst().status;
   document.getElementById("progWrap").style.display="";
@@ -1225,8 +1222,6 @@ async function loadData(){
   }finally{
     loading=false;
     btn.disabled=false;
-    document.getElementById("btnIcon").className="";
-    document.getElementById("btnIcon").textContent="✦";
     document.getElementById("btnText").textContent=
       document.getElementById("results").style.display!=="none"?"갱신":"분석 보기";
     document.getElementById("progWrap").style.display="none";
