@@ -327,6 +327,51 @@ def fetch_market_signal():
 
 
 # ─── 적정주가 ──────────────────────────────────────────────────────────────
+def fetch_naver_investor(code):
+    """네이버 integration의 dealTrendInfos에서 외국인·기관·개인 수급 파싱
+    - 최근 거래일 순매수량(주) + 외국인 연속 순매수/순매도 추세
+    ※ 장중 실시간이 아닌 '전일 마감' 기준"""
+    try:
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/integration", timeout=8)
+        trends = d.get("dealTrendInfos") or []
+        if not trends:
+            return None
+        latest  = trends[0]
+        foreign = round(to_n(latest.get("foreignerPureBuyQuant")))
+        inst    = round(to_n(latest.get("organPureBuyQuant")))
+        indiv   = round(to_n(latest.get("individualPureBuyQuant")))
+        hold    = latest.get("foreignerHoldRatio", "")
+        # 외국인 연속 순매수(+)/순매도(-) 일수
+        streak = 0
+        for t in trends:
+            v = to_n(t.get("foreignerPureBuyQuant"))
+            sign = 1 if v > 0 else -1 if v < 0 else 0
+            if sign == 0:
+                break
+            if streak == 0 or (streak > 0) == (sign > 0):
+                streak += sign
+            else:
+                break
+        days = abs(streak)
+        if foreign > 0:
+            trend = f"외국인 {days}일 연속 순매수" if days >= 2 else "외국인 순매수"
+        elif foreign < 0:
+            trend = f"외국인 {days}일 연속 순매도" if days >= 2 else "외국인 순매도"
+        else:
+            trend = "중립"
+        bd = latest.get("bizdate", "")
+        datestr = f"{bd[4:6]}/{bd[6:8]}" if len(bd) == 8 else "전일"
+        comment = (f"외국인 {'+' if foreign>=0 else ''}{foreign:,}주 · "
+                   f"기관 {'+' if inst>=0 else ''}{inst:,}주 ({datestr} 기준)")
+        print(f"  ✅ 네이버 수급 ({code}): {trend} (외국인 {foreign:+,}주)", file=sys.stderr)
+        return {"foreign": foreign, "institution": inst, "individual": indiv,
+                "foreignTrend": trend, "comment": comment,
+                "holdRatio": hold, "streak": streak, "date": datestr}
+    except Exception as e:
+        print(f"  네이버 수급 실패 ({code}): {e}", file=sys.stderr)
+        return None
+
+
 def fetch_naver_financial(code):
     """네이버 integration API에서 재무지표 + 컨센서스 목표주가 수집
     반환 dict: eps, bps, per, pbr, cns_per(추정PER), cns_eps(추정EPS),
@@ -1025,8 +1070,8 @@ def analyze_stock(stock, kospi, market=None):
             naver = fetch_kis_price(code)
 
     kis_inv  = fetch_kis_investor(code) if is_real_kis else None
-    investor = kis_inv or {"foreign": 0, "institution": 0, "individual": 0,
-                           "foreignTrend": "중립", "comment": "수급은 네이버·증권사 앱에서 직접 확인"}
+    investor = kis_inv or fetch_naver_investor(code) or {"foreign": 0, "institution": 0, "individual": 0,
+                           "foreignTrend": "중립", "comment": "수급 데이터 없음"}
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {"ratio": 0, "volume": 0, "comment": "없음"}
     news = []
