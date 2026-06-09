@@ -995,7 +995,15 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
-    return opinion, score
+    # 중립의 결: 점수가 어느 쪽으로 기울었는지 (매수문턱 6 / 매도문턱 -5)
+    nuance = ""
+    if opinion == "중립":
+        if   score >= 4:  nuance = "매수 우위 (문턱 근접)"
+        elif score >= 1:  nuance = "약한 매수 우위"
+        elif score == 0:  nuance = "완전 중립 (관망)"
+        elif score >= -2: nuance = "약한 매도 우위"
+        else:             nuance = "매도 우위 (문턱 근접)"
+    return opinion, score, nuance
 
 def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
                           psar, investor, cci, price, pivot):
@@ -1160,7 +1168,7 @@ def analyze_stock(stock, kospi, market=None):
 
     ft = investor.get("foreignTrend", "중립") if investor else "중립"
     contra = contra_signal(rsi, macd, macd_sig, obv, pats, fg["score"], investor)
-    opinion, score = master_signal(
+    opinion, score, nuance = master_signal(
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
@@ -1174,6 +1182,7 @@ def analyze_stock(stock, kospi, market=None):
             if score < 6:
                 opinion = "중립"
                 market_brake = "시장 비우호적 — 매수 신호 보류"
+                nuance = "매수 우위 (문턱 근접)" if score >= 4 else "약한 매수 우위"
             else:
                 market_brake = "시장 비우호적 — 신중 진입 권장"
     cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
@@ -1217,6 +1226,7 @@ def analyze_stock(stock, kospi, market=None):
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        "nuance": nuance,
         "marketBrake": market_brake,
         "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
