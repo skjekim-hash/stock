@@ -1017,6 +1017,22 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         neg_count = len([n for n in news_list if n["sentiment"] == "부정"])
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
+    # ── 수급 가중치 (임시) ─────────────────────────────
+    # 외국인 추세를 약하게 반영. 사용자 성향(손실 회피)에 맞춰 '매도(이탈)'를 살짝 더 무겁게.
+    # 중장기(20일)=안정적 기본, 단기(5일)=민감, 외국인매도+개인매수=약세 조합.
+    if investor:
+        f5  = investor.get("foreign5", 0)
+        f20 = investor.get("foreign20", 0)
+        indiv_today = investor.get("individual", 0)
+        if f20 > 0:   score += 1
+        elif f20 < 0: score -= 1
+        if f5 > 0:    score += 1
+        elif f5 < 0:  score -= 1.5          # 단기 이탈에 더 민감
+        # 외국인 이탈 + 개인 순매수 = 전형적 약세 신호 → 추가 감점
+        if f5 < 0 and indiv_today > 0:
+            score -= 1
+    score = round(score)
+    # ──────────────────────────────────────────────────
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
     # 중립의 결: 점수가 어느 쪽으로 기울었는지 (매수문턱 6 / 매도문턱 -5)
     nuance = ""
