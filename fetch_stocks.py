@@ -1184,6 +1184,23 @@ def analyze_stock(stock, kospi, market=None):
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
                                   weekly, investor, short, vol_surge, breakout)
 
+    # 신호 × 외국인 수급(5일 흐름) 조합 해설 — 해석 + 제안 한 줄씩
+    flow_read = ""
+    f5 = investor.get("foreign5", 0) if investor else 0
+    fdir = "매수" if f5 > 0 else "매도" if f5 < 0 else "중립"
+    if opinion == "매수" and fdir == "매수":
+        flow_read = "신호·외국인 수급 모두 매수 우위로 방향이 일치해요. │ 신뢰도 높은 편, 지지구간 분할매수로 접근."
+    elif opinion == "매수" and fdir == "매도":
+        flow_read = "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로."
+    elif opinion == "매도" and fdir == "매수":
+        flow_read = "단기 지표는 과열·조정 신호지만 외국인은 매집 중이에요. │ 큰 흐름은 살아있으니, 추격 대신 조정 시 지지구간에서 노려볼 만."
+    elif opinion == "매도" and fdir == "매도":
+        flow_read = "신호·외국인 수급 모두 약세예요. │ 진입은 자제하고 관망이 안전."
+    elif fdir == "매수":
+        flow_read = "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근."
+    elif fdir == "매도":
+        flow_read = "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응."
+
     def cmt_rsi(v):
         if v is None: return "데이터 부족"
         return ("강한 과매도" if v < 30 else "저점권" if v < 45 else
@@ -1201,6 +1218,7 @@ def analyze_stock(stock, kospi, market=None):
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
         "marketBrake": market_brake,
+        "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
         "fairValue": fair.get("fair_value", 0),
         "fairValueGap": fair.get("gap", 0),
