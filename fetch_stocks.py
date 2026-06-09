@@ -328,31 +328,53 @@ def fetch_market_signal():
 
 # ─── 적정주가 ──────────────────────────────────────────────────────────────
 def fetch_naver_investor(code):
-    """네이버 integration의 dealTrendInfos에서 외국인·기관·개인 수급 파싱
-    - 최근 거래일 순매수량(주) + 외국인 연속 순매수/순매도 추세
+    """네이버 /trend API에서 외국인·기관·개인 수급 파싱
+    - 당일 / 5일 / 20일 / 60일 누적 순매수 (단기~중장기 추세)
+    - 외국인 연속 순매수/순매도 일수 + 5일 일별 흐름
     ※ 장중 실시간이 아닌 '전일 마감' 기준"""
     try:
-        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/integration", timeout=8)
-        trends = d.get("dealTrendInfos") or []
-        if not trends:
+        # page=1 + page=2 합쳐 60일 이상 확보 (페이지당 ~60건이지만 안전하게 2페이지)
+        rows = []
+        seen = set()
+        for pg in (1, 2):
+            try:
+                d = http_json(f"https://m.stock.naver.com/api/stock/{code}/trend?page={pg}", timeout=8)
+                if isinstance(d, list):
+                    for r in d:
+                        bd = r.get("bizdate", "")
+                        if bd and bd not in seen:
+                            seen.add(bd)
+                            rows.append(r)
+            except Exception:
+                break
+        if not rows:
             return None
-        latest  = trends[0]
+        # 최신순 정렬 (bizdate 내림차순)
+        rows.sort(key=lambda r: r.get("bizdate", ""), reverse=True)
+
+        def cum(field, n):
+            return round(sum(to_n(r.get(field)) for r in rows[:n]))
+
+        latest  = rows[0]
         foreign = round(to_n(latest.get("foreignerPureBuyQuant")))
         inst    = round(to_n(latest.get("organPureBuyQuant")))
         indiv   = round(to_n(latest.get("individualPureBuyQuant")))
         hold    = latest.get("foreignerHoldRatio", "")
-        # 최근 5일 누적 순매수 (추세 파악 — 하루치 노이즈 보정)
-        n = min(5, len(trends))
-        foreign5 = round(sum(to_n(t.get("foreignerPureBuyQuant")) for t in trends[:n]))
-        inst5    = round(sum(to_n(t.get("organPureBuyQuant"))      for t in trends[:n]))
-        # 일별 외국인 순매수 (과거→최근 순서로, 미니 막대그래프용)
-        daily = [round(to_n(t.get("foreignerPureBuyQuant"))) for t in trends[:n]][::-1]
-        # 흐름 해석: 최근 절반 vs 이전 절반 비교
+        # 다기간 누적 (외국인)
+        foreign5  = cum("foreignerPureBuyQuant", 5)
+        foreign20 = cum("foreignerPureBuyQuant", 20)
+        foreign60 = cum("foreignerPureBuyQuant", 60)
+        # 다기간 누적 (기관)
+        inst5  = cum("organPureBuyQuant", 5)
+        inst20 = cum("organPureBuyQuant", 20)
+        # 5일 일별 외국인 순매수 (과거→최근, 미니 막대그래프용)
+        n5 = min(5, len(rows))
+        daily = [round(to_n(rows[i].get("foreignerPureBuyQuant"))) for i in range(n5)][::-1]
+        # 흐름 해석: 최근 절반 vs 이전 절반
         flow_label = ""
         if len(daily) >= 4:
             half = len(daily) // 2
-            early = sum(daily[:half])      # 이전
-            late  = sum(daily[half:])      # 최근
+            early, late = sum(daily[:half]), sum(daily[half:])
             if   late > 0 and early <= 0: flow_label = "최근 매수 전환"
             elif late < 0 and early >= 0: flow_label = "최근 매도 전환"
             elif late > 0 and early > 0:  flow_label = "꾸준히 매수"
@@ -361,8 +383,8 @@ def fetch_naver_investor(code):
             elif late < early:            flow_label = "매수세 약화"
         # 외국인 연속 순매수(+)/순매도(-) 일수
         streak = 0
-        for t in trends:
-            v = to_n(t.get("foreignerPureBuyQuant"))
+        for r in rows:
+            v = to_n(r.get("foreignerPureBuyQuant"))
             sign = 1 if v > 0 else -1 if v < 0 else 0
             if sign == 0:
                 break
@@ -381,9 +403,10 @@ def fetch_naver_investor(code):
         datestr = f"{bd[4:6]}/{bd[6:8]}" if len(bd) == 8 else "전일"
         comment = (f"외국인 {'+' if foreign>=0 else ''}{foreign:,}주 · "
                    f"기관 {'+' if inst>=0 else ''}{inst:,}주 ({datestr} 기준)")
-        print(f"  ✅ 네이버 수급 ({code}): {trend} (당일 {foreign:+,} / 5일누적 {foreign5:+,})", file=sys.stderr)
+        print(f"  ✅ 네이버 수급 ({code}): {trend} | 5일 {foreign5:+,} / 20일 {foreign20:+,} / 60일 {foreign60:+,} ({len(rows)}일 확보)", file=sys.stderr)
         return {"foreign": foreign, "institution": inst, "individual": indiv,
-                "foreign5": foreign5, "inst5": inst5, "days": n,
+                "foreign5": foreign5, "foreign20": foreign20, "foreign60": foreign60,
+                "inst5": inst5, "inst20": inst20, "days": n5,
                 "daily": daily, "flowLabel": flow_label,
                 "foreignTrend": trend, "comment": comment,
                 "holdRatio": hold, "streak": streak, "date": datestr}
