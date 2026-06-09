@@ -966,8 +966,7 @@ function renderCard(s,idx){
         <div style="flex:1;border-left:1px solid rgba(255,255,255,.08);padding-left:10px">
           <div style="color:${(s.investor.flowLabel||'').includes('매수')?'#00e5a0':(s.investor.flowLabel||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:800;font-size:12px">${s.investor.flowLabel||"—"}</div>
           <div style="font-size:11px;color:#8090b0;margin-top:3px">5일 <span style="color:${s.investor.foreign5>0?"#00e5a0":s.investor.foreign5<0?"#ff4060":"#8090b0"}">${s.investor.foreign5>0?"+":""}${(s.investor.foreign5||0).toLocaleString()}</span></div>
-          ${s.investor.foreign20!==undefined?`<div style="font-size:11px;color:#8090b0">20일 <span style="color:${s.investor.foreign20>0?"#00e5a0":s.investor.foreign20<0?"#ff4060":"#8090b0"}">${s.investor.foreign20>0?"+":""}${(s.investor.foreign20||0).toLocaleString()}</span></div>`:""}
-          ${s.investor.foreign60!==undefined?`<div style="font-size:11px;color:#8090b0">60일 <span style="color:${s.investor.foreign60>0?"#00e5a0":s.investor.foreign60<0?"#ff4060":"#8090b0"}">${s.investor.foreign60>0?"+":""}${(s.investor.foreign60||0).toLocaleString()}</span></div>`:""}
+          ${s.investor.foreign10!=null?`<div style="font-size:11px;color:#8090b0">10일 <span style="color:${s.investor.foreign10>0?"#00e5a0":s.investor.foreign10<0?"#ff4060":"#8090b0"}">${s.investor.foreign10>0?"+":""}${(s.investor.foreign10||0).toLocaleString()}</span></div>`:""}
         </div>
       </div>
     </div>`:""}
