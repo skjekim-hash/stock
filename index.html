@@ -779,7 +779,10 @@ function renderCard(s,idx){
       <div class="card-hdr-right">
         <div class="card-opinion-pill" style="background:${oc}18;color:${oc};border:1px solid ${oc}35">${oi} ${opLabel}</div>
         ${op==="중립"&&s.nuance?`<div style="font-size:10.5px;color:${s.score>=1?"#00c98a":s.score<=-1?"#ff6680":"#9ab"};text-align:right;margin-top:2px;font-weight:600">${s.nuance}</div>`:""}
-        <div class="card-score-row">
+        ${+s.stopLoss?`<div style="margin-top:4px;text-align:right">
+          <span style="font-size:10px;color:#ff406088">손절</span>
+          <span style="font-size:12px;color:#ff4060;font-weight:800;font-family:'JetBrains Mono',monospace;margin-left:4px">${W(s.stopLoss)}</span>
+        </div>`:""}        <div class="card-score-row">
           <span class="card-score-num">점수 ${s.score>0?"+":""}${s.score}</span>
           ${rs?`<span class="rs-badge" style="background:${rsColor}10;color:${rsColor};border:1px solid ${rsColor}30">${rs.rs>0?"+":""}${rs.rs}%p</span>`:""}
         </div>
