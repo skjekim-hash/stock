@@ -1306,6 +1306,12 @@ function renderJournal(){
     const wins = closed.filter(e=>e.returnPct>0);
     const winRate = Math.round(wins.length/closed.length*100);
     const avgRet = (closed.reduce((s,e)=>s+e.returnPct,0)/closed.length).toFixed(2);
+    // 7일 이상 = 장기보유(비효율) 거래 분리
+    const efficient = closed.filter(e=>!e.heldDays||e.heldDays<7);
+    const longHold  = closed.filter(e=>e.heldDays&&e.heldDays>=7);
+    const effWins = efficient.filter(e=>e.returnPct>0);
+    const effRate = efficient.length?Math.round(effWins.length/efficient.length*100):null;
+    const effAvg  = efficient.length?(efficient.reduce((s,e)=>s+e.returnPct,0)/efficient.length).toFixed(2):null;
     // 보유기간 분석
     const withDays = closed.filter(e=>e.heldDays!==null);
     let holdHtml = "";
@@ -1336,10 +1342,14 @@ function renderJournal(){
     const sigSorted = Object.entries(sig).sort((a,b)=>b[1]-a[1]).slice(0,5);
     statsHtml = `<div style="background:#070c16;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="font-size:12px;font-weight:800;color:#00e5a0;margin-bottom:10px">📊 통계 (청산 ${closed.length}건)</div>
-      <div style="display:flex;gap:16px;margin-bottom:12px">
-        <div><div style="font-size:11.5px;color:#8090b0">승률</div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
+      <div style="display:flex;gap:16px;margin-bottom:6px">
+        <div><div style="font-size:11.5px;color:#8090b0">전체 승률</div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
         <div><div style="font-size:11.5px;color:#8090b0">평균 수익률</div><div style="font-size:18px;font-weight:800;color:${avgRet>0?"#00e5a0":"#ff4060"}">${avgRet>0?"+":""}${avgRet}%</div></div>
       </div>
+      ${efficient.length<closed.length&&effRate!==null?`<div style="font-size:11px;color:#8090b0;margin-bottom:10px;padding:6px 8px;background:#ffc94008;border-radius:8px;border:1px solid #ffc94020">
+        ⚡ 전략 승률(7일↓) <b style="color:${effRate>=60?"#00e5a0":effRate>=40?"#ffc940":"#ff4060"}">${effRate}%</b> · 평균 <b style="color:${effAvg>0?"#00e5a0":"#ff4060"}">${effAvg>0?"+":""}${effAvg}%</b>
+        <span style="color:#ffc940"> · 장기보유 ${longHold.length}건 제외</span>
+      </div>`:""}
       <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">수익 케이스에서 자주 나온 신호</div>
       <div>${sigSorted.map(([k,v])=>`<span style="display:inline-block;background:#00e5a015;color:#00e5a0;border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:11.5px">${k} ${v}회</span>`).join("")||"<span style='color:#4a5878;font-size:11px'>데이터 부족</span>"}</div>
       ${holdHtml}
