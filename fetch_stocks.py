@@ -333,7 +333,7 @@ def fetch_naver_investor(code):
     - 외국인 연속 순매수/순매도 일수 + 5일 일별 흐름
     ※ 장중 실시간이 아닌 '전일 마감' 기준"""
     try:
-        # marketType=ALL&pageSize=60 → KRX 60일치 (단일 호출)
+        # marketType=ALL → KRX+NXT 합산, pageSize=60 → 60일치 (단일 호출)
         rows = []
         seen = set()
         try:
@@ -352,7 +352,6 @@ def fetch_naver_investor(code):
             pass
         if not rows:
             return None
-        # 최신순 정렬
         rows.sort(key=lambda r: r.get("bizdate", ""), reverse=True)
 
         def cum(field, n):
