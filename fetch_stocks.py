@@ -1023,18 +1023,21 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         elif neg_count > pos_count: score -= 1
     # ── 수급 가중치 (임시) ─────────────────────────────
     # 외국인 추세를 약하게 반영. 사용자 성향(손실 회피)에 맞춰 '매도(이탈)'를 살짝 더 무겁게.
-    # 중장기(20일)=안정적 기본, 단기(5일)=민감, 외국인매도+개인매수=약세 조합.
+    # 중장기(20일)=안정적 기본, 단기(5일)=민감, 외국인매도+개인매수=약세 조합(약하게).
+    # 최대 ±2로 제한 (과도한 쏠림 방지)
     if investor:
         f5  = investor.get("foreign5", 0) or 0
         f20 = investor.get("foreign20", 0) or 0
         indiv_today = investor.get("individual", 0)
-        if f20 > 0:   score += 1
-        elif f20 < 0: score -= 1
-        if f5 > 0:    score += 1
-        elif f5 < 0:  score -= 1.5          # 단기 이탈에 더 민감
-        # 외국인 이탈 + 개인 순매수 = 전형적 약세 신호 → 추가 감점
+        supply_adj = 0
+        if f20 > 0:   supply_adj += 1
+        elif f20 < 0: supply_adj -= 1
+        if f5 > 0:    supply_adj += 1
+        elif f5 < 0:  supply_adj -= 1.5
         if f5 < 0 and indiv_today > 0:
-            score -= 1
+            supply_adj -= 0.5              # -1 → -0.5로 완화
+        supply_adj = max(-2, min(2, supply_adj))  # ±2 상한
+        score += supply_adj
     score = round(score)
     # ──────────────────────────────────────────────────
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
