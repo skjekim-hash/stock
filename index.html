@@ -1287,6 +1287,9 @@ function recordEntry(code){
 // 기록 화면 렌더
 function renderJournal(){
   const arr = loadJournal();
+  // 보유중 먼저, 청산은 아래로
+  const active = arr.filter(e=>e.status==="보유");
+  const closed2 = arr.filter(e=>e.status!=="보유");
   const box = document.getElementById("journalBody");
   if(!arr.length){
     box.innerHTML = `<div style="text-align:center;color:#4a5878;padding:40px 0;font-size:13px">아직 기록이 없습니다.<br>종목 카드 하단의 '📝 진입 기록' 버튼을 눌러보세요.</div>`;
@@ -1341,7 +1344,7 @@ function renderJournal(){
     statsHtml = `<div style="text-align:center;color:#8090b0;font-size:11px;padding:8px;margin-bottom:8px">청산 ${closed.length}건 — 통계는 3건부터 표시됩니다</div>`;
   }
 
-  const rows = arr.map(e=>{
+  function makeRow(e){
     const held = e.status==="보유";
     const retColor = e.returnPct===null?"#8090b0":e.returnPct>0?"#00e5a0":"#ff4060";
     return `<div style="background:#0a1020;border:1px solid ${held?'#1a2540':retColor+'40'};border-radius:11px;padding:12px;margin-bottom:10px">
@@ -1360,9 +1363,19 @@ function renderJournal(){
         <button onclick="deleteTrade(${e.id})" style="background:#ff406015;color:#ff4060;border:1px solid #ff406030;border-radius:8px;padding:7px 12px;font-size:11px">삭제</button>
       </div>
     </div>`;
-  }).join("");
+  }
 
-  box.innerHTML = statsHtml + rows;
+  const activeRows = active.map(makeRow).join("");
+  const closedRows = closed2.length ? `
+    <div style="margin-top:14px">
+      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▶')?'▼ 청산 기록 접기':'▶ 청산 기록 보기 (${closed2.length}건)'"
+        style="width:100%;background:#070c16;border:1px solid #1a2540;border-radius:10px;padding:10px;font-size:12px;color:#8090b0;cursor:pointer;text-align:left;font-weight:700">
+        ▶ 청산 기록 보기 (${closed2.length}건)
+      </button>
+      <div style="display:none">${closed2.map(makeRow).join("")}</div>
+    </div>` : "";
+
+  box.innerHTML = statsHtml + activeRows + closedRows;
 }
 
 function closeTradePrompt(id){
