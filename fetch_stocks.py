@@ -333,11 +333,15 @@ def fetch_naver_investor(code):
     - 외국인 연속 순매수/순매도 일수 + 5일 일별 흐름
     ※ 장중 실시간이 아닌 '전일 마감' 기준"""
     try:
-        # /trend는 page 무관하게 최근 10일만 제공 → 한 번만 호출
+        # marketType=ALL&pageSize=60 → KRX 60일치 (단일 호출)
         rows = []
         seen = set()
         try:
-            d = http_json(f"https://m.stock.naver.com/api/stock/{code}/trend", timeout=8)
+            d = http_json(
+                f"https://m.stock.naver.com/api/stock/{code}/trend"
+                f"?code={code}&marketType=ALL&pageSize=60",
+                timeout=10
+            )
             if isinstance(d, list):
                 for r in d:
                     bd = r.get("bizdate", "")
@@ -348,7 +352,7 @@ def fetch_naver_investor(code):
             pass
         if not rows:
             return None
-        # 최신순 정렬 (bizdate 내림차순)
+        # 최신순 정렬
         rows.sort(key=lambda r: r.get("bizdate", ""), reverse=True)
 
         def cum(field, n):
@@ -359,13 +363,12 @@ def fetch_naver_investor(code):
         inst    = round(to_n(latest.get("organPureBuyQuant")))
         indiv   = round(to_n(latest.get("individualPureBuyQuant")))
         hold    = latest.get("foreignerHoldRatio", "")
-        ndays   = len(rows)  # 실제 확보한 거래일 수 (보통 10일)
-        # 다기간 누적 (외국인) — 5일 / 10일
+        ndays   = len(rows)
         foreign5  = cum("foreignerPureBuyQuant", 5)
-        foreign10 = cum("foreignerPureBuyQuant", 10) if ndays >= 8 else None
-        # 다기간 누적 (기관)
+        foreign20 = cum("foreignerPureBuyQuant", 20) if ndays >= 15 else None
+        foreign60 = cum("foreignerPureBuyQuant", 60) if ndays >= 45 else None
         inst5  = cum("organPureBuyQuant", 5)
-        inst10 = cum("organPureBuyQuant", 10) if ndays >= 8 else None
+        inst20 = cum("organPureBuyQuant", 20) if ndays >= 15 else None
         # 5일 일별 외국인 순매수 (과거→최근, 미니 막대그래프용)
         n5 = min(5, len(rows))
         daily = [round(to_n(rows[i].get("foreignerPureBuyQuant"))) for i in range(n5)][::-1]
@@ -402,11 +405,12 @@ def fetch_naver_investor(code):
         datestr = f"{bd[4:6]}/{bd[6:8]}" if len(bd) == 8 else "전일"
         comment = (f"외국인 {'+' if foreign>=0 else ''}{foreign:,}주 · "
                    f"기관 {'+' if inst>=0 else ''}{inst:,}주 ({datestr} 기준)")
-        f10s = f"{foreign10:+,}" if foreign10 is not None else "N/A"
-        print(f"  ✅ 네이버 수급 ({code}): {trend} | 5일 {foreign5:+,} / 10일 {f10s} ({ndays}일 확보)", file=sys.stderr)
+        f20s = f"{foreign20:+,}" if foreign20 is not None else "N/A"
+        f60s = f"{foreign60:+,}" if foreign60 is not None else "N/A"
+        print(f"  ✅ 네이버 수급 ({code}): {trend} | 5일 {foreign5:+,} / 20일 {f20s} / 60일 {f60s} ({ndays}일 확보)", file=sys.stderr)
         return {"foreign": foreign, "institution": inst, "individual": indiv,
-                "foreign5": foreign5, "foreign10": foreign10,
-                "inst5": inst5, "inst10": inst10, "days": n5, "ndays": ndays,
+                "foreign5": foreign5, "foreign20": foreign20, "foreign60": foreign60,
+                "inst5": inst5, "inst20": inst20, "days": n5, "ndays": ndays,
                 "daily": daily, "flowLabel": flow_label,
                 "foreignTrend": trend, "comment": comment,
                 "holdRatio": hold, "streak": streak, "date": datestr}
@@ -1022,10 +1026,10 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     # 중장기(20일)=안정적 기본, 단기(5일)=민감, 외국인매도+개인매수=약세 조합.
     if investor:
         f5  = investor.get("foreign5", 0) or 0
-        f10 = investor.get("foreign10", 0) or 0
+        f20 = investor.get("foreign20", 0) or 0
         indiv_today = investor.get("individual", 0)
-        if f10 > 0:   score += 1
-        elif f10 < 0: score -= 1
+        if f20 > 0:   score += 1
+        elif f20 < 0: score -= 1
         if f5 > 0:    score += 1
         elif f5 < 0:  score -= 1.5          # 단기 이탈에 더 민감
         # 외국인 이탈 + 개인 순매수 = 전형적 약세 신호 → 추가 감점
