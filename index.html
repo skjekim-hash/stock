@@ -1250,11 +1250,8 @@ async function loadData(){
           <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
         </button>`;
       }).join("");
-      // results 상단 여백 (헤더 + 탭바 높이)
-      setTimeout(function(){
-        var tbH=tabBar.offsetHeight;
-        document.getElementById("results").style.paddingTop=tbH+"px";
-      },100);
+      // results 상단 여백 - 탭바 높이 고정값으로 바로 적용 (타이밍 이슈 방지)
+      document.getElementById("results").style.paddingTop="44px";
     }
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
