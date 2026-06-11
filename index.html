@@ -470,6 +470,8 @@ body::before{
   </div>
 </div>
 
+<div id="stockTabBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#070c18;padding:6px 8px;border-bottom:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
+
 <div class="main" id="main">
   <div class="start" id="startScreen">
     <div class="start-icon">📊</div>
@@ -533,6 +535,8 @@ function hideAll(){
   ["startScreen","loadingScreen","errBox","results","footer"]
     .forEach(id=>document.getElementById(id).style.display="none");
   document.getElementById("progWrap").style.display="none";
+  var tb=document.getElementById("stockTabBar");
+  if(tb) tb.style.display="none";
 }
 
 function B(items,color){
@@ -1215,23 +1219,27 @@ async function loadData(){
     window.__stocks = data.stocks;
     document.getElementById("results").innerHTML=
       renderMarketBanner(data.market)+
-      `<div id="stockTabBar" style="position:sticky;top:0;z-index:100;background:#070c18;padding:8px 4px 6px;border-bottom:1px solid #1a2540;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>`+
       renderSummaryTable(data.stocks)+
       data.stocks.map((s,i)=>`<div id="card-${s.code}">`+renderCard(s,i)+`</div>`).join("");
     document.getElementById("results").style.display="";
-    // 종목 탭 바 채우기
+    // 종목 탭 바 채우기 (fixed, 항상 최상단 고정)
     var tabBar=document.getElementById("stockTabBar");
-    if(tabBar) tabBar.innerHTML=data.stocks.map(function(s){
-      var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
-      var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
-      var up=(+s.change||0)>=0; var cc=up?"#00e5a0":"#ff4060";
-      return `<button onclick="document.getElementById('card-${s.code}').scrollIntoView({behavior:'smooth',block:'start'})"
-        style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
-        <span style="font-size:12px">${st.emoji}</span>
-        <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
-        <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
-      </button>`;
-    }).join("");
+    if(tabBar){
+      tabBar.style.display="flex";
+      tabBar.innerHTML=data.stocks.map(function(s){
+        var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
+        var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
+        var up=(+s.change||0)>=0; var cc=up?"#00e5a0":"#ff4060";
+        return `<button onclick="(function(){var el=document.getElementById('card-${s.code}');if(!el)return;var tb=document.getElementById('stockTabBar');var tbH=tb?tb.offsetHeight:0;var y=el.getBoundingClientRect().top+window.scrollY-tbH-6;window.scrollTo({top:y,behavior:'smooth'});})()"
+          style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
+          <span style="font-size:12px">${st.emoji}</span>
+          <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
+          <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
+        </button>`;
+      }).join("");
+      // 탭 바 높이만큼 results 상단 여백
+      document.getElementById("results").style.paddingTop=(tabBar.offsetHeight+8)+"px";
+    }
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
     document.getElementById("updBadge").style.display="";
