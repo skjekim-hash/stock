@@ -468,9 +468,8 @@ body::before{
   <div class="prog" id="progWrap">
     <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
+  <div id="stockTabBar" style="display:none;padding:4px 8px 4px;border-top:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 </div>
-
-<div id="stockTabBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#070c18;padding:4px 8px;border-bottom:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 
 <div class="main" id="main">
   <div class="start" id="startScreen">
@@ -662,8 +661,7 @@ function renderSummaryTable(stocks){
           var el=document.getElementById("card-"+id);
           if(el){
             var hdrH=(document.querySelector(".hdr")||{}).offsetHeight||80;
-            var tbH=(document.getElementById("stockTabBar")||{}).offsetHeight||0;
-            var top=el.getBoundingClientRect().top+window.pageYOffset-hdrH-tbH-6;
+            var top=el.getBoundingClientRect().top+window.pageYOffset-hdrH-6;
             window.scrollTo({top:top,behavior:"smooth"});
           }
         };
@@ -1227,10 +1225,6 @@ async function loadData(){
     var tabBar=document.getElementById("stockTabBar");
     if(tabBar){
       tabBar.style.display="flex";
-      // 헤더 높이 계산해서 탭 바 top 설정
-      var hdr=document.querySelector(".hdr");
-      var hdrH=hdr?hdr.offsetHeight:60;
-      tabBar.style.top=hdrH+"px";
       tabBar.innerHTML=data.stocks.map(function(s){
         var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
         var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
@@ -1238,10 +1232,8 @@ async function loadData(){
         return `<button onclick="(function(){
           var el=document.getElementById('card-${s.code}');if(!el)return;
           var hdr=document.querySelector('.hdr');
-          var tb=document.getElementById('stockTabBar');
           var hdrH=(hdr?hdr.offsetHeight:60);
-          var tbH=(tb?tb.offsetHeight:40);
-          var y=el.getBoundingClientRect().top+window.scrollY-hdrH-tbH-6;
+          var y=el.getBoundingClientRect().top+window.scrollY-hdrH-6;
           window.scrollTo({top:y,behavior:'smooth'});
         })()"
           style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
@@ -1250,8 +1242,6 @@ async function loadData(){
           <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
         </button>`;
       }).join("");
-      // results 상단 여백 - 탭바 높이 고정값으로 바로 적용 (타이밍 이슈 방지)
-      document.getElementById("results").style.paddingTop="44px";
     }
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
