@@ -662,7 +662,8 @@ function renderSummaryTable(stocks){
           var el=document.getElementById("card-"+id);
           if(el){
             var hdrH=(document.querySelector(".hdr")||{}).offsetHeight||80;
-            var top=el.getBoundingClientRect().top+window.pageYOffset-hdrH-6;
+            var tbH=(document.getElementById("stockTabBar")||{}).offsetHeight||0;
+            var top=el.getBoundingClientRect().top+window.pageYOffset-hdrH-tbH-6;
             window.scrollTo({top:top,behavior:"smooth"});
           }
         };
@@ -1222,23 +1223,38 @@ async function loadData(){
       renderSummaryTable(data.stocks)+
       data.stocks.map((s,i)=>`<div id="card-${s.code}">`+renderCard(s,i)+`</div>`).join("");
     document.getElementById("results").style.display="";
-    // 종목 탭 바 채우기 (fixed, 항상 최상단 고정)
+    // 종목 탭 바 - 헤더 바로 아래 fixed
     var tabBar=document.getElementById("stockTabBar");
     if(tabBar){
       tabBar.style.display="flex";
+      // 헤더 높이 계산해서 탭 바 top 설정
+      var hdr=document.querySelector(".hdr");
+      var hdrH=hdr?hdr.offsetHeight:60;
+      tabBar.style.top=hdrH+"px";
       tabBar.innerHTML=data.stocks.map(function(s){
         var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
         var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
         var up=(+s.change||0)>=0; var cc=up?"#00e5a0":"#ff4060";
-        return `<button onclick="(function(){var el=document.getElementById('card-${s.code}');if(!el)return;var tb=document.getElementById('stockTabBar');var tbH=tb?tb.offsetHeight:0;var y=el.getBoundingClientRect().top+window.scrollY-tbH-6;window.scrollTo({top:y,behavior:'smooth'});})()"
+        return `<button onclick="(function(){
+          var el=document.getElementById('card-${s.code}');if(!el)return;
+          var hdr=document.querySelector('.hdr');
+          var tb=document.getElementById('stockTabBar');
+          var hdrH=(hdr?hdr.offsetHeight:60);
+          var tbH=(tb?tb.offsetHeight:40);
+          var y=el.getBoundingClientRect().top+window.scrollY-hdrH-tbH-6;
+          window.scrollTo({top:y,behavior:'smooth'});
+        })()"
           style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
           <span style="font-size:12px">${st.emoji}</span>
           <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
           <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
         </button>`;
       }).join("");
-      // 탭 바 높이만큼 results 상단 여백
-      document.getElementById("results").style.paddingTop=(tabBar.offsetHeight+8)+"px";
+      // results 상단 여백 (헤더 + 탭바 높이)
+      setTimeout(function(){
+        var tbH=tabBar.offsetHeight;
+        document.getElementById("results").style.paddingTop=(hdrH+tbH+4)+"px";
+      },100);
     }
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
