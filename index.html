@@ -1253,7 +1253,7 @@ async function loadData(){
       // results 상단 여백 (헤더 + 탭바 높이)
       setTimeout(function(){
         var tbH=tabBar.offsetHeight;
-        document.getElementById("results").style.paddingTop=(hdrH+tbH+4)+"px";
+        document.getElementById("results").style.paddingTop=tbH+"px";
       },100);
     }
     document.getElementById("footer").style.display="";
