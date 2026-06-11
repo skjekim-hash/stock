@@ -1276,11 +1276,33 @@ async function loadData(){
 
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 90*1000);
 document.getElementById("mktBadge").textContent=kst().status;
-// 적립금 배지 초기화
+// 적립금 배지 초기화 - 항상 표시
+// 기존 청산 기록이 있는데 적립금이 초기화 안 됐으면 자동 소급 계산
 setTimeout(function(){
   var r=loadReserve();
+  if(r.amount===undefined){
+    var arr=loadJournal();
+    var closed=arr.filter(function(e){return e.status==="청산"&&e.exitPrice&&e.entryPrice;});
+    if(closed.length>0){
+      var reserve={amount:0,log:[]};
+      closed.forEach(function(e){
+        var sh=e.shares||1;
+        var pnl=(e.exitPrice-e.entryPrice)*sh;
+        if(pnl>0){
+          reserve.amount+=Math.round(pnl*0.1);
+          reserve.log.push({date:e.exitAt||"",type:"적립",amount:Math.round(pnl*0.1),note:e.name+" "+sh+"주"});
+        } else if(pnl<0){
+          reserve.amount+=pnl;
+          reserve.log.push({date:e.exitAt||"",type:"손절",amount:Math.round(pnl),note:e.name+" "+sh+"주"});
+        }
+      });
+      saveReserve(reserve);
+    } else {
+      saveReserve({amount:0,log:[]});
+    }
+  }
   var el=document.getElementById("reserveBadge");
-  if(el&&r.amount!==undefined){ el.style.display=""; updateReserveBadge(); }
+  if(el){ el.style.display=""; updateReserveBadge(); }
 },100);
 
 /* ───────── 매매 기록 (localStorage 기반) ───────── */
@@ -1298,8 +1320,8 @@ function updateReserveBadge(){
   var amt=r.amount||0;
   var el=document.getElementById("reserveBadge");
   if(!el) return;
-  el.textContent="💰 "+(amt>=0?"+":"")+Math.round(amt).toLocaleString()+"원";
-  el.style.color=amt>=0?"#00e5a0":"#ff4060";
+  el.textContent="💰 "+(amt>0?"+":"")+Math.round(amt).toLocaleString()+"원";
+  el.style.color=amt>0?"#00e5a0":amt<0?"#ff4060":"#8090b0";
 }
 
 function loadJournal(){
@@ -1515,6 +1537,27 @@ function closeTradePrompt(id){
     e.status = "보유"; // 아직 보유중
   }
   saveJournal(arr);
+  renderJournal();
+}
+
+function recalcReserve(){
+  if(!confirm("전체 청산 기록 기준으로 적립금을 재계산할까요?\n기존 적립금은 초기화됩니다.")) return;
+  const arr = loadJournal();
+  const closed = arr.filter(e=>e.status==="청산"&&e.exitPrice&&e.entryPrice);
+  const reserve = {amount:0, log:[]};
+  closed.forEach(function(e){
+    const sh = e.shares||1;
+    const pnl = (e.exitPrice - e.entryPrice) * sh;
+    if(pnl > 0){
+      reserve.amount += Math.round(pnl * 0.1);
+      reserve.log.push({date:e.exitAt||"", type:"적립", amount:Math.round(pnl*0.1), note:`${e.name} ${sh}주`});
+    } else if(pnl < 0){
+      reserve.amount += pnl;
+      reserve.log.push({date:e.exitAt||"", type:"손절", amount:Math.round(pnl), note:`${e.name} ${sh}주`});
+    }
+  });
+  saveReserve(reserve);
+  alert(`재계산 완료!\n청산 ${closed.length}건 반영\n적립금: ${Math.round(reserve.amount).toLocaleString()}원`);
   renderJournal();
 }
 
