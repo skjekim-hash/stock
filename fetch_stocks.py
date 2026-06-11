@@ -29,6 +29,8 @@ STOCKS = [
     {"code": "009150", "yf": "009150.KS", "name": "삼성전기",   "emoji": "🟠"},
     {"code": "005380", "yf": "005380.KS", "name": "현대자동차", "emoji": "🟢"},
     {"code": "105560", "yf": "105560.KS", "name": "KB금융",     "emoji": "🟣"},
+    {"code": "017670", "yf": "017670.KS", "name": "SK텔레콤",   "emoji": "🩵"},
+    {"code": "035420", "yf": "035420.KS", "name": "NAVER",      "emoji": "🟤"},
 ]
 KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
@@ -501,6 +503,8 @@ def calc_fair_value(code, price, fin):
         "009150": {"per": 18, "pbr": 1.8, "name": "전자부품"},
         "005380": {"per": 10, "pbr": 0.8, "name": "자동차"},
         "105560": {"per": 9,  "pbr": 0.9, "name": "은행"},
+        "017670": {"per": 12, "pbr": 1.0, "name": "통신"},
+        "035420": {"per": 25, "pbr": 1.8, "name": "인터넷/플랫폼"},
     }
     sd = sector_data.get(code, {"per": 15, "pbr": 1.5, "name": "일반"})
 
