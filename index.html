@@ -470,7 +470,7 @@ body::before{
   </div>
 </div>
 
-<div id="stockTabBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#070c18;padding:6px 8px;border-bottom:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
+<div id="stockTabBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#070c18;padding:4px 8px;border-bottom:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 
 <div class="main" id="main">
   <div class="start" id="startScreen">
@@ -1251,7 +1251,7 @@ async function loadData(){
         </button>`;
       }).join("");
       // results 상단 여백 - 탭바 높이 고정값으로 바로 적용 (타이밍 이슈 방지)
-      document.getElementById("results").style.paddingTop="12px";
+      document.getElementById("results").style.paddingTop="44px";
     }
     document.getElementById("footer").style.display="";
     document.getElementById("updBadge").textContent=`수집 ${data.updatedAt||data.updatedTime}`;
