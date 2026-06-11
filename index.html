@@ -1228,7 +1228,19 @@ async function loadData(){
       tabBar.innerHTML=data.stocks.map(function(s){
         var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
         var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
-        var up=(+s.change||0)>=0; var cc=up?"#00e5a0":"#ff4060";
+        // 매매기록에서 보유중인 같은 종목 찾기 → 최고 진입가 기준 수익률
+        var journal=loadJournal();
+        var held=journal.filter(function(e){return e.status==="보유"&&e.code===s.code;});
+        var dispPct, cc;
+        if(held.length>0){
+          var maxEntry=Math.max.apply(null,held.map(function(e){return e.entryPrice||0;}));
+          var ret=maxEntry>0?((s.price-maxEntry)/maxEntry*100):0;
+          dispPct=(ret>=0?"+":"")+ret.toFixed(2)+"%";
+          cc=ret>=0?"#00e5a0":"#ff4060";
+        } else {
+          dispPct="";
+          cc="";
+        }
         return `<button onclick="(function(){
           var el=document.getElementById('card-${s.code}');if(!el)return;
           var hdr=document.querySelector('.hdr');
@@ -1239,7 +1251,7 @@ async function loadData(){
           style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
           <span style="font-size:12px">${st.emoji}</span>
           <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
-          <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
+          <span style="font-size:11px;color:${cc};font-weight:700">${dispPct}</span>
         </button>`;
       }).join("");
     }
