@@ -464,6 +464,7 @@ body::before{
     <span class="badge badge-green">5분 자동 갱신</span>
     <span class="badge badge-blue" id="kospiBar">KOSPI --</span>
     <span class="badge" id="updBadge" style="display:none"></span>
+    <span class="badge" id="reserveBadge" style="display:none"></span>
   </div>
   <div class="prog" id="progWrap">
     <div class="prog-fill" id="progFill" style="width:0%"></div>
@@ -830,7 +831,7 @@ function renderCard(s,idx){
         <span class="bar52-val" style="color:${s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffc940"}">${s.boll.position}%</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:${s.boll.position}%;background:linear-gradient(90deg,#00e5a0,#ffc940,#ff4060)"></div></div>
-      <div class="bar52-note">${s.boll.position>80?"상단 근접 — 단기 과열":s.boll.position<20?"하단 근접 — 반등 가능":"중간 구간"}</div>
+      <div class="bar52-note">${s.boll.position>80?"⚠️ 상단 근접 — 단기 과열":s.boll.position<20?"📍 하단 근접 — 반등 가능":"중간 구간"}</div>
     </div>`:""}
     ${bo.position!=null?`<div class="bar52">
       <div class="bar52-row">
@@ -854,7 +855,7 @@ function renderCard(s,idx){
       <span class="op-txt" style="color:${oc}">${op}</span>
     </div>
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
-    ${s.flowRead?`<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">${s.flowRead.split("│").map(function(t,i){return i===0?`<div style="color:#c8d4e4">📊 ${t.trim()}</div>`:`<div style="color:#00d4ff;margin-top:3px">→ ${t.trim()}</div>`}).join("")}</div>`:""}
+    ${s.flowRead?'<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">'+s.flowRead.split("│").map(function(t,i){return i===0?'<div style="color:#c8d4e4">📊 '+t.trim()+'</div>':'<div style="color:#00d4ff;margin-top:3px">→ '+t.trim()+'</div>';}).join("")+'</div>':""}
     ${s.overheat&&s.overheat.level!=="none"?`<div style="margin:10px 0;padding:12px 14px;border-radius:12px;background:${s.overheat.color}14;border:1.5px solid ${s.overheat.color}50">
       <div style="font-size:13px;font-weight:800;color:${s.overheat.color};margin-bottom:6px">${s.overheat.title}</div>
       <div style="font-size:11px;color:#a8b4c8;line-height:1.6">
@@ -1228,7 +1229,19 @@ async function loadData(){
       tabBar.innerHTML=data.stocks.map(function(s){
         var st=STOCKS.find(function(x){return x.code===s.code;})||{emoji:"◆",name:s.code};
         var op=s.opinion||"중립"; var oc=OC[op]||"#ffc940";
-        var up=(+s.change||0)>=0; var cc=up?"#00e5a0":"#ff4060";
+        // 매매기록에서 보유중인 같은 종목 찾기 → 최고 진입가 기준 수익률
+        var journal=loadJournal();
+        var held=journal.filter(function(e){return e.status==="보유"&&e.code===s.code;});
+        var dispPct, cc;
+        if(held.length>0){
+          var maxEntry=Math.max.apply(null,held.map(function(e){return e.entryPrice||0;}));
+          var ret=maxEntry>0?((s.price-maxEntry)/maxEntry*100):0;
+          dispPct=(ret>=0?"+":"")+ret.toFixed(2)+"%";
+          cc=ret>=0?"#00e5a0":"#ff4060";
+        } else {
+          dispPct="";
+          cc="";
+        }
         return `<button onclick="(function(){
           var el=document.getElementById('card-${s.code}');if(!el)return;
           var hdr=document.querySelector('.hdr');
@@ -1239,7 +1252,7 @@ async function loadData(){
           style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap">
           <span style="font-size:12px">${st.emoji}</span>
           <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
-          <span style="font-size:11px;color:${cc};font-weight:700">${up?"+":""}${s.changePct||0}%</span>
+          <span style="font-size:11px;color:${cc};font-weight:700">${dispPct}</span>
         </button>`;
       }).join("");
     }
@@ -1263,9 +1276,53 @@ async function loadData(){
 
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 90*1000);
 document.getElementById("mktBadge").textContent=kst().status;
+// 적립금 배지 초기화 - 항상 표시
+// 기존 청산 기록이 있는데 적립금이 초기화 안 됐으면 자동 소급 계산
+setTimeout(function(){
+  var r=loadReserve();
+  if(r.amount===undefined){
+    var arr=loadJournal();
+    var closed=arr.filter(function(e){return e.status==="청산"&&e.exitPrice&&e.entryPrice;});
+    if(closed.length>0){
+      var reserve={amount:0,log:[]};
+      closed.forEach(function(e){
+        var sh=e.shares||1;
+        var pnl=(e.exitPrice-e.entryPrice)*sh;
+        if(pnl>0){
+          reserve.amount+=Math.round(pnl*0.1);
+          reserve.log.push({date:e.exitAt||"",type:"적립",amount:Math.round(pnl*0.1),note:e.name+" "+sh+"주"});
+        } else if(pnl<0){
+          reserve.amount+=pnl;
+          reserve.log.push({date:e.exitAt||"",type:"손절",amount:Math.round(pnl),note:e.name+" "+sh+"주"});
+        }
+      });
+      saveReserve(reserve);
+    } else {
+      saveReserve({amount:0,log:[]});
+    }
+  }
+  var el=document.getElementById("reserveBadge");
+  if(el){ el.style.display=""; updateReserveBadge(); }
+},100);
 
 /* ───────── 매매 기록 (localStorage 기반) ───────── */
 const JOURNAL_KEY = "stock_journal_v1";
+
+function loadReserve(){ try{ return JSON.parse(localStorage.getItem("reserve")||"{}"); }catch(e){ return {}; } }
+function saveReserve(r){
+  localStorage.setItem("reserve", JSON.stringify(r));
+  var el=document.getElementById("reserveBadge");
+  if(el) el.style.display="";
+  updateReserveBadge();
+}
+function updateReserveBadge(){
+  var r=loadReserve();
+  var amt=r.amount||0;
+  var el=document.getElementById("reserveBadge");
+  if(!el) return;
+  el.textContent="💰 "+(amt>0?"+":"")+Math.round(amt).toLocaleString()+"원";
+  el.style.color=amt>0?"#00e5a0":amt<0?"#ff4060":"#8090b0";
+}
 
 function loadJournal(){
   try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); }
@@ -1287,6 +1344,9 @@ function recordEntry(code){
   if(px===null) return;  // 취소
   const entryPrice = parseFloat(String(px).replace(/,/g,""));
   if(!entryPrice || entryPrice<=0){ alert("올바른 가격을 입력하세요."); return; }
+  const sq = prompt(`매수 수량을 입력하세요 (주)`, "1");
+  if(sq===null) return;
+  const shares = Math.max(1, parseInt(sq)||1);
   const snap = {
     code: s.code, name: stockName, price: s.price, opinion: s.opinion, score: s.score,
     star: !!(s.cautiousEntry&&s.cautiousEntry.entry),
@@ -1303,7 +1363,8 @@ function recordEntry(code){
     enteredAt: now.toISOString().slice(0,16).replace("T"," "),
     enteredTs: now.getTime(),  // 보유기간 계산용
     ...snap,
-    entryPrice: entryPrice,   // 실제 매수가 (화면 현재가와 별개)
+    entryPrice: entryPrice,
+    shares: shares,
     screenPrice: snap.price,  // 진입 시점 화면 현재가 (참고)
     exitPrice: null, exitAt: null, exitTs: null, returnPct: null, exitReason: null,
     heldDays: null,
@@ -1394,9 +1455,10 @@ function renderJournal(){
         <span style="font-size:11px;color:${held?'#ffc940':retColor};font-weight:700">${held?"보유중":(e.returnPct>0?"+":"")+e.returnPct+"%"}</span>
       </div>
       <div style="font-size:11.5px;color:#8090b0;line-height:1.6">
-        진입 ${e.enteredAt} · 매수 ₩${e.entryPrice.toLocaleString()}<br>
+        진입 ${e.enteredAt} · 매수 ₩${e.entryPrice.toLocaleString()} · ${e.shares||1}주${e.soldShares&&e.soldShares<(e.shares||1)?` (잔여 ${(e.shares||1)-e.soldShares}주)`:""}<br>
         의견 ${e.opinion}(${e.score>0?"+":""}${e.score}) ${e.star?"★":""} ${e.overheat!=="none"?e.overheat:""} · RSI ${e.rsi||"—"}
         ${[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).length?"<br>매수신호: "+[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).join(" · "):""}
+        ${e.partialExits&&e.partialExits.length?`<br><span style="color:#ffc940;font-size:11px">부분청산: ${e.partialExits.map(p=>`${p.date} ${p.shares}주@₩${p.price.toLocaleString()}(${p.pnl>=0?"+":""}${p.pnl.toLocaleString()})`).join(" / ")}</span>`:""}
         ${e.exitAt?`<br>청산 ${e.exitAt} · ₩${(e.exitPrice||0).toLocaleString()} · ${e.exitReason||""}${e.heldDays?` · ${e.heldDays}일 보유${e.heldDays>=7?" ⚠️":""}`:""}`:""}
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
@@ -1423,23 +1485,79 @@ function closeTradePrompt(id){
   const arr = loadJournal();
   const e = arr.find(x=>x.id===id);
   if(!e) return;
-  const px = prompt(`청산가를 입력하세요 (매수가 ₩${e.entryPrice.toLocaleString()}):`);
+  const totalShares = e.shares||1;
+  const soldShares = e.soldShares||0;
+  const remaining = totalShares - soldShares;
+  // 청산가
+  const px = prompt(`청산가를 입력하세요\n(매수가 ₩${e.entryPrice.toLocaleString()} · 잔여 ${remaining}주)`);
   if(px===null) return;
   const exitPrice = parseFloat(String(px).replace(/,/g,""));
   if(!exitPrice){ alert("올바른 가격을 입력하세요."); return; }
+  // 청산 수량
+  let exitShares = remaining;
+  if(remaining > 1){
+    const sq = prompt(`청산 수량을 입력하세요 (최대 ${remaining}주)`, String(remaining));
+    if(sq===null) return;
+    exitShares = Math.min(remaining, Math.max(1, parseInt(sq)||remaining));
+  }
   const reason = prompt("청산 이유 (익절/손절/신호변화 등):", "익절") || "";
   const now = new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
-  e.exitPrice = exitPrice;
-  e.exitAt = now.toISOString().slice(0,10);
-  e.exitTs = now.getTime();
-  e.returnPct = Math.round((exitPrice-e.entryPrice)/e.entryPrice*1000)/10;
-  e.exitReason = reason;
-  // 보유기간 계산 (일 단위, 최소 1일)
-  if(e.enteredTs){
-    e.heldDays = Math.max(1, Math.round((e.exitTs-e.enteredTs)/(1000*60*60*24)));
+  const todayStr = now.toISOString().slice(0,10);
+  // 적립금 계산 (청산 수량 기준)
+  const pnl = (exitPrice - e.entryPrice) * exitShares;
+  const reserve = loadReserve();
+  if(pnl > 0){
+    reserve.amount = (reserve.amount||0) + Math.round(pnl * 0.1);
+    reserve.log = reserve.log||[];
+    reserve.log.push({date:todayStr, type:"적립", amount:Math.round(pnl*0.1), note:`${e.name} ${exitShares}주`});
+  } else if(pnl < 0){
+    reserve.amount = (reserve.amount||0) + pnl;
+    reserve.log = reserve.log||[];
+    reserve.log.push({date:todayStr, type:"손절", amount:Math.round(pnl), note:`${e.name} ${exitShares}주`});
   }
-  e.status = "청산";
+  saveReserve(reserve);
+  // 잔여 수량 업데이트
+  e.soldShares = soldShares + exitShares;
+  const newRemaining = totalShares - e.soldShares;
+  if(newRemaining <= 0){
+    // 완전 청산
+    e.exitPrice = exitPrice;
+    e.exitAt = todayStr;
+    e.exitTs = now.getTime();
+    e.returnPct = Math.round((exitPrice-e.entryPrice)/e.entryPrice*1000)/10;
+    e.exitReason = reason;
+    if(e.enteredTs){
+      e.heldDays = Math.max(1, Math.round((now.getTime()-e.enteredTs)/(1000*60*60*24)));
+    }
+    e.status = "청산";
+  } else {
+    // 부분 청산 - 보유 유지, 청산 내역 누적
+    e.partialExits = e.partialExits||[];
+    e.partialExits.push({date:todayStr, price:exitPrice, shares:exitShares, reason:reason, pnl:Math.round(pnl)});
+    e.status = "보유"; // 아직 보유중
+  }
   saveJournal(arr);
+  renderJournal();
+}
+
+function recalcReserve(){
+  if(!confirm("전체 청산 기록 기준으로 적립금을 재계산할까요?\n기존 적립금은 초기화됩니다.")) return;
+  const arr = loadJournal();
+  const closed = arr.filter(e=>e.status==="청산"&&e.exitPrice&&e.entryPrice);
+  const reserve = {amount:0, log:[]};
+  closed.forEach(function(e){
+    const sh = e.shares||1;
+    const pnl = (e.exitPrice - e.entryPrice) * sh;
+    if(pnl > 0){
+      reserve.amount += Math.round(pnl * 0.1);
+      reserve.log.push({date:e.exitAt||"", type:"적립", amount:Math.round(pnl*0.1), note:`${e.name} ${sh}주`});
+    } else if(pnl < 0){
+      reserve.amount += pnl;
+      reserve.log.push({date:e.exitAt||"", type:"손절", amount:Math.round(pnl), note:`${e.name} ${sh}주`});
+    }
+  });
+  saveReserve(reserve);
+  alert(`재계산 완료!\n청산 ${closed.length}건 반영\n적립금: ${Math.round(reserve.amount).toLocaleString()}원`);
   renderJournal();
 }
 
