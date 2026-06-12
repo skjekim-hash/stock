@@ -1242,12 +1242,20 @@ def analyze_stock(stock, kospi, market=None):
 
     ft = investor.get("foreignTrend", "중립") if investor else "중립"
     contra = contra_signal(rsi, macd, macd_sig, obv, pats, fg["score"], investor)
+
+    boll_result = calc_boll(closes_d) if has_data else None
+    boll_pos = None
+    if boll_result and boll_result["upper"] != boll_result["lower"]:
+        boll_pos = round((closes_d[-1] - boll_result["lower"]) / (boll_result["upper"] - boll_result["lower"]) * 100)
+        if boll_pos is not None:
+            boll_result["position"] = boll_pos
+
     opinion, score, nuance = master_signal(
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
-        boll_data=boll, weekly_rsi=weekly.get("rsi"), patterns=pats
+        boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats
     )
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
@@ -1290,11 +1298,6 @@ def analyze_stock(stock, kospi, market=None):
         return ("강한 과매도" if v < 30 else "저점권" if v < 45 else
                 "강한 과매수" if v > 70 else "과매수 진입" if v > 60 else "중립")
 
-    boll = calc_boll(closes_d) if has_data else None
-    boll_pos = None
-    if boll and boll["upper"] != boll["lower"]:
-        boll_pos = round((closes_d[-1] - boll["lower"]) / (boll["upper"] - boll["lower"]) * 100)
-
     return {
         "code": code, "price": price,
         "change": price - prev,
@@ -1318,10 +1321,10 @@ def analyze_stock(stock, kospi, market=None):
             "sector_per": fair.get("sector_per", 0),
         },
         "eps": eps or 0, "bps": bps or 0,
-        "boll": {"upper": round(boll["upper"]) if boll else 0,
-                 "mid":   round(boll["mid"])   if boll else 0,
-                 "lower": round(boll["lower"]) if boll else 0,
-                 "position": boll_pos} if boll else None,
+        "boll": {"upper": round(boll_result["upper"]) if boll_result else 0,
+                 "mid":   round(boll_result["mid"])   if boll_result else 0,
+                 "lower": round(boll_result["lower"]) if boll_result else 0,
+                 "position": boll_pos} if boll_result else None,
         "suggestedPrice": pt["sp"], "suggestedLabel": pt["sl"],
         "targetPrice": pt["tp"], "targetPrice2": pt["tp2"], "stopLoss": pt["stop"],
         "rsi": rsi, "rsiComment": cmt_rsi(rsi),
