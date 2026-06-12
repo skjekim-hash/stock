@@ -818,12 +818,13 @@ function renderCard(s,idx){
     <div class="grid3">
       <div class="stat"><div class="stat-l">5일 MA</div><div class="stat-v" style="color:${+s.sma5>+s.sma20?"#00e5a0":"#ff4060"}">${W(s.sma5)}</div></div>
       <div class="stat"><div class="stat-l">20일 MA</div><div class="stat-v" style="color:#8090b0">${W(s.sma20)}</div></div>
-      ${s.sma20&&s.price?(function(){
+      ${(function(){
+        if(!s.sma20||!s.price) return "";
         var gap=((s.price-s.sma20)/s.sma20*100).toFixed(1);
         var gc=gap>=0?"#ff4060":gap<=-8?"#00e5a0":gap<=-4?"#a8e6cf":"#8090b0";
         var label=gap<=-8?"📍 크게 이탈(반등 주목)":gap<=-4?"하단 이탈":gap>=8?"상단 과열":"평균 근접";
         return `<div class="stat"><div class="stat-l">이격도</div><div class="stat-v" style="color:${gc}">${gap>=0?"+":""}${gap}% <span style="font-size:10px">${label}</span></div></div>`;
-      })():""}
+      })()}
       <div class="stat"><div class="stat-l">60일 MA</div><div class="stat-v" style="color:#4a5878">${W(s.sma60)}</div></div>
     </div>
     <div class="grid3">
