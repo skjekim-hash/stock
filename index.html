@@ -832,7 +832,7 @@ function renderCard(s,idx){
         <span class="bar52-val" style="color:${s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffc940"}">${s.boll.position}%</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:${s.boll.position}%;background:linear-gradient(90deg,#00e5a0,#ffc940,#ff4060)"></div></div>
-      <div class="bar52-note">${s.boll.position>80?"<span style='color:#ff4060;font-weight:700'>⚠️ 상단 근접 — 단기 과열</span>":s.boll.position<20?"<span style='color:#00e5a0;font-weight:700'>📍 하단 근접 — 반등 가능</span>":"중간 구간"}</div>
+      <div class="bar52-note">${s.boll.position>80?"⚠️ 상단 근접 — 단기 과열":s.boll.position<20?"📍 하단 근접 — 반등 가능":"중간 구간"}</div>
     </div>`:""}
     ${bo.position!=null?`<div class="bar52">
       <div class="bar52-row">
