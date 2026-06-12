@@ -818,6 +818,12 @@ function renderCard(s,idx){
     <div class="grid3">
       <div class="stat"><div class="stat-l">5일 MA</div><div class="stat-v" style="color:${+s.sma5>+s.sma20?"#00e5a0":"#ff4060"}">${W(s.sma5)}</div></div>
       <div class="stat"><div class="stat-l">20일 MA</div><div class="stat-v" style="color:#8090b0">${W(s.sma20)}</div></div>
+      ${s.sma20&&s.price?(function(){
+        var gap=((s.price-s.sma20)/s.sma20*100).toFixed(1);
+        var gc=gap>=0?"#ff4060":gap<=-8?"#00e5a0":gap<=-4?"#a8e6cf":"#8090b0";
+        var label=gap<=-8?"📍 크게 이탈(반등 주목)":gap<=-4?"하단 이탈":gap>=8?"상단 과열":"평균 근접";
+        return `<div class="stat"><div class="stat-l">이격도</div><div class="stat-v" style="color:${gc}">${gap>=0?"+":""}${gap}% <span style="font-size:10px">${label}</span></div></div>`;
+      })():""}
       <div class="stat"><div class="stat-l">60일 MA</div><div class="stat-v" style="color:#4a5878">${W(s.sma60)}</div></div>
     </div>
     <div class="grid3">
@@ -831,7 +837,7 @@ function renderCard(s,idx){
         <span class="bar52-val" style="color:${s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffc940"}">${s.boll.position}%</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:${s.boll.position}%;background:linear-gradient(90deg,#00e5a0,#ffc940,#ff4060)"></div></div>
-      <div class="bar52-note">${s.boll.position>80?"상단 근접 — 단기 과열":s.boll.position<20?"하단 근접 — 반등 가능":"중간 구간"}</div>
+      <div class="bar52-note">${s.boll.position>80?`<span style="color:#ff4060;font-weight:700">⚠️ 상단 근접 — 단기 과열</span>`:s.boll.position<20?`<span style="color:#00e5a0;font-weight:700">📍 하단 근접 — 반등 가능</span>`:"중간 구간"}</div>
     </div>`:""}
     ${bo.position!=null?`<div class="bar52">
       <div class="bar52-row">
