@@ -1036,7 +1036,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if f20 > 0:   supply_adj += 1
         elif f20 < 0: supply_adj -= 1
         if f5 > 0:    supply_adj += 1
-        elif f5 < 0:  supply_adj -= 1.5
+        elif f5 < 0:  supply_adj -= 1          # -1.5 → -1로 완화 (16건 데이터 기반)
         if f5 < 0 and indiv_today > 0:
             supply_adj -= 0.5              # -1 → -0.5로 완화
         supply_adj = max(-2, min(2, supply_adj))  # ±2 상한
