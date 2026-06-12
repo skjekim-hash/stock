@@ -983,7 +983,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   investor, short_ratio, news_list,
                   stoch_rsi=None, divergence=None,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
-                  boll=None, weekly_rsi=None, patterns=None):
+                  boll_data=None, weekly_rsi=None, patterns=None):
     score = 0
     # RSI
     if rsi: score += 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0
@@ -1031,8 +1031,8 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         pos = (price - l52) / (h52 - l52) * 100
         score += 2 if pos < 20 else 1 if pos < 35 else -2 if pos > 90 else -1 if pos > 85 else 0
     # 볼린저 밴드 위치 (boll_pos가 있으면)
-    if boll and boll.get("position") is not None:
-        bp = boll["position"]
+    if boll_data and boll_data.get("position") is not None:
+        bp = boll_data["position"]
         score += 2 if bp < 15 else 1 if bp < 25 else -2 if bp > 85 else -1 if bp > 75 else 0
     # VWAP
     if vwap: score += 1 if price > vwap else -1
@@ -1247,7 +1247,7 @@ def analyze_stock(stock, kospi, market=None):
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
-        boll=boll, weekly_rsi=weekly.get("rsi"), patterns=pats
+        boll_data=boll, weekly_rsi=weekly.get("rsi"), patterns=pats
     )
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
