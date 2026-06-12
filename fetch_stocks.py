@@ -982,65 +982,90 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap, weekly_opinion,
                   investor, short_ratio, news_list,
                   stoch_rsi=None, divergence=None,
-                  ichimoku=None, cci=None, psar=None, value_surge=None):
+                  ichimoku=None, cci=None, psar=None, value_surge=None,
+                  boll=None, weekly_rsi=None, patterns=None):
     score = 0
+    # RSI
     if rsi: score += 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0
+    # MACD
     if macd and macd_sig: score += 2 if macd > macd_sig else -2
-    if wr: score += 1 if wr < -80 else -1 if wr > -20 else 0
+    # Williams %R: -70 이하로 문턱 낮춤 (기존 -80)
+    if wr: score += 1 if wr < -70 else -1 if wr > -20 else 0
+    # 스토캐스틱
     if stoch: score += 1 if stoch < 20 else -1 if stoch > 80 else 0
-    if mfi: score += 1 if mfi < 20 else -1 if mfi > 80 else 0
-    if obv: score += 1 if obv["slope"] > 2 else -1 if obv["slope"] < -2 else 0
-    if adx and adx["adx"] < 15: score = round(score * 0.7)
+    # MFI: 범위 확장 (기존 극단만 → 40/60으로 확장)
+    if mfi: score += 2 if mfi < 20 else 1 if mfi < 40 else -2 if mfi > 80 else -1 if mfi > 60 else 0
+    # OBV: +1 → +2로 강화 (수급 대체)
+    if obv: score += 2 if obv["slope"] > 2 else -2 if obv["slope"] < -2 else 0
+    # ADX: 횡보 구간 반등 가능성 반영
+    if adx:
+        if adx["adx"] < 15: score += 1    # 추세 없음 → 반등 여지
+        elif adx["adx"] > 30 and adx["pdi"] < adx["ndi"]: score -= 1  # 강한 하락 추세
+    # 스토캐스틱 RSI: 과매도 구간 차등 (기존 일괄 +2 → K<10이면 +3)
     if stoch_rsi:
-        if stoch_rsi["signal"] == "매수": score += 2
-        elif stoch_rsi["signal"] == "매도": score -= 2
+        if stoch_rsi["signal"] == "매수":
+            score += 3 if stoch_rsi.get("k", 50) < 10 else 2
+        elif stoch_rsi["signal"] == "매도":
+            score -= 2
+    # 다이버전스: +3 → +4로 강화
     if divergence:
-        if divergence.get("bullish"): score += 3
-        if divergence.get("bearish"): score -= 3
+        if divergence.get("bullish"): score += 4
+        if divergence.get("bearish"): score -= 4
+    # 일목
     if ichimoku:
         if ichimoku["signal"] == "매수": score += 2 if "강한" in ichimoku["comment"] else 1
         elif ichimoku["signal"] == "매도": score -= 2 if "강한" in ichimoku["comment"] else 1
+    # CCI
     if cci:
         if cci["signal"] == "매수": score += 2 if "극단" in cci["comment"] else 1
         elif cci["signal"] == "매도": score -= 2 if "극단" in cci["comment"] else 1
+    # PSAR
     if psar:
         if psar["signal"] == "매수": score += 1
         elif psar["signal"] == "매도": score -= 1
+    # 거래대금 급등
     if value_surge and value_surge["surge"]:
         score += 1 if rsi and rsi > 50 else -1 if rsi and rsi < 50 else 0
+    # 52주 위치: +1 → +2로 강화, 볼린저 밴드 위치 추가
     if h52 > 0 and l52 > 0:
         pos = (price - l52) / (h52 - l52) * 100
-        score += 1 if pos < 20 else -1 if pos > 85 else 0
+        score += 2 if pos < 20 else 1 if pos < 35 else -2 if pos > 90 else -1 if pos > 85 else 0
+    # 볼린저 밴드 위치 (boll_pos가 있으면)
+    if boll and boll.get("position") is not None:
+        bp = boll["position"]
+        score += 2 if bp < 15 else 1 if bp < 25 else -2 if bp > 85 else -1 if bp > 75 else 0
+    # VWAP
     if vwap: score += 1 if price > vwap else -1
+    # 이격도: SMA20 대비 -8% 이상 이격이면 평균회귀 가능성
     s5, s20 = calc_sma(closes, 5), calc_sma(closes, 20)
-    if s5 and s20: score += 1 if s5 > s20 else -1
+    if s5 and s20:
+        score += 1 if s5 > s20 else -1
+    if s20 and price > 0:
+        gap = (price - s20) / s20 * 100
+        score += 2 if gap < -8 else 1 if gap < -4 else -1 if gap > 8 else 0
+    # 주봉
     if weekly_opinion == "매수": score += 2
     elif weekly_opinion == "매도": score -= 2
+    # 주봉 RSI 과매도 추가 (+1)
+    if weekly_rsi and weekly_rsi < 40: score += 1
+    elif weekly_rsi and weekly_rsi > 70: score -= 1
+    # 공매도
     if short_ratio > 0:
         if short_ratio > 5: score -= 1
         elif short_ratio < 1: score += 1
+    # 뉴스
     if news_list:
         pos_count = len([n for n in news_list if n["sentiment"] == "긍정"])
         neg_count = len([n for n in news_list if n["sentiment"] == "부정"])
         if pos_count > neg_count: score += 1
         elif neg_count > pos_count: score -= 1
-    # ── 수급 가중치 (임시) ─────────────────────────────
-    # 외국인 추세를 약하게 반영. 사용자 성향(손실 회피)에 맞춰 '매도(이탈)'를 살짝 더 무겁게.
-    # 중장기(20일)=안정적 기본, 단기(5일)=민감, 외국인매도+개인매수=약세 조합(약하게).
-    # 최대 ±2로 제한 (과도한 쏠림 방지)
-    if investor:
-        f5  = investor.get("foreign5", 0) or 0
-        f20 = investor.get("foreign20", 0) or 0
-        indiv_today = investor.get("individual", 0)
-        supply_adj = 0
-        if f20 > 0:   supply_adj += 1
-        elif f20 < 0: supply_adj -= 1
-        if f5 > 0:    supply_adj += 1
-        elif f5 < 0:  supply_adj -= 1          # -1.5 → -1로 완화 (16건 데이터 기반)
-        if f5 < 0 and indiv_today > 0:
-            supply_adj -= 0.5              # -1 → -0.5로 완화
-        supply_adj = max(-2, min(2, supply_adj))  # ±2 상한
-        score += supply_adj
+    # 캔들 패턴: +1 → +2로 강화
+    if patterns:
+        pos_pat = [p for p in patterns if p.get("type") in ["상승반전","강세"]]
+        neg_pat = [p for p in patterns if p.get("type") in ["하락반전","약세"]]
+        if pos_pat: score += 2
+        if neg_pat: score -= 2
+    # 수급은 화면에서 직접 확인 후 판단 (점수에서 제외)
     score = round(score)
     # ──────────────────────────────────────────────────
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
@@ -1221,7 +1246,8 @@ def analyze_stock(stock, kospi, market=None):
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
-        stoch_rsi, divergence, ichimoku, cci, psar, value_surge
+        stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
+        boll=boll, weekly_rsi=weekly.get("rsi"), patterns=pats
     )
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
