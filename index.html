@@ -818,7 +818,7 @@ function renderCard(s,idx){
     <div class="grid3">
       <div class="stat"><div class="stat-l">5일 MA</div><div class="stat-v" style="color:${+s.sma5>+s.sma20?"#00e5a0":"#ff4060"}">${W(s.sma5)}</div></div>
       <div class="stat"><div class="stat-l">20일 MA</div><div class="stat-v" style="color:#8090b0">${W(s.sma20)}</div></div>
-      <div class="stat"><div class="stat-l">60일 MA</div><div class="stat-v" style="color:#4a5878">${W(s.sma60)}</div></div>
+      <div class="stat"><div class="stat-l">이격도</div><div class="stat-v" style="color:${s.sma20&&s.price?(s.price-s.sma20)/s.sma20*100<=-8?"#00e5a0":(s.price-s.sma20)/s.sma20*100<=-4?"#a8e6cf":(s.price-s.sma20)/s.sma20*100>=8?"#ff4060":"#8090b0":"#8090b0"}">${s.sma20&&s.price?((s.price-s.sma20)/s.sma20*100>=0?"+":"")+((s.price-s.sma20)/s.sma20*100).toFixed(1)+"%":"—"}</div></div>
     </div>
     <div class="grid3">
       <div class="stat"><div class="stat-l">VWAP</div><div class="stat-v" style="color:${s.price>s.vwap?"#00e5a0":"#ff4060"}">${W(s.vwap)}</div></div>
