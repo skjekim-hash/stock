@@ -372,6 +372,10 @@ def fetch_naver_investor(code):
         foreign60 = cum("foreignerPureBuyQuant", 60) if ndays >= 45 else None
         inst5  = cum("organPureBuyQuant", 5)
         inst20 = cum("organPureBuyQuant", 20) if ndays >= 15 else None
+        inst60 = cum("organPureBuyQuant", 60) if ndays >= 45 else None
+        indiv5  = cum("individualPureBuyQuant", 5)
+        indiv20 = cum("individualPureBuyQuant", 20) if ndays >= 15 else None
+        indiv60 = cum("individualPureBuyQuant", 60) if ndays >= 45 else None
         # 5일 일별 외국인 순매수 (과거→최근, 미니 막대그래프용)
         n5 = min(5, len(rows))
         daily = [round(to_n(rows[i].get("foreignerPureBuyQuant"))) for i in range(n5)][::-1]
@@ -413,7 +417,9 @@ def fetch_naver_investor(code):
         print(f"  ✅ 네이버 수급 ({code}): {trend} | 5일 {foreign5:+,} / 20일 {f20s} / 60일 {f60s} ({ndays}일 확보)", file=sys.stderr)
         return {"foreign": foreign, "institution": inst, "individual": indiv,
                 "foreign5": foreign5, "foreign20": foreign20, "foreign60": foreign60,
-                "inst5": inst5, "inst20": inst20, "days": n5, "ndays": ndays,
+                "inst5": inst5, "inst20": inst20, "inst60": inst60,
+                "indiv5": indiv5, "indiv20": indiv20, "indiv60": indiv60,
+                "days": n5, "ndays": ndays,
                 "daily": daily, "flowLabel": flow_label,
                 "foreignTrend": trend, "comment": comment,
                 "holdRatio": hold, "streak": streak, "date": datestr}
