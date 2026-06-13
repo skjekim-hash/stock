@@ -259,6 +259,8 @@ def fetch_market_signal():
         ("NQ=F",  "나스닥 선물",       "nasdaq"),
         ("KRW=X", "원/달러 환율",      "fx"),
         ("^VIX",  "공포지수(VIX)",     "vix"),
+        ("^TNX",  "미국 10년물 금리",  "tnx"),
+        ("DX-Y.NYB", "달러인덱스",     "dxy"),
     ]
     out = {}
     for sym, name, key in targets:
@@ -283,6 +285,8 @@ def fetch_market_signal():
     if "nasdaq" in out: score += out["nasdaq"]["pct"] * 1.0
     if "fx"     in out: score -= out["fx"]["pct"]     * 1.0
     if "vix"    in out: score -= out["vix"]["pct"]    * 0.3
+    # 미국 10년물 금리 상승 = 성장주(반도체·플랫폼)에 부담 (-)
+    if "tnx"    in out: score -= out["tnx"]["pct"]    * 0.5
 
     # 절대 수준 감점: 환율·VIX는 '레벨' 자체가 위험 신호 (변동률과 별개)
     # ── 시장 상황 따라 조정하세요 ─────────────────────
@@ -295,6 +299,10 @@ def fetch_market_signal():
     elif fx_price >= FX_WARN:   score -= 1
     if   vix_price >= VIX_PANIC: score -= 2
     elif vix_price >= VIX_FEAR:  score -= 1
+    # 금리 절대 수준: 4.5%↑ 성장주 부담, 5.0%↑ 강한 부담
+    tnx_price = out.get("tnx", {}).get("price", 0)
+    if   tnx_price >= 5.0: score -= 2
+    elif tnx_price >= 4.5: score -= 1
 
     if   score >=  1.5: mood, label = "favorable", "우호적"
     elif score <= -1.5: mood, label = "adverse",   "비우호적"
