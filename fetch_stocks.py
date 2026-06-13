@@ -1340,21 +1340,24 @@ def analyze_stock(stock, kospi, market=None):
             print(f"  📋 반대매매 신호 ({code}): {risk_signals} ({len(risk_signals)}개 — 기준 미달)", file=sys.stderr)
 
     # ── 물갈이 감지 ───────────────────────────────────
-    # 개인 대량 매도 + 외국인·기관 동시 매수 → 매수 매력 신호
+    # 개인 대량 매도 + 외국인·기관 동시 매수 + 주가가 충분히 빠진 자리
     turnover = ""
     if investor:
-        indiv  = investor.get("individual", 0) or 0
+        indiv   = investor.get("individual", 0) or 0
         foreign = investor.get("foreign", 0) or 0
         inst    = investor.get("institution", 0) or 0
         indiv5  = investor.get("indiv5", 0) or 0
-        # 개인 대량 매도 (당일 또는 5일 누적)
+        # 52주 위치 60% 미만 또는 SMA20 아래
+        pos52 = breakout.get("position", 100) if breakout else 100
+        below_avg = (price < calc_sma(closes_d, 20)) if closes_d and len(closes_d) >= 20 else False
+        price_depressed = pos52 < 60 or below_avg
+        # 조건 체크
         indiv_heavy_sell = indiv < 0 and (abs(indiv) > abs(foreign) or abs(indiv) > abs(inst))
         indiv5_sell = indiv5 < 0
-        # 외국인·기관 동시 매수
         both_buying = foreign > 0 and inst > 0
-        if indiv_heavy_sell and indiv5_sell and both_buying:
+        if indiv_heavy_sell and indiv5_sell and both_buying and price_depressed:
             turnover = "🔄 물갈이 진행 — 개인 투매를 외국인·기관이 흡수 중"
-            print(f"  🔄 물갈이 감지 ({code}): 개인 {indiv:+,} / 외국인 {foreign:+,} / 기관 {inst:+,}", file=sys.stderr)
+            print(f"  🔄 물갈이 감지 ({code}): 개인 {indiv:+,} / 외국인 {foreign:+,} / 기관 {inst:+,} / 52주위치 {pos52}%", file=sys.stderr)
     # ──────────────────────────────────────────────────
     # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
