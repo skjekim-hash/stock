@@ -379,17 +379,23 @@ def fetch_naver_investor(code):
         # 5일 일별 외국인 순매수 (과거→최근, 미니 막대그래프용)
         n5 = min(5, len(rows))
         daily = [round(to_n(rows[i].get("foreignerPureBuyQuant"))) for i in range(n5)][::-1]
+        daily_inst  = [round(to_n(rows[i].get("organPureBuyQuant"))) for i in range(n5)][::-1]
+        daily_indiv = [round(to_n(rows[i].get("individualPureBuyQuant"))) for i in range(n5)][::-1]
         # 흐름 해석: 최근 절반 vs 이전 절반
-        flow_label = ""
-        if len(daily) >= 4:
-            half = len(daily) // 2
-            early, late = sum(daily[:half]), sum(daily[half:])
-            if   late > 0 and early <= 0: flow_label = "최근 매수 전환"
-            elif late < 0 and early >= 0: flow_label = "최근 매도 전환"
-            elif late > 0 and early > 0:  flow_label = "꾸준히 매수"
-            elif late < 0 and early < 0:  flow_label = "꾸준히 매도"
-            elif late > early:            flow_label = "매수세 강화"
-            elif late < early:            flow_label = "매수세 약화"
+        def calc_flow_label(d):
+            if len(d) < 4: return ""
+            half = len(d) // 2
+            early, late = sum(d[:half]), sum(d[half:])
+            if   late > 0 and early <= 0: return "최근 매수 전환"
+            elif late < 0 and early >= 0: return "최근 매도 전환"
+            elif late > 0 and early > 0:  return "꾸준히 매수"
+            elif late < 0 and early < 0:  return "꾸준히 매도"
+            elif late > early:            return "매수세 강화"
+            elif late < early:            return "매수세 약화"
+            return ""
+        flow_label       = calc_flow_label(daily)
+        flow_label_inst  = calc_flow_label(daily_inst)
+        flow_label_indiv = calc_flow_label(daily_indiv)
         # 외국인 연속 순매수(+)/순매도(-) 일수
         streak = 0
         for r in rows:
@@ -421,6 +427,8 @@ def fetch_naver_investor(code):
                 "indiv5": indiv5, "indiv20": indiv20, "indiv60": indiv60,
                 "days": n5, "ndays": ndays,
                 "daily": daily, "flowLabel": flow_label,
+                "dailyInst": daily_inst, "flowLabelInst": flow_label_inst,
+                "dailyIndiv": daily_indiv, "flowLabelIndiv": flow_label_indiv,
                 "foreignTrend": trend, "comment": comment,
                 "holdRatio": hold, "streak": streak, "date": datestr}
     except Exception as e:
