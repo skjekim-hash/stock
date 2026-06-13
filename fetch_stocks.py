@@ -1284,9 +1284,15 @@ def analyze_stock(stock, kospi, market=None):
         if len(oversold_signals) >= 3:
             score += 2
             contrarian = "⚡ 역발상 반등 주목 — " + " · ".join(oversold_signals[:3])
-            # 점수 올라서 의견 재조정
             if score >= 6:   opinion = "매수"
             elif score >= 0: opinion = "중립"
+            # nuance 재계산
+            if opinion == "중립":
+                if   score >= 4:  nuance = "매수 우위 (문턱 근접)"
+                elif score >= 1:  nuance = "약한 매수 우위"
+                elif score == 0:  nuance = "완전 중립 (관망)"
+                elif score >= -2: nuance = "약한 매도 우위"
+                else:             nuance = "매도 우위 (문턱 근접)"
     # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
