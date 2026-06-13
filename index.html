@@ -789,6 +789,7 @@ function renderCard(s,idx){
         ${op==="중립"&&s.nuance?`<div style="font-size:10.5px;color:${s.score>=1?"#00c98a":s.score<=-1?"#ff6680":"#9ab"};text-align:right;margin-top:2px;font-weight:600">${s.nuance}</div>`:""}
         ${s.contrarian?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ffc94020;border:1px solid #ffc94050;border-radius:20px;padding:2px 8px;font-size:10px;color:#ffc940;font-weight:700">⚡ 역발상 반등 주목</span></div>`:""}
         ${s.marginCallRisk?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ff406020;border:1px solid #ff406050;border-radius:20px;padding:2px 8px;font-size:10px;color:#ff4060;font-weight:700">⚠️ 반대매매 주의</span></div>`:""}
+        ${s.turnover?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00d4ff20;border:1px solid #00d4ff50;border-radius:20px;padding:2px 8px;font-size:10px;color:#00d4ff;font-weight:700">🔄 물갈이 진행</span></div>`:""}
         ${+s.stopLoss?`<div style="margin-top:4px;text-align:right">
           <span style="font-size:10px;color:#ff406088">손절</span>
           <span style="font-size:12px;color:#ff4060;font-weight:800;font-family:'JetBrains Mono',monospace;margin-left:4px">${W(s.stopLoss)}</span>
