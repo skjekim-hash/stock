@@ -1313,13 +1313,17 @@ def analyze_stock(stock, kospi, market=None):
             risk_signals.append("개인 순매도")
         if vol_surge and vol_surge.get("surge"):
             risk_signals.append("거래량 급증")
-        if changePct < -3:
-            risk_signals.append(f"급락({changePct:.1f}%)")
+        chg_pct = round((price - prev) / prev * 100, 2) if prev and prev > 0 else 0
+        if chg_pct < -3:
+            risk_signals.append(f"급락({chg_pct:.1f}%)")
         has_bearish_candle = any(p.get("type") in ["강한하락","하락반전"] for p in pats)
         if has_bearish_candle:
             risk_signals.append("장대음봉")
         if len(risk_signals) >= 3:
             margin_call_risk = "⚠️ 반대매매 주의 — " + " · ".join(risk_signals[:3])
+            print(f"  ⚠️ 반대매매 주의 ({code}): {margin_call_risk}", file=sys.stderr)
+        elif len(risk_signals) > 0:
+            print(f"  📋 반대매매 신호 ({code}): {risk_signals} ({len(risk_signals)}개 — 기준 미달)", file=sys.stderr)
     # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
