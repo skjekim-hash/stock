@@ -988,16 +988,42 @@ function renderCard(s,idx){
       <span class="irow-l">기관</span>
       <div class="irow-r">
         <div class="irow-v" style="color:${s.investor.institution>0?"#4090ff":s.investor.institution<0?"#ff4060":"#8090b0"}">${s.investor.institution>0?"+":""}${(s.investor.institution||0).toLocaleString()}주</div>
-        <div class="irow-n">${s.investor.inst5!==undefined?`5일 누적 ${s.investor.inst5>0?"+":""}${(s.investor.inst5||0).toLocaleString()}주`:(s.investor.holdRatio?"외인보유 "+s.investor.holdRatio:"")}</div>
+        <div class="irow-n">${s.investor.date?`(~${s.investor.date})`:""}</div>
       </div>
     </div>
+    ${s.investor.dailyInst&&s.investor.dailyInst.length>=2?`<div class="irow" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:42%">${renderFlowBars(s.investor.dailyInst)}
+          <div style="text-align:center;font-size:10.5px;color:#667;margin-top:1px">과거 → 최근</div>
+        </div>
+        <div style="flex:1;border-left:1px solid rgba(255,255,255,.08);padding-left:10px">
+          <div style="color:${(s.investor.flowLabelInst||'').includes('매수')?'#4090ff':(s.investor.flowLabelInst||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:800;font-size:12px">${s.investor.flowLabelInst||"—"}</div>
+          <div style="font-size:11px;color:#8090b0;margin-top:3px">5일 <span style="color:${s.investor.inst5>0?"#4090ff":s.investor.inst5<0?"#ff4060":"#8090b0"}">${s.investor.inst5>0?"+":""}${(s.investor.inst5||0).toLocaleString()}</span></div>
+          ${s.investor.inst20!=null?`<div style="font-size:11px;color:#8090b0">20일 <span style="color:${s.investor.inst20>0?"#4090ff":s.investor.inst20<0?"#ff4060":"#8090b0"}">${s.investor.inst20>0?"+":""}${(s.investor.inst20||0).toLocaleString()}</span></div>`:""}
+          ${s.investor.inst60!=null?`<div style="font-size:11px;color:#8090b0">60일 <span style="color:${s.investor.inst60>0?"#4090ff":s.investor.inst60<0?"#ff4060":"#8090b0"}">${s.investor.inst60>0?"+":""}${(s.investor.inst60||0).toLocaleString()}</span></div>`:""}
+        </div>
+      </div>
+    </div>`:""}
     <div class="irow">
       <span class="irow-l">개인</span>
       <div class="irow-r">
         <div class="irow-v" style="color:${s.investor.individual>0?"#a060ff":s.investor.individual<0?"#ff4060":"#8090b0"}">${s.investor.individual>0?"+":""}${(s.investor.individual||0).toLocaleString()}주</div>
-        <div class="irow-n">${s.investor.individual>0?"순매수":"순매도"}</div>
+        <div class="irow-n">${s.investor.date?`(~${s.investor.date})`:""}</div>
       </div>
     </div>
+    ${s.investor.dailyIndiv&&s.investor.dailyIndiv.length>=2?`<div class="irow" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:42%">${renderFlowBars(s.investor.dailyIndiv)}
+          <div style="text-align:center;font-size:10.5px;color:#667;margin-top:1px">과거 → 최근</div>
+        </div>
+        <div style="flex:1;border-left:1px solid rgba(255,255,255,.08);padding-left:10px">
+          <div style="color:${(s.investor.flowLabelIndiv||'').includes('매수')?'#a060ff':(s.investor.flowLabelIndiv||'').includes('매도')?'#ff4060':'#8090b0'};font-weight:800;font-size:12px">${s.investor.flowLabelIndiv||"—"}</div>
+          <div style="font-size:11px;color:#8090b0;margin-top:3px">5일 <span style="color:${s.investor.indiv5>0?"#a060ff":s.investor.indiv5<0?"#ff4060":"#8090b0"}">${s.investor.indiv5>0?"+":""}${(s.investor.indiv5||0).toLocaleString()}</span></div>
+          ${s.investor.indiv20!=null?`<div style="font-size:11px;color:#8090b0">20일 <span style="color:${s.investor.indiv20>0?"#a060ff":s.investor.indiv20<0?"#ff4060":"#8090b0"}">${s.investor.indiv20>0?"+":""}${(s.investor.indiv20||0).toLocaleString()}</span></div>`:""}
+          ${s.investor.indiv60!=null?`<div style="font-size:11px;color:#8090b0">60일 <span style="color:${s.investor.indiv60>0?"#a060ff":s.investor.indiv60<0?"#ff4060":"#8090b0"}">${s.investor.indiv60>0?"+":""}${(s.investor.indiv60||0).toLocaleString()}</span></div>`:""}
+        </div>
+      </div>
+    </div>`:""}
     ${s.creditRatio>0?'<div class="irow"><span class="irow-l">신용잔고율</span><div class="irow-r"><div class="irow-v" style="color:'+(s.creditRatio>=5?"#ff4060":s.creditRatio>=3?"#ffc940":"#8090b0")+'">'+(s.creditRatio)+'%'+(s.creditRatio>=5?" ⚠️ 반대매매 주의":s.creditRatio>=3?" 주의":"")+'</div><div class="irow-n">높을수록 반대매매 위험</div></div></div>':""}`:""}
     <div class="sec-sub">거래량</div>
     <div class="irow">
