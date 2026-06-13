@@ -1257,6 +1257,37 @@ def analyze_stock(stock, kospi, market=None):
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
         boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats
     )
+
+    # ── 역발상 반등 감지 ──────────────────────────────
+    # 매도 우위인데 과매도 신호 3개 이상 겹치면 반등 가능성 신호
+    contrarian = ""
+    if score < 0:
+        oversold_signals = []
+        if stoch_rsi and stoch_rsi.get("k", 50) < 20:
+            oversold_signals.append("스토캐스틱 RSI 과매도")
+        if rsi and rsi < 40:
+            oversold_signals.append("RSI 저점")
+        if boll_result and boll_result.get("position", 50) < 25:
+            oversold_signals.append("볼린저 하단")
+        if wr and wr < -70:
+            oversold_signals.append("Williams %R 과매도")
+        if stoch and stoch < 20:
+            oversold_signals.append("스토캐스틱 과매도")
+        if high52w > 0 and low52w > 0:
+            pos52 = (price - low52w) / (high52w - low52w) * 100
+            if pos52 < 25:
+                oversold_signals.append("52주 저점 근처")
+        if boll_result:
+            s20 = calc_sma(closes_d, 20)
+            if s20 and (price - s20) / s20 * 100 < -8:
+                oversold_signals.append("이격도 과대")
+        if len(oversold_signals) >= 3:
+            score += 2
+            contrarian = "⚡ 역발상 반등 주목 — " + " · ".join(oversold_signals[:3])
+            # 점수 올라서 의견 재조정
+            if score >= 6:   opinion = "매수"
+            elif score >= 0: opinion = "중립"
+    # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
     if market and opinion == "매수":
@@ -1280,7 +1311,9 @@ def analyze_stock(stock, kospi, market=None):
     flow_read = ""
     f5 = investor.get("foreign5", 0) if investor else 0
     fdir = "매수" if f5 > 0 else "매도" if f5 < 0 else "중립"
-    if opinion == "매수" and fdir == "매수":
+    if contrarian:
+        flow_read = "매도 우위지만 과매도 신호가 집중돼 단기 반등 가능성이 있어요. │ 소량 분할 진입 고려, 손절선 꼭 확인."
+    elif opinion == "매수" and fdir == "매수":
         flow_read = "신호·외국인 수급 모두 매수 우위로 방향이 일치해요. │ 신뢰도 높은 편, 지지구간 분할매수로 접근."
     elif opinion == "매수" and fdir == "매도":
         flow_read = "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로."
@@ -1305,6 +1338,7 @@ def analyze_stock(stock, kospi, market=None):
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
         "nuance": nuance,
+        "contrarian": contrarian,
         "marketBrake": market_brake,
         "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
