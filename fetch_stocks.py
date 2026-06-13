@@ -121,6 +121,8 @@ def fetch_kis_price(code):
                 "changePct": round(to_n(out.get("prdy_ctrt") or 0), 2) * (-1 if sign in ("4","5") else 1),
                 "high52w": round(high52), "low52w": round(low52),
                 "tradedAt": out.get("stck_bsop_date", ""), "source": "KIS API (통합시세)",
+                "creditRatio": to_n(out.get("crdt_rsrs_rt") or 0),   # 신용잔고율
+                "marginRate": to_n(out.get("marg_rate") or 0),        # 증거금 비율
             }
     except Exception as e:
         print(f"  KIS 주가 실패 ({code}): {e}", file=sys.stderr)
@@ -1294,6 +1296,31 @@ def analyze_stock(stock, kospi, market=None):
                 elif score >= -2: nuance = "약한 매도 우위"
                 else:             nuance = "매도 우위 (문턱 근접)"
     # ──────────────────────────────────────────────────
+    # ── 반대매매 위험 감지 ────────────────────────────
+    # 개인 연속 순매도 + 거래량 급증 + 장대음봉 조합
+    margin_call_risk = ""
+    if investor:
+        daily = investor.get("daily", [])
+        indiv = investor.get("individual", 0) or 0
+        # 개인 최근 3일 연속 순매도 여부
+        recent_indiv_sell = False
+        if len(daily) >= 3:
+            # daily는 외국인 기준이라 개인 daily가 별도로 없으면 당일만 체크
+            pass
+        # 조건 체크
+        risk_signals = []
+        if indiv < 0:
+            risk_signals.append("개인 순매도")
+        if vol_surge and vol_surge.get("surge"):
+            risk_signals.append("거래량 급증")
+        if changePct < -3:
+            risk_signals.append(f"급락({changePct:.1f}%)")
+        has_bearish_candle = any(p.get("type") in ["강한하락","하락반전"] for p in pats)
+        if has_bearish_candle:
+            risk_signals.append("장대음봉")
+        if len(risk_signals) >= 3:
+            margin_call_risk = "⚠️ 반대매매 주의 — " + " · ".join(risk_signals[:3])
+    # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
     if market and opinion == "매수":
@@ -1345,6 +1372,7 @@ def analyze_stock(stock, kospi, market=None):
         "opinion": opinion, "score": score, "source": source,
         "nuance": nuance,
         "contrarian": contrarian,
+        "marginCallRisk": margin_call_risk,
         "marketBrake": market_brake,
         "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
@@ -1387,6 +1415,7 @@ def analyze_stock(stock, kospi, market=None):
         "ft": ft, "fc": investor.get("comment", "") if investor else "",
         "volRatio": round(vol_ratio, 2),
         "investor": investor, "short": short,
+        "creditRatio": round(meta_d.get("creditRatio", 0), 2),
         "weekly": weekly, "monthly": monthly,
         "relativeStrength": rs, "breakout": breakout, "volSurge": vol_surge,
         "news": news, "dart": dart,
