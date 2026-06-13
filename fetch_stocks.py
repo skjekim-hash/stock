@@ -1338,6 +1338,24 @@ def analyze_stock(stock, kospi, market=None):
             print(f"  ⚠️ 반대매매 주의 ({code}): {margin_call_risk}", file=sys.stderr)
         elif len(risk_signals) > 0:
             print(f"  📋 반대매매 신호 ({code}): {risk_signals} ({len(risk_signals)}개 — 기준 미달)", file=sys.stderr)
+
+    # ── 물갈이 감지 ───────────────────────────────────
+    # 개인 대량 매도 + 외국인·기관 동시 매수 → 매수 매력 신호
+    turnover = ""
+    if investor:
+        indiv  = investor.get("individual", 0) or 0
+        foreign = investor.get("foreign", 0) or 0
+        inst    = investor.get("institution", 0) or 0
+        indiv5  = investor.get("indiv5", 0) or 0
+        # 개인 대량 매도 (당일 또는 5일 누적)
+        indiv_heavy_sell = indiv < 0 and (abs(indiv) > abs(foreign) or abs(indiv) > abs(inst))
+        indiv5_sell = indiv5 < 0
+        # 외국인·기관 동시 매수
+        both_buying = foreign > 0 and inst > 0
+        if indiv_heavy_sell and indiv5_sell and both_buying:
+            turnover = "🔄 물갈이 진행 — 개인 투매를 외국인·기관이 흡수 중"
+            print(f"  🔄 물갈이 감지 ({code}): 개인 {indiv:+,} / 외국인 {foreign:+,} / 기관 {inst:+,}", file=sys.stderr)
+    # ──────────────────────────────────────────────────
     # ──────────────────────────────────────────────────
     # 시장 분위기 브레이크: 전일 밤 미국 선행지표가 비우호적이면 매수 신호를 보수적으로
     market_brake = ""
@@ -1391,6 +1409,7 @@ def analyze_stock(stock, kospi, market=None):
         "nuance": nuance,
         "contrarian": contrarian,
         "marginCallRisk": margin_call_risk,
+        "turnover": turnover,
         "marketBrake": market_brake,
         "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
