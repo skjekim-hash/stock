@@ -1170,9 +1170,6 @@ def assess_overheat_warning(rsi, stoch_rsi, price, high52w, fair_value, fg_score
     n = len(reasons)
     if n >= 3: return {"level": "경고", "reasons": reasons, "color": "#ff4060", "title": "🚫 고위험 구간"}
     elif n >= 2: return {"level": "주의", "reasons": reasons, "color": "#ffc940", "title": "⚠️ 단기 과열"}
-    # 52주 고점 95%↑는 단독으로도 '주의' (물림 위험이 본질적으로 큼)
-    elif n == 1 and high52w and high52w > 0 and price / high52w * 100 >= 95:
-        return {"level": "주의", "reasons": reasons, "color": "#ffc940", "title": "⚠️ 52주 고점권"}
     else: return {"level": "none", "reasons": reasons, "color": "", "title": ""}
 
 def price_targets(price, op, rsi, pivot):
@@ -1411,18 +1408,6 @@ def analyze_stock(stock, kospi, market=None):
                                      divergence, psar, investor, cci, price, pivot)
     overheat = assess_overheat_warning(rsi, stoch_rsi, price, high52w,
                                        fair.get("fair_value", 0), fg["score"])
-
-    # ── 추격매수 경고 ───────────────────────────────────
-    # 당일 급등(+5%↑) + 52주 고점권(85%↑) + 거래량 잠김(0.8배 미만)
-    # = 고점에서 매물 잠긴 채 오른 자리 → 추격 진입 시 물림 위험
-    chase_warning = ""
-    day_chg = round((price - prev) / prev * 100, 2) if prev and prev > 0 else 0
-    pos52_now = breakout.get("position", 0) if breakout else 0
-    if day_chg >= 5 and pos52_now >= 85 and vol_ratio < 0.8:
-        chase_warning = "🚫 추격 위험 — 고점권 급등 + 거래량 잠김. 눌림 기다리세요"
-        print(f"  🚫 추격매수 경고 ({code}): +{day_chg}% / 52주 {pos52_now}% / 거래량 {vol_ratio:.2f}배", file=sys.stderr)
-    # ──────────────────────────────────────────────────
-
     pt = price_targets(price, opinion, rsi or 50, pivot)
     basis, risk, notes = gen_text(code, opinion, rsi, wr, mfi, ft, obv,
                                   weekly, investor, short, vol_surge, breakout)
@@ -1461,7 +1446,6 @@ def analyze_stock(stock, kospi, market=None):
         "contrarian": contrarian,
         "marginCallRisk": margin_call_risk,
         "turnover": turnover,
-        "chaseWarning": chase_warning,
         "marketBrake": market_brake,
         "flowRead": flow_read,
         "tradedAt": naver.get("tradedAt", "") if naver else "",
