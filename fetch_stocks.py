@@ -890,6 +890,19 @@ def calc_boll(closes, p=20):
     std = (sum((v - m) ** 2 for v in sl) / p) ** 0.5
     return {"upper": m + 2 * std, "mid": m, "lower": m - 2 * std}
 
+def calc_atr(highs, lows, closes, p=14):
+    """평균 실질 변동폭 — 종목별 변동성. 손절폭 산정에 사용."""
+    if len(closes) < p + 1: return None
+    trs = []
+    for i in range(1, len(closes)):
+        tr = max(highs[i] - lows[i],
+                 abs(highs[i] - closes[i-1]),
+                 abs(lows[i] - closes[i-1]))
+        trs.append(tr)
+    atr = sum(trs[-p:]) / p
+    pct = round(atr / closes[-1] * 100, 2) if closes[-1] else 0
+    return {"atr": round(atr), "pct": pct}
+
 def calc_pivot(highs, lows, closes):
     if len(closes) < 2: return None
     h, l, c = highs[-2], lows[-2], closes[-2]; p = (h + l + c) / 3
@@ -1279,6 +1292,7 @@ def analyze_stock(stock, kospi, market=None):
     contra = contra_signal(rsi, macd, macd_sig, obv, pats, fg["score"], investor)
 
     boll_result = calc_boll(closes_d) if has_data else None
+    atr = calc_atr(highs_d, lows_d, closes_d) if has_data else None
     boll_pos = None
     if boll_result and boll_result["upper"] != boll_result["lower"]:
         boll_pos = round((closes_d[-1] - boll_result["lower"]) / (boll_result["upper"] - boll_result["lower"]) * 100)
@@ -1452,6 +1466,8 @@ def analyze_stock(stock, kospi, market=None):
                  "mid":   round(boll_result["mid"])   if boll_result else 0,
                  "lower": round(boll_result["lower"]) if boll_result else 0,
                  "position": boll_pos} if boll_result else None,
+        "atr": atr,
+        "atrStopLoss": round(price - atr["atr"] * 2) if atr else 0,
         "suggestedPrice": pt["sp"], "suggestedLabel": pt["sl"],
         "targetPrice": pt["tp"], "targetPrice2": pt["tp2"], "stopLoss": pt["stop"],
         "rsi": rsi, "rsiComment": cmt_rsi(rsi),
