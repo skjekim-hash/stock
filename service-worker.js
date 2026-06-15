@@ -4,7 +4,7 @@
 //   - 정적 파일(html/css/svg/manifest): 캐시 우선, 백그라운드에서 갱신
 //   - 그 외: 네트워크 우선
 
-const CACHE_VERSION = 'v2026-06-15-atr';
+const CACHE_VERSION = 'v2026-06-15-atr2';
 const STATIC_CACHE  = `stock-static-${CACHE_VERSION}`;
 const DATA_CACHE    = `stock-data-${CACHE_VERSION}`;
 
@@ -20,7 +20,10 @@ const PRECACHE_URLS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(PRECACHE_URLS).catch((err) => {
+      // 캐시 우회: 항상 네트워크에서 최신 정적 파일을 받아 캐시 (구버전 방지)
+      return cache.addAll(
+        PRECACHE_URLS.map((u) => new Request(u, { cache: 'reload' }))
+      ).catch((err) => {
         console.warn('Precache 일부 실패:', err);
       });
     }).then(() => self.skipWaiting())
@@ -54,7 +57,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 정적 파일: 캐시 우선
+  // HTML(index.html, './')은 네트워크 우선 — 코드 갱신 즉시 반영
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // 정적 파일(manifest/icon): 캐시 우선
   if (PRECACHE_URLS.some((p) => url.pathname.endsWith(p.replace('./', '')))) {
     event.respondWith(cacheFirst(request));
     return;
