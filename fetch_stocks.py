@@ -960,6 +960,12 @@ def calc_relative_strength(stock_pct, kospi_pct):
 
 def check_52w_breakout(price, high52w, low52w):
     if high52w == 0: return {"nearHigh": False, "nearLow": False, "position": 50, "comment": ""}
+    # 52주 저점이 0이거나 비정상이면 고점 기준으로만 판단 (position 왜곡 방지)
+    if not low52w or low52w <= 0 or high52w <= low52w:
+        pos = min(round(price / high52w * 100), 100)
+        near_high = pos >= 90
+        comment = (f"52주 신고가 근접 ({pos}%)" if near_high else f"52주 위치 ({pos}%, 저점 미확보)")
+        return {"nearHigh": near_high, "nearLow": False, "position": pos, "comment": comment}
     pos = round((price - low52w) / (high52w - low52w) * 100) if high52w != low52w else 50
     near_high = pos >= 90; near_low = pos <= 10
     comment = (f"52주 신고가 근접 ({pos}%)" if near_high else
@@ -1225,6 +1231,11 @@ def analyze_stock(stock, kospi, market=None):
     yf_low  = round(meta_d.get("fiftyTwoWeekLow", 0))
     if high52w <= 0 or high52w < price: high52w = max(yf_high, price)
     if low52w <= 0 or low52w > price:   low52w = min(yf_low, price) if yf_low > 0 else low52w
+    # API가 52주 저점을 못 주면 보유 일봉 데이터의 최저가로 보정 (0 방지)
+    if (not low52w or low52w <= 0) and has_data and lows_d:
+        low52w = round(min(lows_d))
+    if (not high52w or high52w <= 0) and has_data and highs_d:
+        high52w = round(max(highs_d))
 
     if price == 0: return None
 
@@ -1297,7 +1308,7 @@ def analyze_stock(stock, kospi, market=None):
             oversold_signals.append("Williams %R 과매도")
         if stoch and stoch < 20:
             oversold_signals.append("스토캐스틱 과매도")
-        if high52w > 0 and low52w > 0:
+        if high52w > 0 and low52w > 0 and high52w > low52w:
             pos52 = (price - low52w) / (high52w - low52w) * 100
             if pos52 < 25:
                 oversold_signals.append("52주 저점 근처")
