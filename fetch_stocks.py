@@ -238,6 +238,12 @@ def fetch_short_selling(code):
 def fetch_kospi():
     try:
         d = http_json("https://m.stock.naver.com/api/index/KOSPI/basic")
+        # 등락종목 수 필드 탐색 (ADR 계산용)
+        adr_keys = [k for k in d.keys() if any(t in k.lower() for t in ["rising","falling","up","down","advance","decline","상승","하락"])]
+        if adr_keys:
+            print(f"  📊 KOSPI ADR 후보 필드: {[(k, d[k]) for k in adr_keys]}", file=sys.stderr)
+        else:
+            print(f"  📊 KOSPI 응답 키 목록: {list(d.keys())}", file=sys.stderr)
         price  = to_n(d.get("closePrice") or d.get("indexValue") or 0)
         change = to_n(d.get("compareToPreviousClosePrice") or 0)
         pct    = to_n(d.get("fluctuationsRatio") or 0)
