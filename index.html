@@ -669,7 +669,14 @@ function renderSummaryTable(stocks){
       +  "<div style='font-size:11px;color:"+s1c+";font-family:JetBrains Mono,monospace'>"+s1str+(s1tag?" "+s1tag:"")+"</div>"
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
-      +  "<span style='font-size:11px;font-weight:700;color:"+rc+";font-family:JetBrains Mono,monospace'>"+(s.rsi||"—")+"</span>"
+      +  "<div style='font-size:11px;font-weight:700;color:"+rc+";font-family:JetBrains Mono,monospace'>"+(s.rsi||"—")+"</div>"
+      +  (function(){
+          if(!s.stochRsi||s.stochRsi.k==null) return "<div style='font-size:9.5px;color:#4a5878'>—</div>";
+          var k=s.stochRsi.k;
+          var kc=k<=20?"#00e5a0":k>=80?"#ff4060":"#8090b0";
+          var klabel=k<=20?"과매도":k>=80?"과매수":"";
+          return "<div style='font-size:9.5px;color:"+kc+";font-family:JetBrains Mono,monospace'>S "+k+(klabel?" "+klabel:"")+"</div>";
+        })()
       +"</td>"
       +"</tr>";
   }
@@ -707,7 +714,7 @@ function renderSummaryTable(stocks){
     +  "<th>의견</th>"
     +  "<th style='text-align:right'>현재가</th>"
     +  "<th style='text-align:right;color:#00d4ff'>지지가(S1)</th>"
-    +  "<th>RSI</th>"
+    +  "<th>RSI<br><span style='font-size:9px;color:#4a5878;font-weight:400'>스토캐</span></th>"
     +"</tr></thead>"
     +"<tbody>"+rows+"</tbody>"
     +"</table></div>"
