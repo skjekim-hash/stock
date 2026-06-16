@@ -640,7 +640,7 @@ function renderSummaryTable(stocks){
     // S1 거리 상태: 이미 아래면 매수구간(초록), ±2% 근접이면 노랑, 멀면 회색
     var s1c, s1tag;
     if(s1d===null){ s1c="#4a5878"; s1tag=""; }
-    else if(s.price<=s1){ s1c="#00e5a0"; s1tag="🟢지지권"; }
+    else if(s.price<=s1){ s1c="#00e5a0"; s1tag="지지"; }
     else if(Math.abs(s1d)<=2){ s1c="#ffc940"; s1tag="근접"; }
     else { s1c="#8090b0"; s1tag=""; }
     var cid=s.code;
@@ -674,8 +674,7 @@ function renderSummaryTable(stocks){
           if(!s.stochRsi||s.stochRsi.k==null) return "<div style='font-size:9.5px;color:#4a5878'>—</div>";
           var k=s.stochRsi.k;
           var kc=k<=20?"#00e5a0":k>=80?"#ff4060":"#8090b0";
-          var klabel=k<=20?"과매도":k>=80?"과매수":"";
-          return "<div style='font-size:9.5px;color:"+kc+";font-family:JetBrains Mono,monospace'>S "+k+(klabel?" "+klabel:"")+"</div>";
+          return "<div style='font-size:10px;color:"+kc+";font-family:JetBrains Mono,monospace'>K "+k+"</div>";
         })()
       +"</td>"
       +"</tr>";
@@ -714,7 +713,7 @@ function renderSummaryTable(stocks){
     +  "<th>의견</th>"
     +  "<th style='text-align:right'>현재가</th>"
     +  "<th style='text-align:right;color:#00d4ff'>지지가(S1)</th>"
-    +  "<th>RSI<br><span style='font-size:9px;color:#4a5878;font-weight:400'>스토캐</span></th>"
+    +  "<th>RSI<br><span style='font-size:9px;color:#4a5878;font-weight:400'>스토캐 K</span></th>"
     +"</tr></thead>"
     +"<tbody>"+rows+"</tbody>"
     +"</table></div>"
