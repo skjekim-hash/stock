@@ -1396,6 +1396,40 @@ function updateReserveBadge(){
   el.style.color=amt>0?"#00e5a0":amt<0?"#ff4060":"#8090b0";
 }
 
+// 타임스탬프(KST ms)로 거래 시장 추정 — 기존 기록 소급 분류용
+// 정규장 시간(09:00~15:20)만 KRX, 그 외 시간 기록은 모두 NXT로 간주
+// (사용자는 정규장 거래를 NXT 시간대에 기록하지 않음)
+function guessMarket(ts){
+  if(!ts) return "KRX";
+  const d = new Date(ts);
+  const hhmm = d.getUTCHours()*60 + d.getUTCMinutes();
+  if(hhmm >= 9*60 && hhmm <= 15*60+20) return "KRX";
+  return "NXT";
+}
+
+// 기존 기록 마이그레이션: market 필드 없으면 채워넣기 (1회성)
+// 옛 기록의 enteredTs는 UTC 기준이라 +9h 보정해야 KST가 됨
+function migrateJournal(){
+  try{
+    const arr = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
+    let changed = false;
+    arr.forEach(e=>{
+      if(e.market===undefined && e.enteredTs){
+        // 옛 ts(UTC기준)를 KST ms로 보정
+        const kstTs = e.enteredTs + 9*60*60*1000;
+        e.market = guessMarket(kstTs);
+        // 표시 시간도 KST로 보정 (9시간 밀렸던 것)
+        const d = new Date(kstTs);
+        const p = n => String(n).padStart(2,"0");
+        e.enteredAt = `${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+        e.enteredTs = kstTs;  // 타임스탬프도 KST로 통일
+        changed = true;
+      }
+    });
+    if(changed) localStorage.setItem(JOURNAL_KEY, JSON.stringify(arr));
+  }catch(err){ console.warn("마이그레이션 실패:", err); }
+}
+
 function loadJournal(){
   try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); }
   catch(e){ return []; }
@@ -1429,11 +1463,21 @@ function recordEntry(code){
     psar: s.psar?s.psar.trend:null, cci: s.cci?s.cci.signal:null,
     pos52: (s.high52w&&s.high52w>0)?Math.round(s.price/s.high52w*100):null
   };
-  const now = new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
+  // 한국시간(KST) 기준 현재 시각
+  const nowReal = new Date();
+  const kstMs = nowReal.getTime() + (nowReal.getTimezoneOffset()+540)*60000;
+  const now = new Date(kstMs);
+  // 거래 시장 자동 분류 (KST 시각 기준)
+  // 정규장 09:00~15:20 = KRX / 그 외 시간 = NXT
+  const hhmm = now.getUTCHours()*60 + now.getUTCMinutes();
+  const market = (hhmm >= 9*60 && hhmm <= 15*60+20) ? "KRX" : "NXT";
+  const pad = n => String(n).padStart(2,"0");
+  const enteredAtStr = `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}`;
   const entry = {
     id: Date.now(),
-    enteredAt: now.toISOString().slice(0,16).replace("T"," "),
-    enteredTs: now.getTime(),  // 보유기간 계산용
+    enteredAt: enteredAtStr,
+    enteredTs: kstMs,  // 보유기간 계산용 (KST 기준)
+    market: market,
     ...snap,
     entryPrice: entryPrice,
     shares: shares,
@@ -1521,9 +1565,12 @@ function renderJournal(){
   function makeRow(e){
     const held = e.status==="보유";
     const retColor = e.returnPct===null?"#8090b0":e.returnPct>0?"#00e5a0":"#ff4060";
+    // 시장 구분: 저장된 market 없으면 타임스탬프(KST)로 자동 추정
+    const mkt = e.market || guessMarket(e.enteredTs);
+    const mktColor = mkt==="NXT"?"#a060ff":"#4090ff";
     return `<div style="background:#0a1020;border:1px solid ${held?'#1a2540':retColor+'40'};border-radius:11px;padding:12px;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-weight:800;font-size:13px">${e.name}</span>
+        <span style="font-weight:800;font-size:13px">${e.name} <span style="font-size:10px;color:${mktColor};border:1px solid ${mktColor}50;border-radius:6px;padding:1px 5px;font-weight:600;margin-left:2px">${mkt}</span></span>
         <span style="font-size:11px;color:${held?'#ffc940':retColor};font-weight:700">${held?"보유중":(e.returnPct>0?"+":"")+e.returnPct+"%"}</span>
       </div>
       <div style="font-size:11.5px;color:#8090b0;line-height:1.6">
@@ -1573,8 +1620,11 @@ function closeTradePrompt(id){
     exitShares = Math.min(remaining, Math.max(1, parseInt(sq)||remaining));
   }
   const reason = prompt("청산 이유 (익절/손절/신호변화 등):", "익절") || "";
-  const now = new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
-  const todayStr = now.toISOString().slice(0,10);
+  const nowRealC = new Date();
+  const kstMsC = nowRealC.getTime() + (nowRealC.getTimezoneOffset()+540)*60000;
+  const now = new Date(kstMsC);
+  const pC = n => String(n).padStart(2,"0");
+  const todayStr = `${now.getUTCFullYear()}-${pC(now.getUTCMonth()+1)}-${pC(now.getUTCDate())}`;
   // 적립금 계산 (청산 수량 기준)
   const pnl = (exitPrice - e.entryPrice) * exitShares;
   const reserve = loadReserve();
@@ -1595,11 +1645,11 @@ function closeTradePrompt(id){
     // 완전 청산
     e.exitPrice = exitPrice;
     e.exitAt = todayStr;
-    e.exitTs = now.getTime();
+    e.exitTs = kstMsC;
     e.returnPct = Math.round((exitPrice-e.entryPrice)/e.entryPrice*1000)/10;
     e.exitReason = reason;
     if(e.enteredTs){
-      e.heldDays = Math.max(1, Math.round((now.getTime()-e.enteredTs)/(1000*60*60*24)));
+      e.heldDays = Math.max(1, Math.round((kstMsC-e.enteredTs)/(1000*60*60*24)));
     }
     e.status = "청산";
   } else {
@@ -1651,6 +1701,7 @@ function exportJournal(){
 }
 
 function openJournal(){
+  migrateJournal();
   document.getElementById("journalModal").style.display="flex";
   renderJournal();
 }
