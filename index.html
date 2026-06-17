@@ -521,11 +521,24 @@ const OC={"매수":"#00e5a0","중립":"#ffc940","매도":"#ff4060"};
 const OI={"매수":"▲","중립":"◆","매도":"▼"};
 
 function kst(){
-  const d=new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
-  const h=d.getHours(),mn=d.getMinutes(),day=d.getDay(),min=h*60+mn;
-  const open=day>=1&&day<=5&&min>=540&&min<=930;
-  return{open,label:open?"현재가":"종가",
-    status:(day===0||day===6)?"주말휴장":open?"🟢 장중":min<540?"🟡 장전":"🔴 장마감"};
+  const ms=Date.now()+(new Date().getTimezoneOffset()+540)*60000;
+  const d=new Date(ms);
+  const h=d.getUTCHours(),mn=d.getUTCMinutes(),day=d.getUTCDay(),min=h*60+mn;
+  const weekday=day>=1&&day<=5;
+  const open=weekday&&min>=540&&min<=930;          // 정규장 09:00~15:30
+  // NXT: 프리 08:00~08:50, 애프터 15:40~20:00
+  const nxtPre=weekday&&min>=480&&min<=530;
+  const nxtAfter=weekday&&min>=940&&min<=1200;
+  const nxt=nxtPre||nxtAfter;
+  let status;
+  if(day===0||day===6) status="주말휴장";
+  else if(open) status="🟢 장중";
+  else if(nxt) status="🌌 NXT 야간거래";
+  else if(min<480) status="🟡 장전";
+  else status="🔴 장마감";
+  return{open,nxt,nxtPre,nxtAfter,
+    label:open?"현재가":nxt?"NXT가":"종가",
+    status};
 }
 const W=n=>(!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR");
 const P=n=>n==null?"—":`${+n>0?"+":""}${(+n).toFixed(2)}%`;
@@ -600,12 +613,43 @@ function renderMarketBanner(m){
   var boxStyle=adverse
     ? "border-color:"+c+";background:linear-gradient(135deg,rgba(255,64,96,.12),rgba(255,64,96,.04));box-shadow:0 0 0 1px "+c+"55"
     : "border-color:"+c+"44";
-  return "<div class='market-banner' style='"+boxStyle+"'>"
+  // ── NXT 야간 모드 ──
+  var ki=kst();
+  var nightHeader="";
+  var nightAlert="";
+  if(ki.nxt){
+    var phase=ki.nxtPre?"프리마켓 (08:00~08:50)":"애프터마켓 (15:40~20:00)";
+    nightHeader="<div style='background:linear-gradient(135deg,#1a1040,#0a1430);border:1px solid #6040a0;border-radius:12px;padding:10px 14px;margin-bottom:10px'>"
+      +"<div style='font-size:13px;font-weight:800;color:#a060ff'>🌌 NXT 야간거래 모드 · "+phase+"</div>"
+      +"<div style='font-size:11px;color:#9ab;margin-top:3px;line-height:1.5'>개별 종목 지표는 정규장 마감 기준이에요. 지금은 미국 선행지표로 내일 흐름을 가늠하세요.</div>"
+      +"</div>";
+    // 미국 지표 급변동 자동 안내
+    var alerts=[];
+    if(m.nasdaq&&typeof m.nasdaq.pct==="number"){
+      if(m.nasdaq.pct<=-1.5) alerts.push("나스닥선물 "+m.nasdaq.pct+"% 급락 — 내일 갭하락 대비, 보유 종목 점검");
+      else if(m.nasdaq.pct>=1.5) alerts.push("나스닥선물 +"+m.nasdaq.pct+"% 급등 — 내일 갭상승 가능, 추격 주의");
+    }
+    if(m.sox&&typeof m.sox.pct==="number"){
+      if(m.sox.pct<=-3) alerts.push("반도체(SOX) "+m.sox.pct+"% 급락 — 하이닉스·삼성전자·삼성전기 갭하락 주의");
+      else if(m.sox.pct>=3) alerts.push("반도체(SOX) +"+m.sox.pct+"% 급등 — 반도체 3종 갭상승 가능");
+    }
+    if(m.vix&&typeof m.vix.pct==="number"&&m.vix.pct>=15){
+      alerts.push("VIX +"+m.vix.pct+"% 급등 — 공포 확대, 내일 변동성 주의");
+    }
+    if(alerts.length){
+      nightAlert="<div style='background:#ff406012;border:1px solid #ff406040;border-radius:10px;padding:9px 12px;margin-top:8px'>"
+        +"<div style='font-size:11px;font-weight:700;color:#ff8c40;margin-bottom:4px'>⚡ NXT 대응 가이드</div>"
+        +alerts.map(function(a){return "<div style='font-size:11px;color:#d8e0ec;line-height:1.5;margin-top:2px'>• "+a+"</div>";}).join("")
+        +"</div>";
+    }
+  }
+  return nightHeader+"<div class='market-banner' style='"+boxStyle+(ki.nxt?";border-color:#6040a0":"")+"'>"
     +"<div class='mb-top'>"
     +"<span class='mb-label' style='color:"+c+";font-size:13px'>"+icon+" 미국 선행 "+sm.label+"</span>"
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
+    +nightAlert
     +"</div>";
 }
 
