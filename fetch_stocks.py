@@ -262,6 +262,7 @@ def fetch_market_signal():
         ("^TNX",  "미국 10년물 금리",  "tnx"),
         ("DX-Y.NYB", "달러인덱스",     "dxy"),
         ("CNY=X", "위안/달러",         "cny"),
+        ("TSM",   "TSMC",             "tsmc"),
     ]
     out = {}
     for sym, name, key in targets:
@@ -344,6 +345,20 @@ def fetch_market_signal():
             out["summary"]["cnyNote"] = "위안은 안정인데 원화만 약세 — 한국 고유 악재 가능성. 외국인 이탈 신호일 수 있어 더 주의."
         elif not krw_weak and cny_weak:
             out["summary"]["cnyNote"] = "위안 약세지만 원화는 견조 — 한국이 상대적으로 버티는 중. 차별화 흐름 확인."
+
+    # TSMC ADR 짝 읽기 (점수 미반영, 반도체 선행 가이드용)
+    # TSMC는 파운드리 1위 — SOX 지수보다 삼성전자·하이닉스에 더 직결된 선행지표
+    tsmc_pct = out.get("tsmc", {}).get("pct", 0)
+    sox_pct_now = out.get("sox", {}).get("pct", 0)
+    if "tsmc" in out:
+        if tsmc_pct >= 2:
+            out["summary"]["tsmcNote"] = f"TSMC +{tsmc_pct}% 강세 — 삼성전자·SK하이닉스 내일 긍정적. 단 추격보다 눌림 대기."
+        elif tsmc_pct <= -2:
+            out["summary"]["tsmcNote"] = f"TSMC {tsmc_pct}% 약세 — 삼성전자·SK하이닉스 갭하락 주의. 지지선 확인 후 분할."
+        elif sox_pct_now <= -1 and tsmc_pct >= 0:
+            out["summary"]["tsmcNote"] = f"SOX 약세지만 TSMC는 견조({'+' if tsmc_pct>=0 else ''}{tsmc_pct}%) — 반도체 차별화. 개별 종목 수급 확인."
+        elif sox_pct_now >= 1 and tsmc_pct <= 0:
+            out["summary"]["tsmcNote"] = f"SOX 강세지만 TSMC는 약세({tsmc_pct}%) — 파운드리 부진. 삼성·하이닉스 신중."
     parts = []
     for k in ("sox", "nasdaq", "fx", "vix"):
         if k in out:
