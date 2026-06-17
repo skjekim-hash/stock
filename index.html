@@ -526,18 +526,19 @@ function kst(){
   const h=d.getUTCHours(),mn=d.getUTCMinutes(),day=d.getUTCDay(),min=h*60+mn;
   const weekday=day>=1&&day<=5;
   const open=weekday&&min>=540&&min<=930;          // 정규장 09:00~15:30
-  // NXT: 프리 08:00~08:50, 애프터 15:40~20:00
+  // NXT 실거래: 프리 08:00~08:50, 애프터 15:40~20:00
   const nxtPre=weekday&&min>=480&&min<=530;
   const nxtAfter=weekday&&min>=940&&min<=1200;
-  const nxt=nxtPre||nxtAfter;
+  const nxtLive=nxtPre||nxtAfter;
+  // 야간 모드: 정규장·주말 외 모든 평일 시간 (미국 모니터링 + 내일 전략용)
+  const nxt=weekday&&!open;
   let status;
   if(day===0||day===6) status="주말휴장";
   else if(open) status="🟢 장중";
-  else if(nxt) status="🌌 NXT 야간거래";
-  else if(min<480) status="🟡 장전";
-  else status="🔴 장마감";
-  return{open,nxt,nxtPre,nxtAfter,
-    label:open?"현재가":nxt?"NXT가":"종가",
+  else if(nxtLive) status="🌌 NXT 거래중";
+  else status="🌙 야간 (모니터링)";
+  return{open,nxt,nxtLive,nxtPre,nxtAfter,
+    label:open?"현재가":"종가",
     status};
 }
 const W=n=>(!n||isNaN(+n)||+n===0)?"—":"₩"+(+n).toLocaleString("ko-KR");
@@ -618,10 +619,13 @@ function renderMarketBanner(m){
   var nightHeader="";
   var nightAlert="";
   if(ki.nxt){
-    var phase=ki.nxtPre?"프리마켓 (08:00~08:50)":"애프터마켓 (15:40~20:00)";
+    var phase, phaseDesc;
+    if(ki.nxtPre){ phase="NXT 프리마켓 (08:00~08:50)"; phaseDesc="지금 NXT 거래 가능 시간이에요."; }
+    else if(ki.nxtAfter){ phase="NXT 애프터마켓 (15:40~20:00)"; phaseDesc="지금 NXT 거래 가능 시간이에요."; }
+    else{ phase="야간 모니터링"; phaseDesc="지금은 거래 불가 시간이에요. 미국 장 보며 내일 전략을 세우세요."; }
     nightHeader="<div style='background:linear-gradient(135deg,#1a1040,#0a1430);border:1px solid #6040a0;border-radius:12px;padding:10px 14px;margin-bottom:10px'>"
-      +"<div style='font-size:13px;font-weight:800;color:#a060ff'>🌌 NXT 야간거래 모드 · "+phase+"</div>"
-      +"<div style='font-size:11px;color:#9ab;margin-top:3px;line-height:1.5'>개별 종목 지표는 정규장 마감 기준이에요. 지금은 미국 선행지표로 내일 흐름을 가늠하세요.</div>"
+      +"<div style='font-size:13px;font-weight:800;color:#a060ff'>🌙 "+phase+"</div>"
+      +"<div style='font-size:11px;color:#9ab;margin-top:3px;line-height:1.5'>개별 종목 지표는 정규장 마감 기준이에요. "+phaseDesc+"</div>"
       +"</div>";
     // 미국 지표 급변동 자동 안내
     var alerts=[];
