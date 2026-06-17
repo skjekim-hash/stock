@@ -261,6 +261,7 @@ def fetch_market_signal():
         ("^VIX",  "공포지수(VIX)",     "vix"),
         ("^TNX",  "미국 10년물 금리",  "tnx"),
         ("DX-Y.NYB", "달러인덱스",     "dxy"),
+        ("CNY=X", "위안/달러",         "cny"),
     ]
     out = {}
     for sym, name, key in targets:
@@ -330,6 +331,19 @@ def fetch_market_signal():
         advice = "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요."
 
     out["summary"] = {"mood": mood, "label": label, "score": round(score, 1), "advice": advice}
+
+    # 위안/원화 짝 읽기 (점수 미반영, 해석 가이드용)
+    # 위안 약세 + 원화 약세 = 아시아 전반 자금이탈 / 원화만 약세 = 한국 고유 악재
+    cny_pct = out.get("cny", {}).get("pct", 0)
+    if "cny" in out and "fx" in out:
+        cny_weak = cny_pct >= 0.3   # 위안 약세(위안/달러 상승)
+        krw_weak = fx_pct >= 0.3    # 원화 약세
+        if krw_weak and cny_weak:
+            out["summary"]["cnyNote"] = "위안·원화 동반 약세 — 아시아 전반 자금 이탈 분위기 (한국만의 문제는 아님). 외국인 매도 흐름 주시."
+        elif krw_weak and not cny_weak:
+            out["summary"]["cnyNote"] = "위안은 안정인데 원화만 약세 — 한국 고유 악재 가능성. 외국인 이탈 신호일 수 있어 더 주의."
+        elif not krw_weak and cny_weak:
+            out["summary"]["cnyNote"] = "위안 약세지만 원화는 견조 — 한국이 상대적으로 버티는 중. 차별화 흐름 확인."
     parts = []
     for k in ("sox", "nasdaq", "fx", "vix"):
         if k in out:
