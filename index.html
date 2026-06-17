@@ -521,16 +521,21 @@ const OC={"매수":"#00e5a0","중립":"#ffc940","매도":"#ff4060"};
 const OI={"매수":"▲","중립":"◆","매도":"▼"};
 
 function kst(){
-  const ms=Date.now()+(new Date().getTimezoneOffset()+540)*60000;
-  const d=new Date(ms);
-  const h=d.getUTCHours(),mn=d.getUTCMinutes(),day=d.getUTCDay(),min=h*60+mn;
+  // 기기 시간대와 무관하게 한국시간(KST) 추출
+  const parts=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
+  const get=t=>{const p=parts.find(x=>x.type===t);return p?p.value:"";};
+  let hh=parseInt(get("hour"),10); if(hh===24) hh=0;
+  const mm=parseInt(get("minute"),10);
+  const wdMap={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+  const day=wdMap[get("weekday")] ?? 1;
+  const min=hh*60+mm;
   const weekday=day>=1&&day<=5;
   const open=weekday&&min>=540&&min<=930;          // 정규장 09:00~15:30
   // NXT 실거래: 프리 08:00~08:50, 애프터 15:40~20:00
   const nxtPre=weekday&&min>=480&&min<=530;
   const nxtAfter=weekday&&min>=940&&min<=1200;
   const nxtLive=nxtPre||nxtAfter;
-  // 야간 모드: 정규장·주말 외 모든 평일 시간 (미국 모니터링 + 내일 전략용)
+  // 야간 모드: 정규장·주말 외 모든 평일 시간
   const nxt=weekday&&!open;
   let status;
   if(day===0||day===6) status="주말휴장";
