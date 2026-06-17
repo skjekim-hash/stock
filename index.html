@@ -593,12 +593,12 @@ function renderMarketBanner(m){
   // 지표별 색: 좋으면 초록, 나쁘면 빨강
   // sox·nasdaq은 내리면 악재(빨강), fx·vix는 오르면 악재(빨강)
   var parts=[];
-  [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"],["vix","VIX"],["tnx","미국금리"],["dxy","달러인덱스"]].forEach(function(p){
+  [["sox","반도체"],["nasdaq","나스닥선물"],["fx","환율"],["vix","VIX"],["tnx","미국금리"],["dxy","달러인덱스"],["cny","위안/달러"]].forEach(function(p){
     var k=p[0], lbl=p[1];
     if(m[k]&&typeof m[k].pct==="number"){
       var pct=m[k].pct;
       var pctStr=(pct>=0?"+":"")+pct+"%";
-      var bad=(k==="fx"||k==="vix"||k==="tnx"||k==="dxy")?pct>0:pct<0;
+      var bad=(k==="fx"||k==="vix"||k==="tnx"||k==="dxy"||k==="cny")?pct>0:pct<0;
       var col=Math.abs(pct)<0.3?"#9ab":bad?"#ff5470":"#00e5a0";
       var txt;
       if((k==="fx"||k==="vix")&&m[k].price){
@@ -607,6 +607,8 @@ function renderMarketBanner(m){
       } else if(k==="tnx"&&m[k].price){
         txt=lbl+" "+m[k].price+"% ("+pctStr+")";
       } else if(k==="dxy"&&m[k].price){
+        txt=lbl+" "+m[k].price+" ("+pctStr+")";
+      } else if(k==="cny"&&m[k].price){
         txt=lbl+" "+m[k].price+" ("+pctStr+")";
       } else {
         txt=lbl+" "+pctStr;
@@ -658,6 +660,7 @@ function renderMarketBanner(m){
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
+    +(sm.cnyNote?"<div style='font-size:11px;color:#b0c0d8;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🇨🇳 "+sm.cnyNote+"</div>":"")
     +nightAlert
     +"</div>";
 }
@@ -1298,6 +1301,7 @@ function renderCard(s,idx){
       <div class="guide-item"><b>공포지수(VIX)</b> — 미국 시장의 <i>변동성·불안 심리</i>를 나타내는 '공포지수'. <b>수치와 변동률 둘 다</b> 봅니다. 평소 15~20에서 움직이다가 30 넘으면 공포, 40 위는 패닉. <b>오르면 비우호, 내리면 안정.</b> 절대 수치가 낮아도 하루 변동률이 크게 튀면(예: +30%) 갑자기 불안해졌다는 신호라 무리한 진입을 피합니다. <i>※ 한국판인 V-KOSPI도 있지만, 한국 장이 열린 뒤 따라 움직이는 후행 지표라 선행 신호로는 미국 VIX를 사용합니다.</i></div>
       <div class="guide-item"><b>미국 10년물 국채금리</b> — 글로벌 자금의 기준점. <b>오르면 성장주(반도체·플랫폼·2차전지)에 부담</b>이에요. 금리가 오르면 미래 이익의 현재가치가 깎여서, 성장 기대로 비싸게 거래되던 종목일수록 타격이 큽니다. 하이닉스·삼성전자·NAVER가 직접 영향권. <b>4.5% 위는 부담, 5.0% 위는 강한 부담</b> 구간으로 보고, 하루 변동률도 함께 봅니다. 반대로 금리가 내리면 성장주에 우호적이에요. <i>※ 은행주(KB금융)는 금리 상승이 오히려 호재일 수 있어 종목별로 영향이 갈립니다.</i></div>
       <div class="guide-item"><b>달러인덱스(DXY)</b> — 달러가 주요 6개 통화 대비 강한지 약한지를 보는 지표. <b>환율과 짝지어 읽는 게 핵심</b>이에요. ① DXY 오르고 원화도 약세 → <i>글로벌 달러 강세</i>라 어쩔 수 없는 흐름(우리만의 문제 아님). ② DXY 그대로인데 원화만 약세 → <i>한국 고유 악재</i>(더 위험, 외국인 이탈 신호일 수 있음). DXY가 오르면 보통 신흥국(한국 포함) 자금이 미국으로 빠져나가 부담이에요. <i>※ 점수에는 직접 반영하지 않고, 환율 움직임의 원인을 읽는 보조 지표로 씁니다.</i></div>
+      <div class="guide-item"><b>위안/달러(CNY)</b> — 중국 위안화 환율. <b>한국 증시는 위안화와 같이 움직이는 경향</b>이 강해요(둘 다 신흥 아시아로 묶임). <b>원화와 짝지어 읽습니다.</b> ① 위안·원화 동반 약세 → <i>아시아 전반 자금 이탈</i>(한국만의 문제 아님). ② 위안은 안정인데 원화만 약세 → <i>한국 고유 악재</i>(외국인 이탈 신호일 수 있어 더 주의). ③ 위안 약세인데 원화는 견조 → <i>한국이 상대적으로 버티는 차별화</i>. 외국인이 아시아에서 빠지는 분위기인지 미리 가늠하는 선행 신호예요. <i>※ 점수 미반영, 환율 해석 보조용.</i></div>
       <div class="guide-item" style="color:#8090b0;font-size:11.5px">
         이 지표들을 종합해 <b style="color:#00e5a0">🟢 우호적</b> / <b style="color:#ffc940">🟡 중립</b> / <b style="color:#ff4060">🔴 비우호적</b>으로 판정하고, 비우호적인 날은 매수 신호를 보수적으로 누릅니다(경계선 매수는 보류, 강한 매수는 '신중 진입').
       </div>
