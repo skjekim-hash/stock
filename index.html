@@ -1577,6 +1577,133 @@ function recordEntry(code){
 }
 
 // 기록 화면 렌더
+// 포트폴리오 집계 + 집중도 위험
+const SECTOR_MAP = {
+  "SK하이닉스":"반도체","삼성전자":"반도체","삼성전기":"반도체",
+  "LG전자":"가전/수출","현대차":"자동차","KB금융":"금융",
+  "SK텔레콤":"통신","NAVER":"플랫폼"
+};
+
+function calcPortfolio(arr){
+  const held = arr.filter(e=>e.status==="보유");
+  if(!held.length) return null;
+  const nowMs = Date.now();
+  const pos = {};
+  held.forEach(e=>{
+    const sh = (e.shares||1) - (e.soldShares||0);
+    if(sh<=0) return;
+    if(!pos[e.name]) pos[e.name]={shares:0, cost:0, days:0};
+    pos[e.name].shares += sh;
+    pos[e.name].cost += (e.entryPrice||0)*sh;
+    if(e.enteredTs){
+      const d=(nowMs-e.enteredTs)/(1000*60*60*24);
+      pos[e.name].days = Math.max(pos[e.name].days, d);
+    }
+  });
+  let totalCost=0;
+  const sectorCost={};
+  Object.entries(pos).forEach(([n,p])=>{
+    totalCost += p.cost;
+    const sec = SECTOR_MAP[n]||"기타";
+    sectorCost[sec] = (sectorCost[sec]||0) + p.cost;
+  });
+  // 종목 비중 정렬
+  const byStock = Object.entries(pos).map(([n,p])=>({
+    name:n, shares:p.shares, avg:p.cost/p.shares, cost:p.cost,
+    weight:p.cost/totalCost*100, days:Math.round(p.days)
+  })).sort((a,b)=>b.cost-a.cost);
+  const bySector = Object.entries(sectorCost).map(([s,c])=>({
+    sector:s, weight:c/totalCost*100
+  })).sort((a,b)=>b.weight-a.weight);
+
+  // 집중도 경고
+  const warns=[];
+  const topStock = byStock[0];
+  if(topStock && topStock.weight>=35) warns.push(`${topStock.name} 비중 ${topStock.weight.toFixed(0)}% — 한 종목 쏠림 주의`);
+  const topSector = bySector[0];
+  if(topSector && topSector.weight>=50) warns.push(`${topSector.sector} 섹터 ${topSector.weight.toFixed(0)}% — 섹터 집중 주의`);
+
+  return {byStock, bySector, totalCost, warns, count:byStock.length};
+}
+
+function renderPortfolio(arr){
+  const p = calcPortfolio(arr);
+  if(!p) return "";
+  const stockColors=["#00d4ff","#a060ff","#00e5a0","#ffc940","#ff8c40","#4090ff","#ff4060","#8090b0"];
+  // 비중 막대
+  const stockBars = p.byStock.map((s,i)=>{
+    const c = stockColors[i%stockColors.length];
+    return `<div style="margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+        <span style="color:#c8d4e4">${s.name} <span style="color:#8090b0">${s.shares}주·${s.days}일</span></span>
+        <span style="color:${c};font-weight:700;font-family:'JetBrains Mono',monospace">${s.weight.toFixed(0)}%</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${s.weight}%;background:${c};border-radius:3px"></div>
+      </div>
+    </div>`;
+  }).join("");
+  const warnHtml = p.warns.length?
+    `<div style="margin-top:8px;padding:7px 10px;background:rgba(255,140,64,.08);border:1px solid rgba(255,140,64,.25);border-radius:8px">
+      ${p.warns.map(w=>`<div style="font-size:10.5px;color:#ff8c40;line-height:1.5">⚠️ ${w}</div>`).join("")}
+    </div>`:
+    `<div style="margin-top:8px;font-size:10.5px;color:#00e5a0">✓ 분산 양호 — 한 종목·섹터 쏠림 없음</div>`;
+
+  return `<div style="background:linear-gradient(135deg,#0a1530,#0f1c3a);border:1.5px solid #4090ff44;border-radius:16px;padding:16px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-size:11px;color:#b8c4d8;letter-spacing:1px;font-weight:700">📊 포트폴리오 (보유 ${p.count}종목)</span>
+      <span style="font-size:12px;color:#4090ff;font-weight:800;font-family:'JetBrains Mono',monospace">${(p.totalCost/10000).toFixed(0)}만원</span>
+    </div>
+    ${stockBars}
+    ${warnHtml}
+  </div>`;
+}
+
+// 청산 점검 알림 (보유 종목) — 강제 아님, 점검 신호
+function getExitAlerts(arr, stocksData){
+  const held = arr.filter(e=>e.status==="보유");
+  const nowMs = Date.now();
+  const alerts=[];
+  // 종목별 현재가 (data.json에서)
+  const priceMap={};
+  (stocksData||[]).forEach(s=>{ priceMap[s.code]=s.price; });
+  const codeMap={"SK하이닉스":"000660","삼성전자":"005930","LG전자":"066570","삼성전기":"009150","현대차":"005380","KB금융":"105560","SK텔레콤":"017670","NAVER":"035420"};
+
+  held.forEach(e=>{
+    const sh=(e.shares||1)-(e.soldShares||0);
+    if(sh<=0) return;
+    const code=codeMap[e.name];
+    const cur=priceMap[code];
+    const days = e.enteredTs?(nowMs-e.enteredTs)/(1000*60*60*24):0;
+    const reasons=[];
+    if(cur && e.entryPrice){
+      const ret=(cur-e.entryPrice)/e.entryPrice*100;
+      if(ret>=5) reasons.push({t:`목표 +5% 도달 (현재 +${ret.toFixed(1)}%)`, c:"#00e5a0", k:"익절"});
+      else if(ret<=-8) reasons.push({t:`손실 ${ret.toFixed(1)}% — 손절선 점검`, c:"#ff4060", k:"손절"});
+    }
+    if(days>=7) reasons.push({t:`${Math.round(days)}일 보유 — 장기 보유 점검`, c:"#ff8c40", k:"기간"});
+    if(reasons.length) alerts.push({name:e.name, days:Math.round(days), reasons});
+  });
+  return alerts;
+}
+
+function renderExitAlerts(arr, stocksData){
+  const alerts = getExitAlerts(arr, stocksData);
+  if(!alerts.length) return "";
+  const rows = alerts.map(a=>{
+    const tags = a.reasons.map(r=>`<span style="display:inline-block;background:${r.c}18;color:${r.c};border:1px solid ${r.c}40;border-radius:7px;padding:2px 7px;margin:2px 3px 0 0;font-size:10.5px;font-weight:700">${r.t}</span>`).join("");
+    return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="font-size:12px;font-weight:700;color:#e8edf5;margin-bottom:3px">${a.name}</div>
+      <div>${tags}</div>
+    </div>`;
+  }).join("");
+  return `<div style="background:linear-gradient(135deg,#2a1810,#3a2010);border:1.5px solid #ff8c4055;border-radius:16px;padding:16px;margin-bottom:14px">
+    <div style="font-size:11px;color:#ffb070;letter-spacing:1px;font-weight:700;margin-bottom:4px">🔔 청산 점검 알림</div>
+    <div style="font-size:10.5px;color:#a8b4c8;margin-bottom:10px">강제가 아닌 점검 신호예요. 최종 판단은 직접 하세요.</div>
+    ${rows}
+  </div>`;
+}
+
 // 매매 습관 점수 계산 (100점 만점)
 // 수익률 40 + 보유기간 40 + 청산규율 20
 function calcHabitScore(arr){
@@ -1782,7 +1909,7 @@ function renderJournal(){
       <div style="display:none">${closed2.map(makeRow).join("")}</div>
     </div>` : "";
 
-  box.innerHTML = renderHabitCard(arr) + statsHtml + activeRows + closedRows;
+  box.innerHTML = renderExitAlerts(arr, window.__stocks) + renderHabitCard(arr) + renderPortfolio(arr) + statsHtml + activeRows + closedRows;
 }
 
 function closeTradePrompt(id){
