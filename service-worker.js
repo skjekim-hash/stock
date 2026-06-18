@@ -4,7 +4,7 @@
 //   - 정적 파일(html/css/svg/manifest): 캐시 우선, 백그라운드에서 갱신
 //   - 그 외: 네트워크 우선
 
-const CACHE_VERSION = 'v2026-06-18-nxt2';
+const CACHE_VERSION = 'v2026-06-18-nxt3';
 const STATIC_CACHE  = `stock-static-${CACHE_VERSION}`;
 const DATA_CACHE    = `stock-data-${CACHE_VERSION}`;
 
@@ -30,13 +30,14 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 활성화: 옛 캐시 정리
+// 활성화: 옛 캐시 전부 정리 (버전 무관하게 깨끗이 비움)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
+      // 현재 STATIC_CACHE만 남기고 나머지(옛 data 캐시 포함) 전부 삭제
       return Promise.all(
         keys
-          .filter((k) => k !== STATIC_CACHE && k !== DATA_CACHE)
+          .filter((k) => k !== STATIC_CACHE)
           .map((k) => caches.delete(k))
       );
     }).then(() => self.clients.claim())
@@ -51,9 +52,13 @@ self.addEventListener('fetch', (event) => {
   // GET 요청만 처리 (POST 등은 캐시 안 함)
   if (request.method !== 'GET') return;
 
-  // data.json: 네트워크 우선 (캐시 무효화 파라미터 ?_=… 무시하고 캐시 키 통일)
+  // data.json: 항상 네트워크에서만 (캐시 안 함 — 최신 데이터 100% 보장)
   if (url.pathname.endsWith('data.json')) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(
+      fetch(request, { cache: 'no-store' }).catch(() =>
+        caches.match(stripQuery(request.url))  // 오프라인일 때만 옛 캐시
+      )
+    );
     return;
   }
 
