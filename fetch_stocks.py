@@ -286,7 +286,15 @@ def fetch_market_signal():
     if "sox"    in out: score += out["sox"]["pct"]    * 1.5
     if "nasdaq" in out: score += out["nasdaq"]["pct"] * 1.0
     if "fx"     in out: score -= out["fx"]["pct"]     * 1.0
-    if "vix"    in out: score -= out["vix"]["pct"]    * 0.3
+    # VIX 변동률: 절대 수준에 따라 가중 차등 (VIX는 본질적으로 '레벨'이 핵심)
+    # 안정권(25미만)에선 변동률이 커도 약하게 — 18→20 같은 변동에 과민반응 방지
+    # 공포권(30+)에선 변동률도 강하게 — 진짜 위험은 놓치지 않음
+    if "vix" in out:
+        vix_lv = out.get("vix", {}).get("price", 0)
+        if   vix_lv >= 30: vix_w = 0.5
+        elif vix_lv >= 25: vix_w = 0.3
+        else:              vix_w = 0.1
+        score -= out["vix"]["pct"] * vix_w
     # 미국 10년물 금리 상승 = 성장주(반도체·플랫폼)에 부담 (-)
     if "tnx"    in out: score -= out["tnx"]["pct"]    * 0.5
 
