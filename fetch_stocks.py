@@ -181,6 +181,39 @@ def fetch_kis_short(code):
 
 
 # ─── 네이버 금융 ───────────────────────────────────────────────────────────
+def fetch_nxt_prices():
+    """NXT(애프터마켓) 실시간 가격을 8종목 한 번에 수집.
+    네이버 front-api/realTime/marketPrice의 overMarketPriceInfo.overPrice 사용.
+    NXT 거래중(OPEN)일 때만 유효. 정규장/마감 시간엔 빈 dict 반환."""
+    codes = ",".join(s["code"] for s in STOCKS)
+    url = (f"https://m.stock.naver.com/front-api/realTime/marketPrice"
+           f"?itemCodes={codes}&endType=stock&stockType=domestic")
+    out = {}
+    try:
+        d = http_json(url)
+        datas = (d.get("result") or {}).get("datas") or []
+        for item in datas:
+            code = item.get("itemCode")
+            om = item.get("overMarketPriceInfo") or {}
+            status = om.get("overMarketStatus")  # OPEN / CLOSE
+            over_price = to_n(om.get("overPrice"))
+            close_price = to_n(item.get("closePrice"))
+            if code and over_price > 0:
+                # 정규장 종가 대비 NXT 등락
+                nxt_chg = round((over_price - close_price) / close_price * 100, 2) if close_price > 0 else 0
+                out[code] = {
+                    "nxtPrice": round(over_price),
+                    "closePrice": round(close_price),
+                    "nxtChgPct": nxt_chg,
+                    "status": status,  # OPEN이면 거래중
+                    "session": om.get("tradingSessionType", ""),  # AFTER_MARKET / PRE_MARKET
+                }
+        print(f"  NXT 가격 수집: {len(out)}종목", file=sys.stderr)
+    except Exception as e:
+        print(f"  NXT 가격 수집 실패: {e}", file=sys.stderr)
+    return out
+
+
 def fetch_naver_price(code):
     try:
         d = http_json(f"https://m.stock.naver.com/api/stock/{code}/price?pageSize=2&page=1")
@@ -1558,12 +1591,18 @@ def main():
     kospi = fetch_kospi()
     print(f"  KOSPI: {kospi['price']} ({'+' if kospi['changePct'] >= 0 else ''}{kospi['changePct']}%)", file=sys.stderr)
     market = fetch_market_signal()
+    nxt_prices = fetch_nxt_prices()  # NXT 애프터마켓 실시간 (거래중일 때만 유효)
 
     stocks_data = []
     for stock in STOCKS:
         try:
             result = analyze_stock(stock, kospi, market)
-            if result: stocks_data.append(result)
+            if result:
+                # NXT 실시간 가격 부착 (지지가 도달·낙폭 표시용)
+                nxt = nxt_prices.get(stock["code"])
+                if nxt and nxt.get("status") == "OPEN":
+                    result["nxt"] = nxt
+                stocks_data.append(result)
             else: print(f"  ⚠ {stock['name']} 데이터 없음", file=sys.stderr)
         except Exception as e:
             print(f"  ❌ {stock['name']} 오류: {e}", file=sys.stderr)
