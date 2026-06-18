@@ -424,8 +424,10 @@ def fetch_naver_investor(code):
             d = http_json(
                 f"https://m.stock.naver.com/front-api/stock/domestic/trend"
                 f"?code={code}&marketType=ALL&pageSize=60",
-                timeout=10
+                timeout=10,
+                headers={"Referer": f"https://m.stock.naver.com/domestic/stock/{code}/total"}
             )
+            # front-api는 {"isSuccess":true,"result":[...]} 구조. 차단 시 isSuccess=false/빈 result.
             items = d.get("result", []) if isinstance(d, dict) else (d if isinstance(d, list) else [])
             for r in items:
                 bd = r.get("bizdate", "")
@@ -434,8 +436,26 @@ def fetch_naver_investor(code):
                     rows.append(r)
         except Exception:
             pass
+        # front-api 차단/실패 시 → 구 /api/trend(KRX)로 폴백. 통합은 못 줘도 수급은 살림.
         if not rows:
+            try:
+                d2 = http_json(
+                    f"https://m.stock.naver.com/api/stock/{code}/trend"
+                    f"?code={code}&marketType=ALL&pageSize=60",
+                    timeout=10
+                )
+                items2 = d2 if isinstance(d2, list) else (d2.get("result", []) if isinstance(d2, dict) else [])
+                for r in items2:
+                    bd = r.get("bizdate", "")
+                    if bd and bd not in seen:
+                        seen.add(bd)
+                        rows.append(r)
+            except Exception:
+                pass
+        if not rows:
+            print(f"  ⚠ 수급 실패 ({code}): front-api·폴백 모두 데이터 없음", file=sys.stderr)
             return None
+        print(f"  💰 수급 OK ({code}): {len(rows)}일치 · 최근 외국인 {rows[0].get('foreignerPureBuyQuant','?')}", file=sys.stderr)
         rows.sort(key=lambda r: r.get("bizdate", ""), reverse=True)
 
         def cum(field, n):

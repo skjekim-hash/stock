@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-06-19 08:30:20 KST",
-  "updatedTime": "08:30",
+  "updatedAt": "2026-06-19 08:31:05 KST",
+  "updatedTime": "08:31",
   "kospi": {
     "price": 9063.84,
     "change": 0.0,
@@ -14,8 +14,8 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 30674.0,
-      "pct": -0.15
+      "price": 30681.75,
+      "pct": -0.12
     },
     "fx": {
       "name": "원/달러 환율",
@@ -72,7 +72,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-06-19",
       "fairValue": 2835000,
       "fairValueGap": 5.6,
@@ -195,25 +195,64 @@
       ],
       "contra": {
         "signals": [
-          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의"
+          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의",
+          "⚠️ 외국인·기관 매수 + RSI 과매수 → 고점 매수 주의"
         ],
         "action": "현 신호 유효",
-        "strength": 0
+        "strength": -1
       },
       "fg": {
         "score": 71,
         "label": "탐욕",
         "color": "#ffd166"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 6일 연속 순매수",
+      "fc": "외국인 +25,375주 · 기관 +38,559주 (06/18 기준)",
       "volRatio": 1.12,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 25375,
+        "institution": 38559,
+        "individual": -35111,
+        "foreign5": 1205850,
+        "foreign20": -4287673,
+        "foreign60": -16548854,
+        "inst5": 513907,
+        "inst20": 2748850,
+        "inst60": 5416881,
+        "indiv5": -1630783,
+        "indiv20": 1438031,
+        "indiv60": 10797339,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          573440,
+          180233,
+          351894,
+          74908,
+          25375
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          -270178,
+          165238,
+          238957,
+          341331,
+          38559
+        ],
+        "flowLabelInst": "최근 매수 전환",
+        "dailyIndiv": [
+          -276904,
+          -337306,
+          -582133,
+          -399329,
+          -35111
+        ],
+        "flowLabelIndiv": "꾸준히 매도",
+        "foreignTrend": "외국인 6일 연속 순매수",
+        "comment": "외국인 +25,375주 · 기관 +38,559주 (06/18 기준)",
+        "holdRatio": "51.31%",
+        "streak": 6,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -292,7 +331,7 @@
       ],
       "basis": [
         "RSI 72.0 · Williams%R -6.0 · MFI 70.4 — 다중 과매수 주의",
-        "외국인 0주 · 기관 0주 · OBV 상승",
+        "외국인 +25,375주 · 기관 +38,559주 · OBV 상승",
         "주봉 중립 · 공매도 0% · 52주 신고가 근접"
       ],
       "risk": [],
@@ -303,9 +342,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 2819000,
+        "nxtPrice": 2824000,
         "closePrice": 2685000,
-        "nxtChgPct": 4.99,
+        "nxtChgPct": 5.18,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
@@ -326,7 +365,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-06-19",
       "fairValue": 455833,
       "fairValueGap": 25.7,
@@ -457,15 +496,53 @@
         "label": "탐욕",
         "color": "#ffd166"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 순매수",
+      "fc": "외국인 +2,424,675주 · 기관 +1,943,262주 (06/18 기준)",
       "volRatio": 1.1,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 2424675,
+        "institution": 1943262,
+        "individual": -4166249,
+        "foreign5": 1448510,
+        "foreign20": -42563890,
+        "foreign60": -140025109,
+        "inst5": 7743185,
+        "inst20": 17834301,
+        "inst60": 32230971,
+        "indiv5": -8663033,
+        "indiv20": 24498370,
+        "indiv60": 67455450,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          2880306,
+          -1828940,
+          -27451,
+          -2000080,
+          2424675
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          3295009,
+          531697,
+          839414,
+          1133803,
+          1943262
+        ],
+        "flowLabelInst": "꾸준히 매수",
+        "dailyIndiv": [
+          -5933301,
+          1306068,
+          -743977,
+          874426,
+          -4166249
+        ],
+        "flowLabelIndiv": "꾸준히 매도",
+        "foreignTrend": "외국인 순매수",
+        "comment": "외국인 +2,424,675주 · 기관 +1,943,262주 (06/18 기준)",
+        "holdRatio": "47.62%",
+        "streak": 1,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -544,7 +621,7 @@
       ],
       "basis": [
         "RSI 65.6 · Williams%R -9.1 · MFI 67.8 — 다중 과매수 주의",
-        "외국인 0주 · 기관 0주 · OBV 상승",
+        "외국인 +2,424,675주 · 기관 +1,943,262주 · OBV 상승",
         "주봉 중립 · 공매도 0% · 52주 신고가 근접"
       ],
       "risk": [],
@@ -578,7 +655,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-06-19",
       "fairValue": 166750,
       "fairValueGap": -27.0,
@@ -703,15 +780,53 @@
         "label": "중립",
         "color": "#9ab"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 2일 연속 순매수",
+      "fc": "외국인 +61,516주 · 기관 -16,958주 (06/18 기준)",
       "volRatio": 0.39,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 61516,
+        "institution": -16958,
+        "individual": -41488,
+        "foreign5": -221251,
+        "foreign20": -7158860,
+        "foreign60": -6701206,
+        "inst5": 13615,
+        "inst20": 335748,
+        "inst60": 356783,
+        "indiv5": 192443,
+        "indiv20": 6169886,
+        "indiv60": 5747570,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          -126962,
+          -33196,
+          -153726,
+          31117,
+          61516
+        ],
+        "flowLabel": "꾸준히 매도",
+        "dailyInst": [
+          145349,
+          16861,
+          -86739,
+          -44898,
+          -16958
+        ],
+        "flowLabelInst": "최근 매도 전환",
+        "dailyIndiv": [
+          -13967,
+          -12891,
+          247041,
+          13748,
+          -41488
+        ],
+        "flowLabelIndiv": "최근 매수 전환",
+        "foreignTrend": "외국인 2일 연속 순매수",
+        "comment": "외국인 +61,516주 · 기관 -16,958주 (06/18 기준)",
+        "holdRatio": "28.54%",
+        "streak": 2,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -790,7 +905,7 @@
       ],
       "basis": [
         "RSI 48.9 · Williams%R -90.9 · MFI 56.6 — 다중 과매도",
-        "외국인 0주 · 기관 0주 · OBV 상승",
+        "외국인 +61,516주 · 기관 -16,958주 · OBV 상승",
         "주봉 중립 · 공매도 0% · 37%"
       ],
       "risk": [],
@@ -824,7 +939,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-06-19",
       "fairValue": 1848600,
       "fairValueGap": -16.0,
@@ -947,25 +1062,64 @@
       "patterns": [],
       "contra": {
         "signals": [
-          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의"
+          "⚠️ MACD 상승 + RSI 과매수 → 신호 과잉 주의",
+          "⚠️ 외국인·기관 매수 + RSI 과매수 → 고점 매수 주의"
         ],
         "action": "현 신호 유효",
-        "strength": 0
+        "strength": -1
       },
       "fg": {
         "score": 69,
         "label": "탐욕",
         "color": "#ffd166"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 5일 연속 순매수",
+      "fc": "외국인 +194,796주 · 기관 +44,458주 (06/18 기준)",
       "volRatio": 1.04,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 194796,
+        "institution": 44458,
+        "individual": -238445,
+        "foreign5": 1271310,
+        "foreign20": 923430,
+        "foreign60": 681125,
+        "inst5": -739429,
+        "inst20": -896256,
+        "inst60": -277844,
+        "indiv5": -519715,
+        "indiv20": -28777,
+        "indiv60": -397596,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          217861,
+          492322,
+          284775,
+          81556,
+          194796
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          -539315,
+          -36809,
+          -101710,
+          -106053,
+          44458
+        ],
+        "flowLabelInst": "꾸준히 매도",
+        "dailyIndiv": [
+          321550,
+          -445245,
+          -183088,
+          25513,
+          -238445
+        ],
+        "flowLabelIndiv": "꾸준히 매도",
+        "foreignTrend": "외국인 5일 연속 순매수",
+        "comment": "외국인 +194,796주 · 기관 +44,458주 (06/18 기준)",
+        "holdRatio": "39.40%",
+        "streak": 5,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -1008,7 +1162,7 @@
       "dart": [],
       "basis": [
         "RSI 70.7 · Williams%R -10.6 · MFI 55.0 — 다중 과매수 주의",
-        "외국인 0주 · 기관 0주 · OBV 상승",
+        "외국인 +194,796주 · 기관 +44,458주 · OBV 상승",
         "주봉 중립 · 공매도 0% · 52주 신고가 근접"
       ],
       "risk": [],
@@ -1019,9 +1173,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 2265000,
+        "nxtPrice": 2272000,
         "closePrice": 2200000,
-        "nxtChgPct": 2.95,
+        "nxtChgPct": 3.27,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
@@ -1176,15 +1330,53 @@
         "label": "공포",
         "color": "#ffd166"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 2일 연속 순매도",
+      "fc": "외국인 -76,285주 · 기관 -152,977주 (06/18 기준)",
       "volRatio": 0.6,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": -76285,
+        "institution": -152977,
+        "individual": 228273,
+        "foreign5": 136652,
+        "foreign20": -2388831,
+        "foreign60": -6343083,
+        "inst5": -926320,
+        "inst20": -715053,
+        "inst60": -476373,
+        "indiv5": 817907,
+        "indiv20": 3107202,
+        "indiv60": 6356262,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          83179,
+          177244,
+          183503,
+          -230989,
+          -76285
+        ],
+        "flowLabel": "최근 매도 전환",
+        "dailyInst": [
+          -67415,
+          -47727,
+          -428703,
+          -229498,
+          -152977
+        ],
+        "flowLabelInst": "꾸준히 매도",
+        "dailyIndiv": [
+          -6622,
+          -127615,
+          256364,
+          467507,
+          228273
+        ],
+        "flowLabelIndiv": "최근 매수 전환",
+        "foreignTrend": "외국인 2일 연속 순매도",
+        "comment": "외국인 -76,285주 · 기관 -152,977주 (06/18 기준)",
+        "holdRatio": "25.28%",
+        "streak": -2,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -1263,7 +1455,7 @@
       ],
       "basis": [
         "RSI 44.3 · Williams%R -82.0 · MFI 49.4 — 다중 과매도",
-        "외국인 0주 · 기관 0주 · OBV 하락",
+        "외국인 -76,285주 · 기관 -152,977주 · OBV 하락",
         "주봉 중립 · 공매도 0% · 46%"
       ],
       "risk": [],
@@ -1274,9 +1466,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 611000,
+        "nxtPrice": 610000,
         "closePrice": 601000,
-        "nxtChgPct": 1.66,
+        "nxtChgPct": 1.5,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
@@ -1297,7 +1489,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-06-19",
       "fairValue": 204632,
       "fairValueGap": 25.5,
@@ -1425,15 +1617,53 @@
         "label": "중립",
         "color": "#9ab"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 순매수",
+      "fc": "외국인 +204,913주 · 기관 -276,000주 (06/18 기준)",
       "volRatio": 0.99,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 204913,
+        "institution": -276000,
+        "individual": 77851,
+        "foreign5": 527789,
+        "foreign20": 986064,
+        "foreign60": -1556740,
+        "inst5": -34275,
+        "inst20": -90889,
+        "inst60": 2267581,
+        "indiv5": -406428,
+        "indiv20": -797759,
+        "indiv60": -701187,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          138099,
+          171107,
+          123647,
+          -109977,
+          204913
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          229909,
+          82260,
+          -21412,
+          -49032,
+          -276000
+        ],
+        "flowLabelInst": "최근 매도 전환",
+        "dailyIndiv": [
+          -335316,
+          -249830,
+          -89920,
+          190787,
+          77851
+        ],
+        "flowLabelIndiv": "최근 매수 전환",
+        "foreignTrend": "외국인 순매수",
+        "comment": "외국인 +204,913주 · 기관 -276,000주 (06/18 기준)",
+        "holdRatio": "80.12%",
+        "streak": 1,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -1512,7 +1742,7 @@
       ],
       "basis": [
         "RSI 53.7 · Williams%R -55.5 · MFI 62.9 — 지표 중립권",
-        "외국인 0주 · 기관 0주 · OBV 상승",
+        "외국인 +204,913주 · 기관 -276,000주 · OBV 상승",
         "주봉 중립 · 공매도 0% · 53%"
       ],
       "risk": [],
@@ -1523,9 +1753,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 162000,
+        "nxtPrice": 162200,
         "closePrice": 163100,
-        "nxtChgPct": -0.67,
+        "nxtChgPct": -0.55,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
@@ -1675,15 +1905,53 @@
         "label": "공포",
         "color": "#ffd166"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 5일 연속 순매수",
+      "fc": "외국인 +4,749주 · 기관 -106,697주 (06/18 기준)",
       "volRatio": 0.59,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 4749,
+        "institution": -106697,
+        "individual": 117190,
+        "foreign5": 313094,
+        "foreign20": -4705267,
+        "foreign60": -3709028,
+        "inst5": -508536,
+        "inst20": -324321,
+        "inst60": 695412,
+        "indiv5": 194739,
+        "indiv20": 4888456,
+        "indiv60": 2965844,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          178696,
+          37888,
+          84973,
+          6788,
+          4749
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          -20469,
+          32938,
+          -286229,
+          -128079,
+          -106697
+        ],
+        "flowLabelInst": "최근 매도 전환",
+        "dailyIndiv": [
+          -149209,
+          -70264,
+          180899,
+          116123,
+          117190
+        ],
+        "flowLabelIndiv": "최근 매수 전환",
+        "foreignTrend": "외국인 5일 연속 순매수",
+        "comment": "외국인 +4,749주 · 기관 -106,697주 (06/18 기준)",
+        "holdRatio": "36.97%",
+        "streak": 5,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -1762,7 +2030,7 @@
       ],
       "basis": [
         "RSI 43.9 · Williams%R -100.0 · MFI 71.5 — 다중 과매도",
-        "외국인 0주 · 기관 0주 · OBV 하락",
+        "외국인 +4,749주 · 기관 -106,697주 · OBV 하락",
         "주봉 매도 · 공매도 0% · 34%"
       ],
       "risk": [],
@@ -1773,9 +2041,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 93000,
+        "nxtPrice": 92800,
         "closePrice": 95900,
-        "nxtChgPct": -3.02,
+        "nxtChgPct": -3.23,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
@@ -1796,7 +2064,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "",
+      "flowRead": "단기 지표는 과열·조정 신호지만 외국인은 매집 중이에요. │ 큰 흐름은 살아있으니, 추격 대신 조정 시 지지구간에서 노려볼 만.",
       "tradedAt": "2026-06-19",
       "fairValue": 329227,
       "fairValueGap": 40.1,
@@ -1925,15 +2193,53 @@
         "label": "중립",
         "color": "#9ab"
       },
-      "ft": "중립",
-      "fc": "수급 데이터 없음",
+      "ft": "외국인 3일 연속 순매수",
+      "fc": "외국인 +197,924주 · 기관 -149,822주 (06/18 기준)",
       "volRatio": 0.35,
       "investor": {
-        "foreign": 0,
-        "institution": 0,
-        "individual": 0,
-        "foreignTrend": "중립",
-        "comment": "수급 데이터 없음"
+        "foreign": 197924,
+        "institution": -149822,
+        "individual": -39730,
+        "foreign5": 947762,
+        "foreign20": -2506262,
+        "foreign60": -5388053,
+        "inst5": 452662,
+        "inst20": 3487565,
+        "inst60": 1500981,
+        "indiv5": -1353250,
+        "indiv20": -960738,
+        "indiv60": 3789222,
+        "days": 5,
+        "ndays": 60,
+        "daily": [
+          654497,
+          -69257,
+          22311,
+          142287,
+          197924
+        ],
+        "flowLabel": "꾸준히 매수",
+        "dailyInst": [
+          750508,
+          -19191,
+          -158472,
+          29639,
+          -149822
+        ],
+        "flowLabelInst": "최근 매도 전환",
+        "dailyIndiv": [
+          -1388624,
+          116599,
+          149380,
+          -190875,
+          -39730
+        ],
+        "flowLabelIndiv": "꾸준히 매도",
+        "foreignTrend": "외국인 3일 연속 순매수",
+        "comment": "외국인 +197,924주 · 기관 -149,822주 (06/18 기준)",
+        "holdRatio": "35.05%",
+        "streak": 3,
+        "date": "06/18"
       },
       "short": {
         "ratio": 0,
@@ -2012,7 +2318,7 @@
       ],
       "basis": [
         "RSI 50.7 · Williams%R -74.2 · MFI 57.0 — 지표 중립권",
-        "외국인 0주 · 기관 0주 · OBV 하락",
+        "외국인 +197,924주 · 기관 -149,822주 · OBV 하락",
         "주봉 중립 · 공매도 0% · 39%"
       ],
       "risk": [],
@@ -2023,9 +2329,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 236000,
+        "nxtPrice": 235500,
         "closePrice": 235000,
-        "nxtChgPct": 0.43,
+        "nxtChgPct": 0.21,
         "status": "OPEN",
         "session": "PRE_MARKET"
       }
