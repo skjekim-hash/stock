@@ -1577,6 +1577,107 @@ function recordEntry(code){
 }
 
 // 기록 화면 렌더
+// 매매 습관 점수 계산 (100점 만점)
+// 수익률 40 + 보유기간 40 + 청산규율 20
+function calcHabitScore(arr){
+  const TARGET = 5.0;  // 목표 평균 수익률
+  const closed = arr.filter(e=>e.status==="청산"&&e.returnPct!==null);
+  const held = arr.filter(e=>e.status==="보유");
+  if(closed.length<3) return null;  // 3건 미만이면 점수 미산정
+
+  // A. 수익률 (40점): 목표 5% 대비
+  const avgRet = closed.reduce((s,e)=>s+e.returnPct,0)/closed.length;
+  const retScore = Math.min(40, Math.max(0, avgRet/TARGET*40));
+
+  // B. 보유기간 (40점): 평균 3일 이내 만점, 7일+ 0점
+  const wd = closed.filter(e=>e.heldDays);
+  const avgHold = wd.length?wd.reduce((s,e)=>s+e.heldDays,0)/wd.length:0;
+  let holdScore;
+  if(avgHold<=3) holdScore=40;
+  else if(avgHold>=7) holdScore=0;
+  else holdScore=40*(7-avgHold)/(7-3);
+
+  // C. 청산규율 (20점): 보유중 7일 초과 비율로 감점
+  const nowMs = Date.now();
+  let over7=0;
+  held.forEach(e=>{
+    if(e.enteredTs){
+      const d=(nowMs-e.enteredTs)/(1000*60*60*24);
+      if(d>=7) over7++;
+    }
+  });
+  const discScore = held.length?20*(1-over7/held.length):20;
+
+  const total = Math.round(retScore+holdScore+discScore);
+  let grade, gColor, gBg;
+  if(total>=85){ grade="A"; gColor="#00e5a0"; gBg="linear-gradient(135deg,#003a28,#005038)"; }
+  else if(total>=70){ grade="B"; gColor="#4090ff"; gBg="linear-gradient(135deg,#0a2548,#103060)"; }
+  else if(total>=55){ grade="C"; gColor="#ffc940"; gBg="linear-gradient(135deg,#3a3010,#504010)"; }
+  else { grade="D"; gColor="#ff4060"; gBg="linear-gradient(135deg,#3a0a18,#500a20)"; }
+
+  // 5일 이상 미청산 (생존자 편향 경고)
+  const watching=[];
+  held.forEach(e=>{
+    if(e.enteredTs){
+      const d=(nowMs-e.enteredTs)/(1000*60*60*24);
+      if(d>=5) watching.push({name:e.name, days:Math.round(d)});
+    }
+  });
+
+  // 한 줄 코멘트 (가장 약한 항목 기준)
+  let comment;
+  const rW=retScore/40, hW=holdScore/40, dW=discScore/20;
+  const weakest = Math.min(rW, hW, dW);
+  if(grade==="A") comment="탁월해요. 빠른 회전과 청산 규율이 잘 잡혀 있어요.";
+  else if(rW===weakest) comment=`수익률이 목표(${TARGET}%) 대비 아쉬워요. 진입 자리를 더 신중히.`;
+  else if(hW===weakest||dW===weakest) comment="장기 보유가 점수를 깎고 있어요. 청산 타이밍을 점검하세요.";
+  else comment="전반적으로 안정적이에요.";
+
+  return {total, grade, gColor, gBg, retScore:Math.round(retScore), holdScore:Math.round(holdScore),
+          discScore:Math.round(discScore), avgRet, avgHold, over7, comment, watching, TARGET};
+}
+
+function renderHabitCard(arr){
+  const h = calcHabitScore(arr);
+  if(!h) return "";
+  const bar = (label,score,max,color)=>{
+    const pct = score/max*100;
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+        <span style="color:#b8c4d8">${label}</span>
+        <span style="color:${color};font-weight:700;font-family:'JetBrains Mono',monospace">${score}/${max}</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:3px"></div>
+      </div>
+    </div>`;
+  };
+  const watchHtml = h.watching.length?
+    `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,201,64,.08);border:1px solid rgba(255,201,64,.25);border-radius:9px">
+      <div style="font-size:10.5px;color:#ffc940;font-weight:700;margin-bottom:3px">⏳ 미청산 주의 (5일+)</div>
+      <div style="font-size:10.5px;color:#c8d4e4;line-height:1.5">${h.watching.map(w=>`${w.name} ${w.days}일`).join(" · ")}<br><span style="color:#8090b0">이게 어떻게 끝나느냐에 따라 실제 점수가 달라져요.</span></div>
+    </div>`:"";
+
+  return `<div style="background:${h.gBg};border:1.5px solid ${h.gColor}55;border-radius:16px;padding:16px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;color:#b8c4d8;letter-spacing:1px;font-weight:700">매매 습관 점수</div>
+        <div style="font-size:11px;color:#8090b0;margin-top:2px">청산 ${arr.filter(e=>e.status==="청산"&&e.returnPct!==null).length}건 기준</div>
+      </div>
+      <div style="text-align:right;display:flex;align-items:baseline;gap:6px">
+        <span style="font-size:38px;font-weight:900;color:${h.gColor};font-family:'JetBrains Mono',monospace;line-height:1">${h.total}</span>
+        <span style="font-size:14px;color:#8090b0">/100</span>
+        <span style="font-size:28px;font-weight:900;color:${h.gColor};margin-left:4px">${h.grade}</span>
+      </div>
+    </div>
+    ${bar("수익률 (목표 "+h.TARGET+"%)",h.retScore,40,"#00d4ff")}
+    ${bar("보유기간 (평균 "+h.avgHold.toFixed(1)+"일)",h.holdScore,40,"#a060ff")}
+    ${bar("청산 규율 (7일+ "+h.over7+"건)",h.discScore,20,"#ff8c40")}
+    <div style="font-size:11px;color:#d8e0ec;line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">💡 ${h.comment}</div>
+    ${watchHtml}
+  </div>`;
+}
+
 function renderJournal(){
   const arr = loadJournal();
   // 보유중 먼저, 청산은 아래로
@@ -1681,7 +1782,7 @@ function renderJournal(){
       <div style="display:none">${closed2.map(makeRow).join("")}</div>
     </div>` : "";
 
-  box.innerHTML = statsHtml + activeRows + closedRows;
+  box.innerHTML = renderHabitCard(arr) + statsHtml + activeRows + closedRows;
 }
 
 function closeTradePrompt(id){
