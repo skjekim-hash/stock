@@ -1392,7 +1392,7 @@ async function loadData(){
     document.getElementById("results").innerHTML=
       renderMarketBanner(data.market)+
       renderSummaryTable(data.stocks)+
-      data.stocks.map((s,i)=>`<div id="card-${s.code}" class="card-refresh" style="animation-delay:${i*0.05}s">`+renderCard(s,i)+`</div>`).join("");
+      data.stocks.map((s,i)=>`<div class="card-refresh" style="animation-delay:${i*0.05}s">`+renderCard(s,i)+`</div>`).join("");
     document.getElementById("results").style.display="";
     // 종목 탭 바 - 헤더 바로 아래 fixed
     var tabBar=document.getElementById("stockTabBar");
