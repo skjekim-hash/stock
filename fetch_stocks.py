@@ -415,21 +415,23 @@ def fetch_naver_investor(code):
     - 외국인 연속 순매수/순매도 일수 + 5일 일별 흐름
     ※ 장중 실시간이 아닌 '전일 마감' 기준"""
     try:
-        # marketType=ALL → KRX+NXT 합산, pageSize=60 → 60일치 (단일 호출)
+        # front-api/domestic/trend + marketType=ALL → 진짜 KRX+NXT 통합 (60일치)
+        # ※ 구 /api/stock/{code}/trend 는 marketType 무시하고 KRX만 줌 — 반드시 front-api 사용
+        # 응답은 {"isSuccess":true, "result":[...]} 구조라 result를 꺼내야 함
         rows = []
         seen = set()
         try:
             d = http_json(
-                f"https://m.stock.naver.com/api/stock/{code}/trend"
+                f"https://m.stock.naver.com/front-api/stock/domestic/trend"
                 f"?code={code}&marketType=ALL&pageSize=60",
                 timeout=10
             )
-            if isinstance(d, list):
-                for r in d:
-                    bd = r.get("bizdate", "")
-                    if bd and bd not in seen:
-                        seen.add(bd)
-                        rows.append(r)
+            items = d.get("result", []) if isinstance(d, dict) else (d if isinstance(d, list) else [])
+            for r in items:
+                bd = r.get("bizdate", "")
+                if bd and bd not in seen:
+                    seen.add(bd)
+                    rows.append(r)
         except Exception:
             pass
         if not rows:
