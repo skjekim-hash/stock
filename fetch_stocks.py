@@ -1287,8 +1287,10 @@ def analyze_stock(stock, kospi, market=None):
         if not naver and KIS_AVAILABLE:
             naver = fetch_kis_price(code)
 
-    kis_inv  = fetch_kis_investor(code) if is_real_kis else None
-    investor = kis_inv or fetch_naver_investor(code) or {"foreign": 0, "institution": 0, "individual": 0,
+    # 수급은 네이버 통합(KRX+NXT, marketType=ALL)을 우선 — KIS는 KRX만이라 NXT 누락됨.
+    # 네이버는 5·20·60일 누적·일별 흐름·연속일수까지 풍부. 실패 시에만 KIS(KRX) 폴백.
+    investor = fetch_naver_investor(code) or (fetch_kis_investor(code) if is_real_kis else None) or {
+                           "foreign": 0, "institution": 0, "individual": 0,
                            "foreignTrend": "중립", "comment": "수급 데이터 없음"}
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {"ratio": 0, "volume": 0, "comment": "없음"}
