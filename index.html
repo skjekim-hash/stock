@@ -903,6 +903,27 @@ function renderCard(s,idx){
       <span class="price-val">${W(s.price)}</span>
       ${s.change?`<span class="price-chg" style="color:${cc}">${up?"▲":"▼"} ${W(Math.abs(+s.change))} (${P(s.changePct)})</span>`:""}
     </div>
+    ${s.nxt?(function(){
+      var np=s.nxt.nxtPrice, chg=s.nxt.nxtChgPct;
+      var nc=chg>0?"#00e5a0":chg<0?"#ff4060":"#8090b0";
+      // 지지가 도달 체크 (피봇 S1·S2)
+      var s1=(s.pivot&&+s.pivot.s1)?+s.pivot.s1:0;
+      var s2=(s.pivot&&+s.pivot.s2)?+s.pivot.s2:0;
+      var reach="";
+      if(s2>0&&np<=s2) reach="<span style='color:#00e5a0;font-weight:700'>🟢 S2 지지 도달</span>";
+      else if(s1>0&&np<=s1) reach="<span style='color:#00e5a0;font-weight:700'>🟢 S1 지지 도달</span>";
+      else if(s1>0){
+        var distS1=Math.round((np-s1)/np*1000)/10;
+        if(distS1<=2&&distS1>=0) reach="<span style='color:#ffc940;font-weight:700'>🟡 S1 근접 (+"+distS1+"%)</span>";
+      }
+      return `<div style="margin-top:8px;padding:10px 12px;border-radius:11px;background:linear-gradient(135deg,#1a1040,#0a1430);border:1px solid #6040a0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:#a060ff;font-weight:700">🌌 NXT 실시간</span>
+          <span style="font-size:15px;font-weight:800;color:${nc};font-family:'JetBrains Mono',monospace">${W(np)} <span style="font-size:11px">(${chg>0?"+":""}${chg}%)</span></span>
+        </div>
+        <div style="font-size:10.5px;color:#8090b0;margin-top:4px">정규장 종가 ${W(s.nxt.closePrice)} 대비 · NXT 거래중${reach?" · "+reach:""}</div>
+      </div>`;
+    })():""}
     ${s.high52w>0?`<div class="grid2">
       <div class="stat"><div class="stat-l">52주 최고</div><div class="stat-v" style="color:#ff4060">${W(s.high52w)}</div></div>
       <div class="stat"><div class="stat-l">52주 최저</div><div class="stat-v" style="color:#00e5a0">${W(s.low52w)}</div></div>
