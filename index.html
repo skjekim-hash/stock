@@ -1390,6 +1390,7 @@ async function loadData(){
 
     hideAll();
     window.__stocks = data.stocks;
+    window.__market = data.market;
     document.getElementById("results").innerHTML=
       renderMarketBanner(data.market)+
       renderSummaryTable(data.stocks)+
@@ -2059,6 +2060,49 @@ function simPickStock(code){ _simState.code=code; renderSim(); }
 function simSetShares(n){ _simState.shares=Math.max(1,Math.min(5,n)); renderSim(); }
 
 // 추매 적합성 판정 — 사용자 데이터 법칙: 고위치 눌림=반등, 저위치 추세하락=물림
+// 동적 허용 이격 — 현재가가 첫 지지선에서 얼마나 떨어져도 "소량 진입 OK"인지 종목별 계산
+// 철학: 강한 종목도 너무 높으면 안 산다. 가산 상한 캡 + 애매하면 보류(보수 편향).
+function simEntryFit(s){
+  const entry = s.price;
+  const supports=[s.pivot?.s1,s.boll?.lower,s.sma20,s.pivot?.s2,s.ichimoku?.kijun]
+    .filter(p=>p&&p<entry).sort((a,b)=>b-a);
+  const firstSup = supports[0];
+  if(!firstSup) return { gap:null, allow:null, verdict:"noSupport" };
+  const gap = (firstSup-entry)/entry*100;        // 음수 (예: -10)
+  const gapAbs = Math.abs(gap);
+
+  const mkt = (window.__market && window.__market.summary) ? window.__market.summary.score : 6;
+  let allow = 5.0; const factors=[];
+  const inv = s.investor||{};
+  // ─ 가산 (받쳐주는 힘) ─
+  if((inv.streak||0)>=5){ allow+=1.5; factors.push(["외국인 5일+ 연속순매수","+1.5"]); }
+  else if((inv.streak||0)>0){ allow+=0.7; factors.push(["외국인 순매수","+0.7"]); }
+  if(inv.foreign5>0 && inv.foreign20>0){ allow+=0.5; factors.push(["5·20일 누적 +","+0.5"]); }
+  if(mkt>=8){ allow+=1.0; factors.push(["시장 우호적","+1.0"]); }
+  else if(mkt>=6){ allow+=0.5; factors.push(["시장 양호","+0.5"]); }
+  const atrp = s.atr?.pct||0;
+  if(atrp>=10){ allow+=1.5; factors.push(["고변동(ATR "+atrp.toFixed(0)+"%)","+1.5"]); }
+  else if(atrp>=6){ allow+=0.7; factors.push(["중변동(ATR "+atrp.toFixed(0)+"%)","+0.7"]); }
+  if((s.adx?.adx||0)>=25 && s.ichimoku?.signal==="매수"){ allow+=1.0; factors.push(["강한 상승추세","+1.0"]); }
+  // ─ 차감 (되돌림 위험) — 보수 편향: 차감을 무겁게 ─
+  if(s.overheat?.level==="주의" || (s.rsi||0)>=70){ allow-=2.5; factors.push(["과열/과매수","−2.5"]); }
+  else if((s.rsi||0)>=65){ allow-=1.0; factors.push(["과매수 진입","−1.0"]); }
+  if(s.divergence?.bearish){ allow-=2.0; factors.push(["약세 다이버전스","−2.0"]); }
+  if((s.breakout?.position||0)>=95){ allow-=1.5; factors.push(["52주 신고가권","−1.5"]); }
+  if(inv.foreign60<0){ allow-=1.0; factors.push(["60일 외국인 순매도","−1.0"]); }
+
+  // 가산 상한 캡: 아무리 좋아도 7% 못 넘음 (높은 데서 사라고 부추기지 않기)
+  let capped=false;
+  if(allow>7.0){ allow=7.0; capped=true; }
+  if(allow<2.0) allow=2.0; // 최소 바닥
+
+  let verdict;
+  if(gapAbs<=allow) verdict="ok";
+  else if(gapAbs<=allow+2) verdict="caution";
+  else verdict="hold";
+  return { gap, gapAbs, allow, factors, capped, firstSup, verdict };
+}
+
 function simJudge(s){
   const pos = s.breakout?.position ?? 50;
   const ichi = s.ichimoku?.signal || "";
@@ -2143,6 +2187,7 @@ function renderSim(){
 
   const totalCost = entry*shares;
   const pos = s.breakout?.position ?? 50;
+  const fit = simEntryFit(s);
 
   document.getElementById("simBody").innerHTML = `
   <div style="padding:14px 16px">
@@ -2167,6 +2212,27 @@ function renderSim(){
         <span style="font-size:12px;color:#8090b0;margin-left:auto">투입 ₩${totalCost.toLocaleString()}</span>
       </div>
     </div>
+
+    ${(()=>{
+      if(fit.verdict==="noSupport") return `<div style="background:#1a2540;border-radius:12px;padding:13px;margin-bottom:12px;font-size:12px;color:#9fb0cc;line-height:1.6">현재가 아래 지지선이 없어요(신고가 구간). 진입 기준 잡기 어려움 — <b style="color:#ff8888">신규 진입 신중</b>.</div>`;
+      const vc={ok:"#2ecc71",caution:"#ffc940",hold:"#ff6b6b"}[fit.verdict];
+      const vt={ok:"✅ 소량 신규 진입 가능",caution:"⚠️ 경계 — 아주 소량만/조금 더 대기",hold:"🚫 진입 보류 — 너무 높은 자리"}[fit.verdict];
+      const vmsg={
+        ok:`현재가가 첫 지지선(₩${fit.firstSup.toLocaleString()})에서 ${fit.gapAbs.toFixed(1)}% 위. 허용 ${fit.allow.toFixed(1)}% 안쪽이라 떨어져도 추매 자리가 가까워요.`,
+        caution:`지지선까지 ${fit.gapAbs.toFixed(1)}% (허용 ${fit.allow.toFixed(1)}%를 살짝 초과). 진입하려면 최소 수량으로, 또는 지지구간 근처까지 대기 권장.`,
+        hold:`지지선까지 ${fit.gapAbs.toFixed(1)}%인데 허용은 ${fit.allow.toFixed(1)}%뿐. 지금 사면 첫 추매까지 낙폭이 커서 "높은 데서 물림". 눌림 대기.`
+      }[fit.verdict];
+      const facHtml = fit.factors.map(f=>`<span style="display:inline-block;background:#0d1424;border-radius:6px;padding:2px 7px;margin:2px 3px 2px 0;font-size:10px;color:${f[1][0]==='+'?'#7ec99a':'#e89090'}">${f[0]} ${f[1]}</span>`).join("");
+      return `<div style="background:${vc}18;border:1px solid ${vc}55;border-radius:12px;padding:13px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:800;color:${vc};margin-bottom:6px">${vt}</div>
+        <div style="font-size:12px;color:#cdd9ee;line-height:1.6;margin-bottom:8px">${vmsg}</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#8090b0;margin-bottom:6px">
+          <span>현재 이격 <b style="color:#fff">${fit.gapAbs.toFixed(1)}%</b></span>
+          <span>허용 이격 <b style="color:#fff">${fit.allow.toFixed(1)}%</b>${fit.capped?' <span style="color:#ffc940">(상한7%)</span>':''}</span>
+        </div>
+        <div style="border-top:1px solid ${vc}33;padding-top:7px">${facHtml}</div>
+      </div>`;
+    })()}
 
     <div style="background:${jColor}22;border:1px solid ${jBorder}55;border-radius:12px;padding:13px;margin-bottom:16px">
       <div style="font-size:14px;font-weight:800;color:${jBorder};margin-bottom:5px">${j.title}</div>
