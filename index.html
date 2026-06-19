@@ -459,6 +459,7 @@ body::before{
         <span id="btnText">분석 보기</span>
       </button>
       <button class="btn-jrnl" onclick="openJournal()">📝 기록</button>
+      <button class="btn-jrnl" onclick="openSim()">🎯 시뮬</button>
     </div>
   </div>
   <div class="hdr-badges">
@@ -2041,6 +2042,145 @@ function openJournal(){
 function closeJournal(){
   document.getElementById("journalModal").style.display="none";
 }
+
+// ─── 진입 시뮬레이션 ───────────────────────────────────────────
+let _simState = { code:null, shares:3 };
+
+function openSim(){
+  const stocks = window.__stocks||[];
+  if(!stocks.length){ alert("먼저 '분석 보기'로 데이터를 불러와주세요."); return; }
+  if(!_simState.code) _simState.code = stocks[0].code;
+  document.getElementById("simModal").style.display="flex";
+  renderSim();
+}
+function closeSim(){ document.getElementById("simModal").style.display="none"; }
+
+function simPickStock(code){ _simState.code=code; renderSim(); }
+function simSetShares(n){ _simState.shares=Math.max(1,Math.min(5,n)); renderSim(); }
+
+// 추매 적합성 판정 — 사용자 데이터 법칙: 고위치 눌림=반등, 저위치 추세하락=물림
+function simJudge(s){
+  const pos = s.breakout?.position ?? 50;
+  const ichi = s.ichimoku?.signal || "";
+  const rsi = s.rsi ?? 50;
+  // 고위치(70%+) & 추세 살아있음 → 건강한 눌림 가능 → 추매 OK
+  if(pos>=70 && ichi==="매수"){
+    if(rsi>=70) return {ok:true, level:"caution", title:"⚠️ 추매 가능하나 과열",
+      msg:"강한 종목이라 눌림 시 반등 기대되지만, 지금 과매수라 첫 진입가가 높음. 지지구간까지 기다렸다 진입 권장."};
+    return {ok:true, level:"ok", title:"✅ 추매 적합 (고위치 눌림형)",
+      msg:"52주 고위치 + 추세 유지. 하락은 눌림일 가능성. 지지구간 분할 추매가 통계적으로 유효."};
+  }
+  // 저위치(60%-) & 하락추세 → 물림 위험 → 추매 경고
+  if(pos<60 && ichi==="매도"){
+    return {ok:false, level:"danger", title:"🚫 추매 비권장 (저위치 추세하락형)",
+      msg:"52주 저위치 + 하락추세. 추매는 물타기로 번질 위험 큼. 진입 자체를 보류하거나, 진입했다면 손절 우선."};
+  }
+  // 중간지대
+  if(pos>=70 && ichi==="매도"){
+    return {ok:true, level:"caution", title:"⚠️ 고위치지만 추세 꺾임",
+      msg:"고위치인데 단기 추세가 하락 전환. 1차 추매까지만 보수적으로, 지지 이탈 시 손절 전환."};
+  }
+  return {ok:true, level:"caution", title:"⚠️ 중립 — 신중 접근",
+    msg:"뚜렷한 추매 우위 신호 없음. 소량 진입 + 지지구간 확인 후 대응."};
+}
+
+function simRender_levels(s, entry, shares){
+  // 지지선 후보 모으기 (현재가 아래만), 가까운 순
+  const cands = [];
+  const push=(label,price)=>{ if(price && price<entry) cands.push({label,price:Math.round(price)}); };
+  push("피봇 S1", s.pivot?.s1);
+  push("볼린저 하단", s.boll?.lower);
+  push("SMA20", s.sma20);
+  push("피봇 S2", s.pivot?.s2);
+  push("일목 기준선", s.ichimoku?.kijun);
+  push("SMA60", s.sma60);
+  // 중복/근접 제거 후 가까운 순 정렬
+  cands.sort((a,b)=>b.price-a.price);
+  const uniq=[]; cands.forEach(c=>{ if(!uniq.some(u=>Math.abs(u.price-c.price)/entry<0.01)) uniq.push(c); });
+  const levels = uniq.slice(0,4); // 최대 4개 지지선
+
+  // 추매 시뮬: 1주씩, 총 5주 한도
+  let curShares = shares, curCost = entry*shares;
+  const maxShares = 5;
+  let rows = "";
+  levels.forEach((lv,i)=>{
+    const dropPct = ((lv.price-entry)/entry*100);
+    const canAdd = curShares < maxShares;
+    let avgAfter = curCost/curShares, action;
+    if(canAdd){
+      const newShares = curShares+1, newCost = curCost+lv.price;
+      avgAfter = newCost/newShares;
+      const avgDropPct = ((avgAfter-entry)/entry*100);
+      action = `+1주 추매 → ${curShares+1}주 / 평단 ₩${Math.round(avgAfter).toLocaleString()} (${avgDropPct.toFixed(1)}%)`;
+      curShares=newShares; curCost=newCost;
+    } else {
+      action = `한도(5주) 도달 → 추매 중단. 이 구간 이탈 시 <b style="color:#ff6b6b">손절 검토</b>`;
+    }
+    const lossHere = Math.round((lv.price-entry)*shares); // 최초 진입분 기준 평가손
+    rows += `<div style="background:#0f1830;border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${canAdd?'#4a9eff':'#ff6b6b'}">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:700;color:#cdd9ee">${lv.label}</span>
+        <span style="font-family:monospace;font-size:13px;color:#8fa3c8">₩${lv.price.toLocaleString()} <span style="color:#ff8888">(${dropPct.toFixed(1)}%)</span></span>
+      </div>
+      <div style="font-size:12px;color:#9fb0cc;line-height:1.5">${action}</div>
+    </div>`;
+  });
+  if(!levels.length) rows = `<div style="color:#8090b0;font-size:12px;padding:10px">현재가 아래 뚜렷한 지지선이 없어요. 신고가 구간이라 추매 기준 잡기 어려움 — 진입 자체를 신중히.</div>`;
+  return rows;
+}
+
+function renderSim(){
+  const stocks = window.__stocks||[];
+  const s = stocks.find(x=>x.code===_simState.code) || stocks[0];
+  const entry = s.price;
+  const shares = _simState.shares;
+  const j = simJudge(s);
+  const jColor = {ok:"#1f6b3a",caution:"#7a5c1a",danger:"#7a1f1f"}[j.level];
+  const jBorder = {ok:"#2ecc71",caution:"#ffc940",danger:"#ff6b6b"}[j.level];
+
+  // 종목 선택 칩
+  const chips = stocks.map(x=>`<button onclick="simPickStock('${x.code}')" style="background:${x.code===s.code?'#2a4a7a':'#1a2540'};color:${x.code===s.code?'#fff':'#8090b0'};border:none;border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap">${x.code===s.code?'● ':''}${({'000660':'하이닉스','005930':'삼성전자','066570':'LG전자','009150':'삼성전기','005380':'현대차','105560':'KB금융','017670':'SKT','035420':'NAVER'})[x.code]||x.code}</button>`).join("");
+
+  const totalCost = entry*shares;
+  const pos = s.breakout?.position ?? 50;
+
+  document.getElementById("simBody").innerHTML = `
+  <div style="padding:14px 16px">
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px">${chips}</div>
+
+    <div style="background:#0d1424;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;color:#8090b0">진입가 (현재가)</div>
+          <div style="font-size:22px;font-weight:800;color:#fff;font-family:monospace">₩${entry.toLocaleString()}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:#8090b0">52주 위치</div>
+          <div style="font-size:18px;font-weight:700;color:${pos>=70?'#ffc940':pos<60?'#4a9eff':'#cdd9ee'}">${pos}%</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #1a2540;padding-top:10px">
+        <span style="font-size:12px;color:#8090b0">진입 주수</span>
+        <button onclick="simSetShares(${shares-1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#1a2540;color:#fff;font-size:16px;cursor:pointer">−</button>
+        <span style="font-size:18px;font-weight:800;color:#fff;min-width:24px;text-align:center">${shares}</span>
+        <button onclick="simSetShares(${shares+1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#1a2540;color:#fff;font-size:16px;cursor:pointer">+</button>
+        <span style="font-size:12px;color:#8090b0;margin-left:auto">투입 ₩${totalCost.toLocaleString()}</span>
+      </div>
+    </div>
+
+    <div style="background:${jColor}22;border:1px solid ${jBorder}55;border-radius:12px;padding:13px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:800;color:${jBorder};margin-bottom:5px">${j.title}</div>
+      <div style="font-size:12px;color:#cdd9ee;line-height:1.6">${j.msg}</div>
+    </div>
+
+    <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">📉 하락 시 대응 시나리오 (1주씩 추매 · 최대 5주)</div>
+    ${simRender_levels(s, entry, shares)}
+
+    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #1a2540">
+      ※ 지지선은 피봇·볼린저·이평·일목 기준 자동 산출. 추매는 "계획된 분할"일 때만 유효하며, 한도(5주) 도달 후엔 추매가 아니라 손절을 검토하세요. 본 시뮬레이션은 참고용입니다.
+    </div>
+  </div>`;
+}
 </script>
 <script>
 // PWA 서비스 워커 등록
@@ -2062,6 +2202,15 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
     <div id="journalBody"></div>
+  </div>
+</div>
+<div class="jrnl-modal" id="simModal">
+  <div class="jrnl-sheet">
+    <div class="jrnl-head">
+      <span class="jrnl-title">🎯 진입 시뮬레이션</span>
+      <button class="jrnl-x" onclick="closeSim()">✕</button>
+    </div>
+    <div id="simBody"></div>
   </div>
 </div>
 </body>
