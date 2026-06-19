@@ -1842,17 +1842,13 @@ function renderJournal(){
   const closed = arr.filter(e=>e.returnPct!==null);
   let statsHtml = "";
   if(closed.length>=3){
-    // 3단계 분류 — 사용자 기준: 1%+ 수익 / 0~0.9% 본전탈출(빠른 손절) / 마이너스 손실
-    const WIN = 1.0;
-    const wins = closed.filter(e=>e.returnPct>=WIN);
-    const breakeven = closed.filter(e=>e.returnPct>=0 && e.returnPct<WIN);
-    const losses = closed.filter(e=>e.returnPct<0);
+    const wins = closed.filter(e=>e.returnPct>0);
     const winRate = Math.round(wins.length/closed.length*100);
     const avgRet = (closed.reduce((s,e)=>s+e.returnPct,0)/closed.length).toFixed(2);
     // 7일 이상 = 장기보유(비효율) 거래 분리
     const efficient = closed.filter(e=>!e.heldDays||e.heldDays<7);
     const longHold  = closed.filter(e=>e.heldDays&&e.heldDays>=7);
-    const effWins = efficient.filter(e=>e.returnPct>=WIN);
+    const effWins = efficient.filter(e=>e.returnPct>0);
     const effRate = efficient.length?Math.round(effWins.length/efficient.length*100):null;
     const effAvg  = efficient.length?(efficient.reduce((s,e)=>s+e.returnPct,0)/efficient.length).toFixed(2):null;
     // 보유기간 분석
@@ -1886,22 +1882,8 @@ function renderJournal(){
     statsHtml = `<div style="background:#070c16;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="font-size:12px;font-weight:800;color:#00e5a0;margin-bottom:10px">📊 통계 (청산 ${closed.length}건)</div>
       <div style="display:flex;gap:16px;margin-bottom:6px">
-        <div><div style="font-size:11.5px;color:#8090b0">실질 승률 <span style="font-size:9px;color:#5a6a88">(1%+)</span></div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
+        <div><div style="font-size:11.5px;color:#8090b0">전체 승률</div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
         <div><div style="font-size:11.5px;color:#8090b0">평균 수익률</div><div style="font-size:18px;font-weight:800;color:${avgRet>0?"#00e5a0":"#ff4060"}">${avgRet>0?"+":""}${avgRet}%</div></div>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px">
-        <div style="flex:1;background:#00e5a012;border-radius:8px;padding:6px 8px;text-align:center">
-          <div style="font-size:15px;font-weight:800;color:#00e5a0">${wins.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">수익 1%+</div>
-        </div>
-        <div style="flex:1;background:#ffc94012;border-radius:8px;padding:6px 8px;text-align:center">
-          <div style="font-size:15px;font-weight:800;color:#ffc940">${breakeven.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">본전탈출 0~0.9%</div>
-        </div>
-        <div style="flex:1;background:#ff406012;border-radius:8px;padding:6px 8px;text-align:center">
-          <div style="font-size:15px;font-weight:800;color:#ff4060">${losses.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">손실 −</div>
-        </div>
       </div>
       ${efficient.length<closed.length&&effRate!==null?`<div style="font-size:11px;color:#8090b0;margin-bottom:10px;padding:6px 8px;background:#ffc94008;border-radius:8px;border:1px solid #ffc94020">
         ⚡ 전략 승률(7일↓) <b style="color:${effRate>=60?"#00e5a0":effRate>=40?"#ffc940":"#ff4060"}">${effRate}%</b> · 평균 <b style="color:${effAvg>0?"#00e5a0":"#ff4060"}">${effAvg>0?"+":""}${effAvg}%</b>
@@ -1917,7 +1899,7 @@ function renderJournal(){
 
   function makeRow(e){
     const held = e.status==="보유";
-    const retColor = e.returnPct===null?"#8090b0":e.returnPct>=1.0?"#00e5a0":e.returnPct>=0?"#ffc940":"#ff4060";
+    const retColor = e.returnPct===null?"#8090b0":e.returnPct>0?"#00e5a0":"#ff4060";
     // 시장 구분: 저장된 market 없으면 타임스탬프(KST)로 자동 추정
     const mkt = e.market || guessMarket(e.enteredTs);
     const mktColor = mkt==="NXT"?"#a060ff":"#4090ff";
