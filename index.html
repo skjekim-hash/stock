@@ -1846,19 +1846,19 @@ function renderJournal(){
   const closed = arr.filter(e=>e.returnPct!==null);
   let statsHtml = "";
   if(closed.length>=3){
-    // 3단계 분류 — 사용자 기준: 1%+ 수익 / 0~0.9% 본전탈출(빠른 손절) / 마이너스 손실
-    const WIN = 1.0;
-    const wins = closed.filter(e=>e.returnPct>=WIN);
-    const breakeven = closed.filter(e=>e.returnPct>=0 && e.returnPct<WIN);
-    const losses = closed.filter(e=>e.returnPct<0);
-    const winRate = Math.round(wins.length/closed.length*100);
+    // 성공 = 30일 이내 AND 1%+ 수익. 그 외 전부 실패(손실 / 1%미만 / 30일초과).
+    const WIN = 1.0, MAXDAYS = 30;
+    const isSuccess = e => (!e.heldDays || e.heldDays<=MAXDAYS) && e.returnPct>=WIN;
+    const wins = closed.filter(isSuccess);
+    const fails = closed.filter(e=>!isSuccess(e));
+    // 실패 사유별 (중복 가능 — 한 거래가 여러 사유 해당 가능하나 표시용으로 우선순위)
+    const failLoss   = fails.filter(e=>e.returnPct<0);                                   // 손실
+    const failSmall  = fails.filter(e=>e.returnPct>=0 && e.returnPct<WIN);               // 1% 미만 수익
+    const failLong   = fails.filter(e=>e.returnPct>=WIN && e.heldDays && e.heldDays>MAXDAYS); // 1%+지만 30일초과
+    const realRate = closed.length?Math.round(wins.length/closed.length*100):null;
     const avgRet = (closed.reduce((s,e)=>s+e.returnPct,0)/closed.length).toFixed(2);
-    // 7일 이상 = 장기보유(비효율) 거래 분리
-    const efficient = closed.filter(e=>!e.heldDays||e.heldDays<7);
-    const longHold  = closed.filter(e=>e.heldDays&&e.heldDays>=7);
-    const effWins = efficient.filter(e=>e.returnPct>=WIN);
-    const effRate = efficient.length?Math.round(effWins.length/efficient.length*100):null;
-    const effAvg  = efficient.length?(efficient.reduce((s,e)=>s+e.returnPct,0)/efficient.length).toFixed(2):null;
+    const overHold = failLong; const inTime = closed.filter(e=>!e.heldDays||e.heldDays<=MAXDAYS);
+    const inTimeAvg = inTime.length?(inTime.reduce((s,e)=>s+e.returnPct,0)/inTime.length).toFixed(2):null;
     // 보유기간 분석
     const withDays = closed.filter(e=>e.heldDays!==null);
     let holdHtml = "";
@@ -1890,26 +1890,30 @@ function renderJournal(){
     statsHtml = `<div style="background:#070c16;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="font-size:12px;font-weight:800;color:#00e5a0;margin-bottom:10px">📊 통계 (청산 ${closed.length}건)</div>
       <div style="display:flex;gap:16px;margin-bottom:6px">
-        <div><div style="font-size:11.5px;color:#8090b0">실질 승률 <span style="font-size:9px;color:#5a6a88">(1%+)</span></div><div style="font-size:18px;font-weight:800;color:${winRate>=60?"#00e5a0":winRate>=40?"#ffc940":"#ff4060"}">${winRate}%</div></div>
-        <div><div style="font-size:11.5px;color:#8090b0">평균 수익률</div><div style="font-size:18px;font-weight:800;color:${avgRet>0?"#00e5a0":"#ff4060"}">${avgRet>0?"+":""}${avgRet}%</div></div>
+        <div><div style="font-size:11.5px;color:#8090b0">성공률 <span style="font-size:9px;color:#5a6a88">(30일내 1%+)</span></div><div style="font-size:18px;font-weight:800;color:${realRate>=60?"#00e5a0":realRate>=40?"#ffc940":"#ff4060"}">${realRate}%</div></div>
+        <div><div style="font-size:11.5px;color:#8090b0">성공 ${wins.length} / 실패 ${fails.length}</div><div style="font-size:18px;font-weight:800;color:${avgRet>0?"#00e5a0":"#ff4060"}">평균 ${avgRet>0?"+":""}${avgRet}%</div></div>
       </div>
       <div style="display:flex;gap:6px;margin-bottom:10px">
         <div style="flex:1;background:#00e5a012;border-radius:8px;padding:6px 8px;text-align:center">
           <div style="font-size:15px;font-weight:800;color:#00e5a0">${wins.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">수익 1%+</div>
-        </div>
-        <div style="flex:1;background:#ffc94012;border-radius:8px;padding:6px 8px;text-align:center">
-          <div style="font-size:15px;font-weight:800;color:#ffc940">${breakeven.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">본전탈출 0~0.9%</div>
+          <div style="font-size:9.5px;color:#8090b0">✅ 성공</div>
         </div>
         <div style="flex:1;background:#ff406012;border-radius:8px;padding:6px 8px;text-align:center">
-          <div style="font-size:15px;font-weight:800;color:#ff4060">${losses.length}</div>
-          <div style="font-size:9.5px;color:#8090b0">손실 −</div>
+          <div style="font-size:15px;font-weight:800;color:#ff4060">${failLoss.length}</div>
+          <div style="font-size:9.5px;color:#8090b0">손실</div>
+        </div>
+        <div style="flex:1;background:#ffc94012;border-radius:8px;padding:6px 8px;text-align:center">
+          <div style="font-size:15px;font-weight:800;color:#ffc940">${failSmall.length}</div>
+          <div style="font-size:9.5px;color:#8090b0">1% 미만</div>
+        </div>
+        <div style="flex:1;background:#ff8c4212;border-radius:8px;padding:6px 8px;text-align:center">
+          <div style="font-size:15px;font-weight:800;color:#ff8c42">${failLong.length}</div>
+          <div style="font-size:9.5px;color:#8090b0">30일 초과</div>
         </div>
       </div>
-      ${efficient.length<closed.length&&effRate!==null?`<div style="font-size:11px;color:#8090b0;margin-bottom:10px;padding:6px 8px;background:#ffc94008;border-radius:8px;border:1px solid #ffc94020">
-        ⚡ 전략 승률(7일↓) <b style="color:${effRate>=60?"#00e5a0":effRate>=40?"#ffc940":"#ff4060"}">${effRate}%</b> · 평균 <b style="color:${effAvg>0?"#00e5a0":"#ff4060"}">${effAvg>0?"+":""}${effAvg}%</b>
-        <span style="color:#ffc940"> · 장기보유 ${longHold.length}건 제외</span>
+      ${overHold.length>0?`<div style="font-size:11px;color:#8090b0;margin-bottom:10px;padding:6px 8px;background:#ff406008;border-radius:8px;border:1px solid #ff406020">
+        🔴 30일 초과 보유 <b style="color:#ff4060">${overHold.length}건</b>은 수익 여부와 무관하게 <b>실패</b>로 집계 — 자금이 오래 묶인 거래예요.
+        <span style="color:#8090b0"> · 30일내 평균 ${inTimeAvg>0?"+":""}${inTimeAvg}%</span>
       </div>`:""}
       <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">수익 케이스에서 자주 나온 신호</div>
       <div>${sigSorted.map(([k,v])=>`<span style="display:inline-block;background:#00e5a015;color:#00e5a0;border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:11.5px">${k} ${v}회</span>`).join("")||"<span style='color:#4a5878;font-size:11px'>데이터 부족</span>"}</div>
@@ -1921,7 +1925,8 @@ function renderJournal(){
 
   function makeRow(e){
     const held = e.status==="보유";
-    const retColor = e.returnPct===null?"#8090b0":e.returnPct>=1.0?"#00e5a0":e.returnPct>=0?"#ffc940":"#ff4060";
+    const over30 = e.heldDays && e.heldDays>30;
+    const retColor = e.returnPct===null?"#8090b0":(over30?"#ff8c42":(e.returnPct>=1.0?"#00e5a0":e.returnPct>=0?"#ffc940":"#ff4060"));
     // 시장 구분: 저장된 market 없으면 타임스탬프(KST)로 자동 추정
     const mkt = e.market || guessMarket(e.enteredTs);
     const mktColor = mkt==="NXT"?"#a060ff":"#4090ff";
@@ -1935,7 +1940,7 @@ function renderJournal(){
         의견 ${e.opinion}(${e.score>0?"+":""}${e.score}) ${e.star?"★":""} ${e.overheat!=="none"?e.overheat:""} · RSI ${e.rsi||"—"}
         ${[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).length?"<br>매수신호: "+[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).join(" · "):""}
         ${e.partialExits&&e.partialExits.length?`<br><span style="color:#ffc940;font-size:11px">부분청산: ${e.partialExits.map(p=>`${p.date} ${p.shares}주@₩${p.price.toLocaleString()}(${p.pnl>=0?"+":""}${p.pnl.toLocaleString()})`).join(" / ")}</span>`:""}
-        ${e.exitAt?`<br>청산 ${e.exitAt} · ₩${(e.exitPrice||0).toLocaleString()} · ${e.exitReason||""}${e.heldDays?` · ${e.heldDays}일 보유${e.heldDays>=7?" ⚠️":""}`:""}`:""}
+        ${e.exitAt?`<br>청산 ${e.exitAt} · ₩${(e.exitPrice||0).toLocaleString()} · ${e.exitReason||""}${e.heldDays?` · ${e.heldDays}일 보유${e.heldDays>30?" 🔴실패":""}`:""}`:""}
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
         ${held?`<button onclick="closeTradePrompt(${e.id})" style="flex:1;background:#00e5a015;color:#00e5a0;border:1px solid #00e5a030;border-radius:8px;padding:7px;font-size:11px;font-weight:700">청산 입력</button>`:""}
