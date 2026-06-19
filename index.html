@@ -88,6 +88,8 @@ body::before{
 .btn-main:active{transform:scale(.97)}
 .hdr-btns{display:flex;gap:6px;align-items:center}
 .btn-jrnl{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.btn-icon{background:#00d4ff12;border:1px solid #00d4ff30;border-radius:12px;width:38px;height:38px;padding:0;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.btn-icon:active{transform:scale(.92)}
 .btn-jrnl:active{transform:scale(.97)}
 .spin{animation:spin .7s linear infinite;display:inline-block}
 
@@ -458,8 +460,9 @@ body::before{
       <button class="btn-main" id="mainBtn" onclick="loadData()">
         <span id="btnText">분석 보기</span>
       </button>
-      <button class="btn-jrnl" onclick="openJournal()">📝 기록</button>
-      <button class="btn-jrnl" onclick="openSim()">🎯 시뮬</button>
+      <button class="btn-icon" onclick="openJournal()" title="매매 기록">📝</button>
+      <button class="btn-icon" onclick="openSim()" title="진입 시뮬레이션">🎯</button>
+      <button class="btn-icon" onclick="openRecover()" title="현금 회수">💵</button>
     </div>
   </div>
   <div class="hdr-badges">
@@ -2074,6 +2077,134 @@ function openSim(){
 }
 function closeSim(){ document.getElementById("simModal").style.display="none"; }
 
+// ─── 현금 회수 우선순위 ───────────────────────────────────────
+function openRecover(){
+  const stocks=window.__stocks||[];
+  if(!stocks.length){ alert("먼저 '분석 보기'로 데이터를 불러와주세요."); return; }
+  document.getElementById("recoverModal").style.display="flex";
+  renderRecover();
+}
+function closeRecover(){ document.getElementById("recoverModal").style.display="none"; }
+
+function recoverTargetPrice(s){
+  // 반등 시 빼면 좋을 목표가 = 가까운 저항(되돌림 1차). 피봇 P, SMA5, 볼린저 중간 중 현재가 위 가장 가까운 것
+  const cur=s.price;
+  const cands=[s.pivot?.p, s.sma5, s.boll?.mid, s.vwap].filter(p=>p&&p>cur).sort((a,b)=>a-b);
+  return cands[0] || Math.round(cur*1.03); // 없으면 +3%
+}
+
+function recoverScore(s, hasProfit){
+  let sc=0; const why=[];
+  if(hasProfit){ sc+=3; why.push("이미 평가익"); }
+  const k=s.stochRsi?.k ?? 50;
+  if(k<=20){ sc+=2; why.push("스토캐스틱 과매도"); } else if(k<=40) sc+=1;
+  if((s.wr??-50)<=-80){ sc+=2; why.push("Williams 과매도"); } else if((s.wr??-50)<=-60) sc+=1;
+  if((s.boll?.position??50)<=20){ sc+=2; why.push("볼린저 하단"); } else if((s.boll?.position??50)<=40) sc+=1;
+  if((s.rsi??50)<=45){ sc+=1; why.push("RSI 저점권"); }
+  return {sc, why};
+}
+
+function renderRecover(){
+  const stocks=window.__stocks||[];
+  const arr=getJournal();
+  const held=arr.filter(e=>e.status==="보유"&&e.entryPrice);
+  const curMap={}; stocks.forEach(s=>curMap[s.code]=s);
+  const nameToCode={'삼성전자':'005930','SK하이닉스':'000660','하이닉스':'000660','LG전자':'066570','삼성전기':'009150','현대차':'005380','현대자동차':'005380','KB금융':'105560','SK텔레콤':'017670','NAVER':'035420'};
+
+  // 종목별 집계
+  const agg={};
+  held.forEach(e=>{
+    const code=e.code||nameToCode[e.name]; if(!code) return;
+    const sh=e.shares||1;
+    if(!agg[code]) agg[code]={name:e.name,code,sh:0,cost:0,cnt:0};
+    agg[code].sh+=sh; agg[code].cost+=e.entryPrice*sh; agg[code].cnt++;
+  });
+
+  const reserve=loadReserve();
+  const curReserve=reserve.amount||0;
+  // 목표 = 정리하려는 손실 종목의 손실을 받아낼 '무손실 회수 쿠션'. 기본은 가장 깊은 손실 종목 기준.
+  const _t = (window.__recoverTarget!=null)?window.__recoverTarget:40*10000;
+
+  // 각 종목 평가손익 + 회수액 + 반등점수 + 목표가
+  let rows=Object.values(agg).map(a=>{
+    const s=curMap[a.code]; if(!s) return null;
+    const avg=a.cost/a.sh, cur=s.price;
+    const pnl=Math.round((cur-avg)*a.sh);
+    const retPct=(cur-avg)/avg*100;
+    const recoverCash=Math.round(cur*a.sh);
+    const hasProfit=pnl>0;
+    const {sc,why}=recoverScore(s,hasProfit);
+    const tgt=recoverTargetPrice(s);
+    const tgtPnl=Math.round((tgt-avg)*a.sh);
+    const tgtPct=((tgt-cur)/cur*100);
+    return {...a,avg,cur,pnl,retPct,recoverCash,hasProfit,sc,why,tgt,tgtPnl,tgtPct};
+  }).filter(Boolean);
+
+  // 정렬: 평가익 우선 → 반등점수 높은 순 → 손실 작은 순
+  rows.sort((x,y)=> (y.hasProfit-x.hasProfit) || (y.sc-x.sc) || (y.pnl-x.pnl));
+
+  // 무손실 회수 쿠션: 평가익 종목은 그 이익, 반등 종목은 목표가 도달 시 이익(0 이상만). 손실 종목 청산은 쿠션에 안 보탬.
+  let cushion=0, lineIdx=-1;
+  rows.forEach((r,i)=>{
+    const contrib = r.hasProfit ? r.pnl : Math.max(0, r.tgtPnl);
+    if(lineIdx<0){ cushion+=contrib; if(cushion>=_t) lineIdx=i; }
+  });
+  const shortfall=Math.max(0,_t-cushion);
+
+  const fmt=n=>(n>=0?"+":"")+n.toLocaleString()+"원";
+  const rowHtml=rows.map((r,i)=>{
+    const tierColor = r.hasProfit?"#00e5a0":(r.sc>=5?"#ffc940":"#8090b0");
+    const tag = r.hasProfit?"✅ 지금 빼도 이익":(r.sc>=5?"⏳ 반등 임박":"🔻 약함·보류");
+    const passed = lineIdx>=0 && i<=lineIdx;
+    return `<div style="background:${passed?'#0f1f18':'#0d1424'};border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${tierColor}">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+        <span style="font-size:13px;font-weight:800;color:#cdd9ee">${i+1}. ${r.name} <span style="font-size:10px;color:#5a6a88">${r.sh}주</span></span>
+        <span style="font-size:11px;font-weight:700;color:${tierColor}">${tag}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#8090b0;margin-bottom:2px">
+        <span>평단 ₩${Math.round(r.avg).toLocaleString()} → 현재 ₩${r.cur.toLocaleString()}</span>
+        <span style="color:${r.pnl>=0?'#00e5a0':'#ff6b6b'}">${fmt(r.pnl)} (${r.retPct.toFixed(1)}%)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9fb0cc">
+        <span>💰 회수 ₩${r.recoverCash.toLocaleString()}</span>
+        ${!r.hasProfit?`<span>🎯 반등목표 ₩${r.tgt.toLocaleString()} (+${r.tgtPct.toFixed(1)}%) → ${fmt(r.tgtPnl)}</span>`:`<span style="color:#5a6a88">미련X 고점권</span>`}
+      </div>
+      ${r.why.length?`<div style="margin-top:5px">${r.why.map(w=>`<span style="display:inline-block;background:#1a2540;border-radius:5px;padding:1px 6px;margin-right:3px;font-size:9.5px;color:#9fb0cc">${w}</span>`).join("")}</div>`:""}
+    </div>`;
+  }).join("");
+
+  document.getElementById("recoverBody").innerHTML=`
+  <div style="padding:14px 16px">
+    <div style="background:#0d1424;border-radius:12px;padding:13px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-size:11px;color:#8090b0">무손실 회수 쿠션</div>
+          <div style="font-size:18px;font-weight:800;color:#00e5a0">₩${cushion.toLocaleString()}</div></div>
+        <div style="text-align:right"><div style="font-size:11px;color:#8090b0">손절 필요액(목표)</div>
+          <div style="font-size:18px;font-weight:800;color:#4a9eff">₩${_t.toLocaleString()}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #1a2540;padding-top:9px">
+        <span style="font-size:11px;color:#8090b0">목표 변경</span>
+        <input id="recoverTargetInput" type="number" value="${_t/10000}" onchange="window.__recoverTarget=Math.round(this.value*10000);renderRecover();" style="width:70px;background:#1a2540;border:none;border-radius:6px;color:#fff;padding:5px 8px;font-size:13px;text-align:right">
+        <span style="font-size:11px;color:#8090b0">만원</span>
+        <span style="margin-left:auto;font-size:12px;color:${shortfall>0?'#ffc940':'#00e5a0'};font-weight:700">${shortfall>0?`부족 ₩${shortfall.toLocaleString()}`:'쿠션 충분 ✓'}</span>
+      </div>
+      <div style="font-size:10px;color:#5a6a88;margin-top:6px">적립금 현재 ₩${curReserve.toLocaleString()} · 쿠션은 손실 없이 뺄 수 있는 이익 합계(평가익+반등목표 도달분)</div>
+    </div>
+
+    <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">회수 우선순위 (평가익·반등 임박 순)</div>
+    ${rowHtml||'<div style="color:#8090b0;font-size:12px;padding:10px">보유 종목이 없어요.</div>'}
+
+    ${lineIdx>=0?`<div style="background:#00e5a012;border:1px solid #00e5a040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#cdd9ee;line-height:1.6">
+      ✅ 위 <b style="color:#00e5a0">${lineIdx+1}개</b>를 정리(평가익 즉시 + 반등목표 도달 시)하면, 손실 없이 ₩${_t.toLocaleString()} 쿠션이 생겨요. 그걸로 손실 종목(LG 등)을 끊을 여력이 마련돼요.</div>`:
+      shortfall>0?`<div style="background:#ffc94012;border:1px solid #ffc94040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#cdd9ee;line-height:1.6">
+      ⚠️ 무손실 회수만으론 목표(₩${_t.toLocaleString()})에 ₩${shortfall.toLocaleString()} 부족해요. 반등을 더 기다리거나, 목표를 낮추거나, 일부는 손실 감수가 필요할 수 있어요.</div>`:""}
+
+    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #1a2540">
+      ※ 평가익 종목 먼저(손실 없이 현금화) → 반등 임박 종목은 목표가 도달 시 정리. 이렇게 손실 없이 쿠션을 만든 뒤, 그 여력으로 깊이 물린 종목을 끊는 순서입니다. 추매는 권하지 않아요. 참고용.
+    </div>
+  </div>`;
+}
+
 function simPickStock(code){ _simState.code=code; renderSim(); }
 function simSetShares(n){ _simState.shares=Math.max(1,Math.min(5,n)); renderSim(); }
 
@@ -2302,6 +2433,15 @@ if ('serviceWorker' in navigator) {
       <button class="jrnl-x" onclick="closeSim()">✕</button>
     </div>
     <div id="simBody"></div>
+  </div>
+</div>
+<div class="jrnl-modal" id="recoverModal">
+  <div class="jrnl-sheet">
+    <div class="jrnl-head">
+      <span class="jrnl-title">💵 현금 회수 우선순위</span>
+      <button class="jrnl-x" onclick="closeRecover()">✕</button>
+    </div>
+    <div id="recoverBody"></div>
   </div>
 </div>
 </body>
