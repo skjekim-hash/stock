@@ -90,6 +90,8 @@ body::before{
 .btn-jrnl{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
 .btn-icon{background:#00d4ff12;border:1px solid #00d4ff30;border-radius:12px;width:38px;height:38px;padding:0;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .btn-icon:active{transform:scale(.92)}
+.btn-icon-main{background:linear-gradient(135deg,#001a0d,#002a1a);border:1px solid rgba(0,229,160,.35);color:var(--green)}
+.btn-icon-main:disabled{opacity:.5}
 .btn-jrnl:active{transform:scale(.97)}
 .spin{animation:spin .7s linear infinite;display:inline-block}
 
@@ -457,8 +459,8 @@ body::before{
       <div class="hdr-title">국내 주식 분석</div>
     </div>
     <div class="hdr-btns">
-      <button class="btn-main" id="mainBtn" onclick="loadData()">
-        <span id="btnText">분석 보기</span>
+      <button class="btn-icon btn-icon-main" id="mainBtn" onclick="loadData()" title="분석/갱신">
+        <span id="btnText">🔄</span>
       </button>
       <button class="btn-icon" onclick="openJournal()" title="매매 기록">📝</button>
       <button class="btn-icon" onclick="openSim()" title="진입 시뮬레이션">🎯</button>
@@ -1367,7 +1369,7 @@ async function loadData(){
   loading=true;
   const btn=document.getElementById("mainBtn");
   btn.disabled=true;
-  document.getElementById("btnText").textContent="불러오는 중...";
+  document.getElementById("btnText").textContent="⏳";
   document.getElementById("mktBadge").textContent=kst().status;
   document.getElementById("progWrap").style.display="";
   document.getElementById("progFill").style.width="30%";
@@ -1450,8 +1452,7 @@ async function loadData(){
   }finally{
     loading=false;
     btn.disabled=false;
-    document.getElementById("btnText").textContent=
-      document.getElementById("results").style.display!=="none"?"갱신":"분석 보기";
+    document.getElementById("btnText").textContent="🔄";
     document.getElementById("progWrap").style.display="none";
   }
 }
@@ -2106,7 +2107,7 @@ function recoverScore(s, hasProfit){
 
 function renderRecover(){
   const stocks=window.__stocks||[];
-  const arr=getJournal();
+  const arr=loadJournal();
   const held=arr.filter(e=>e.status==="보유"&&e.entryPrice);
   const curMap={}; stocks.forEach(s=>curMap[s.code]=s);
   const nameToCode={'삼성전자':'005930','SK하이닉스':'000660','하이닉스':'000660','LG전자':'066570','삼성전기':'009150','현대차':'005380','현대자동차':'005380','KB금융':'105560','SK텔레콤':'017670','NAVER':'035420'};
