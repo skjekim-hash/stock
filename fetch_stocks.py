@@ -415,20 +415,18 @@ def fetch_naver_investor(code):
     - 외국인 연속 순매수/순매도 일수 + 5일 일별 흐름
     ※ 장중 실시간이 아닌 '전일 마감' 기준"""
     try:
-        # front-api/domestic/trend + marketType=ALL → 진짜 KRX+NXT 통합 (60일치)
-        # ※ 구 /api/stock/{code}/trend 는 marketType 무시하고 KRX만 줌 — 반드시 front-api 사용
-        # 응답은 {"isSuccess":true, "result":[...]} 구조라 result를 꺼내야 함
+        # 수급: 네이버 /api/trend (KRX 기준, 60일치). marketType=ALL이라 써도 이 엔드포인트는 KRX만 줌.
+        # ※ 통합(KRX+NXT)은 front-api에 있으나 GitHub 서버 IP에서 차단돼 실효 없어 제거함.
+        #   NXT는 한국 거래의 ~18%이고 수급 '방향'은 KRX만으로도 동일하게 읽힘.
         rows = []
         seen = set()
         try:
             d = http_json(
-                f"https://m.stock.naver.com/front-api/stock/domestic/trend"
+                f"https://m.stock.naver.com/api/stock/{code}/trend"
                 f"?code={code}&marketType=ALL&pageSize=60",
-                timeout=10,
-                headers={"Referer": f"https://m.stock.naver.com/domestic/stock/{code}/total"}
+                timeout=8
             )
-            # front-api는 {"isSuccess":true,"result":[...]} 구조. 차단 시 isSuccess=false/빈 result.
-            items = d.get("result", []) if isinstance(d, dict) else (d if isinstance(d, list) else [])
+            items = d if isinstance(d, list) else (d.get("result", []) if isinstance(d, dict) else [])
             for r in items:
                 bd = r.get("bizdate", "")
                 if bd and bd not in seen:
@@ -436,24 +434,8 @@ def fetch_naver_investor(code):
                     rows.append(r)
         except Exception:
             pass
-        # front-api 차단/실패 시 → 구 /api/trend(KRX)로 폴백. 통합은 못 줘도 수급은 살림.
         if not rows:
-            try:
-                d2 = http_json(
-                    f"https://m.stock.naver.com/api/stock/{code}/trend"
-                    f"?code={code}&marketType=ALL&pageSize=60",
-                    timeout=10
-                )
-                items2 = d2 if isinstance(d2, list) else (d2.get("result", []) if isinstance(d2, dict) else [])
-                for r in items2:
-                    bd = r.get("bizdate", "")
-                    if bd and bd not in seen:
-                        seen.add(bd)
-                        rows.append(r)
-            except Exception:
-                pass
-        if not rows:
-            print(f"  ⚠ 수급 실패 ({code}): front-api·폴백 모두 데이터 없음", file=sys.stderr)
+            print(f"  ⚠ 수급 실패 ({code}): 데이터 없음", file=sys.stderr)
             return None
         print(f"  💰 수급 OK ({code}): {len(rows)}일치 · 최근 외국인 {rows[0].get('foreignerPureBuyQuant','?')}", file=sys.stderr)
         rows.sort(key=lambda r: r.get("bizdate", ""), reverse=True)
