@@ -552,6 +552,89 @@ def fetch_naver_financial(code):
     return out
 
 
+def fetch_fundamentals(code):
+    """네이버 finance/annual에서 실적 추세 수집 → 거품/건전 판정.
+    매출·영업이익 성장률(YoY), ROE, 부채비율, 추정이익 성장(컨센서스) 기반."""
+    def pnum(s):
+        if s in (None, "-", ""): return None
+        m = re.search(r'-?[\d,]+\.?\d*', str(s))
+        return float(m.group().replace(",", "")) if m else None
+
+    out = {"revGrowth": None, "opGrowth": None, "roe": None, "debtRatio": None,
+           "opMargin": None, "fwdEpsGrowth": None, "years": [], "grade": "정보없음",
+           "gradeColor": "#8090b0", "comment": "실적 데이터 없음", "rows": {}}
+    try:
+        d = http_json(f"https://m.stock.naver.com/api/stock/{code}/finance/annual", timeout=8)
+        fi = d.get("financeInfo") or {}
+        cols = fi.get("trTitleList") or []
+        keys = [c["key"] for c in cols]            # 예: ['202312','202412','202512','202612']
+        isCns = {c["key"]: (c.get("isConsensus")=="Y") for c in cols}
+        rows = {}
+        for r in (fi.get("rowList") or []):
+            t = r.get("title"); cc = r.get("columns") or {}
+            rows[t] = {k: pnum((cc.get(k) or {}).get("value")) for k in keys}
+
+        # 확정 실적 연도(컨센서스 제외)만으로 성장률 — 최근 2개 확정연도 비교
+        actualKeys = [k for k in keys if not isCns.get(k)]
+        def yoy(title):
+            vals = [rows.get(title,{}).get(k) for k in actualKeys]
+            vals = [v for v in vals if v is not None]
+            if len(vals) >= 2 and vals[-2]:
+                return round((vals[-1]-vals[-2])/abs(vals[-2])*100, 1)
+            return None
+        out["revGrowth"] = yoy("매출액")
+        out["opGrowth"]  = yoy("영업이익")
+
+        # 최신 확정연도 ROE·부채비율·영업이익률
+        lastA = actualKeys[-1] if actualKeys else None
+        if lastA:
+            out["roe"]       = rows.get("ROE",{}).get(lastA)
+            out["debtRatio"] = rows.get("부채비율",{}).get(lastA)
+            out["opMargin"]  = rows.get("영업이익률",{}).get(lastA)
+
+        # 추정이익 성장: 컨센서스연도 EPS vs 최신 확정 EPS
+        cnsKeys = [k for k in keys if isCns.get(k)]
+        if cnsKeys and lastA:
+            epsNow = rows.get("EPS",{}).get(lastA)
+            epsFwd = rows.get("EPS",{}).get(cnsKeys[0])
+            if epsNow and epsFwd:
+                out["fwdEpsGrowth"] = round((epsFwd-epsNow)/abs(epsNow)*100, 1)
+
+        out["rows"] = {t: rows[t] for t in ("매출액","영업이익","ROE","부채비율") if t in rows}
+        out["years"] = [c["title"] for c in cols]
+
+        # ── 종합 판정 ──
+        score = 0; reasons = []
+        if out["fwdEpsGrowth"] is not None:
+            if out["fwdEpsGrowth"] >= 20: score += 2; reasons.append(f"추정이익 +{out['fwdEpsGrowth']:.0f}% 성장")
+            elif out["fwdEpsGrowth"] >= 0: score += 1
+            else: score -= 2; reasons.append(f"추정이익 {out['fwdEpsGrowth']:.0f}% 역성장")
+        if out["opGrowth"] is not None:
+            if out["opGrowth"] >= 10: score += 1; reasons.append(f"영업이익 +{out['opGrowth']:.0f}%")
+            elif out["opGrowth"] < 0: score -= 1; reasons.append(f"영업이익 {out['opGrowth']:.0f}%")
+        if out["roe"] is not None:
+            if out["roe"] >= 10: score += 1; reasons.append(f"ROE {out['roe']:.0f}%")
+            elif out["roe"] < 5: score -= 1; reasons.append(f"ROE {out['roe']:.0f}% 낮음")
+        if out["debtRatio"] is not None:
+            if out["debtRatio"] <= 100: score += 1
+            elif out["debtRatio"] >= 200: score -= 1; reasons.append(f"부채 {out['debtRatio']:.0f}%")
+
+        if score >= 3:
+            out["grade"]="✅ 실적 건전"; out["gradeColor"]="#00e5a0"
+            out["comment"]="실적이 주가를 받쳐줘요. " + " · ".join(reasons[:3])
+        elif score >= 0:
+            out["grade"]="⚠️ 실적 보통"; out["gradeColor"]="#ffc940"
+            out["comment"]="실적 받침이 평범해요. " + (" · ".join(reasons[:3]) or "성장 동력 약함")
+        else:
+            out["grade"]="🚫 거품 의심"; out["gradeColor"]="#ff4060"
+            out["comment"]="실적이 주가를 못 따라가요. " + " · ".join(reasons[:3])
+
+        print(f"  📊 실적 ({code}): {out['grade']} · 영익성장 {out['opGrowth']} · ROE {out['roe']} · 추정EPS성장 {out['fwdEpsGrowth']}", file=sys.stderr)
+    except Exception as e:
+        print(f"  실적 수집 실패 ({code}): {e}", file=sys.stderr)
+    return out
+
+
 def fetch_financial_data(yf_sym, code):
     """재무 dict 수집 — 네이버 1순위, Yahoo로 eps/bps 보강, fallback 최후
     반환: fetch_naver_financial과 같은 dict 구조"""
@@ -1333,6 +1416,7 @@ def analyze_stock(stock, kospi, market=None):
 
     fin = fetch_financial_data(stock["yf"], code)
     fair = calc_fair_value(code, price, fin)
+    fundamentals = fetch_fundamentals(code)
     eps = fin.get("eps") or 0
     bps = fin.get("bps") or 0
 
@@ -1582,6 +1666,7 @@ def analyze_stock(stock, kospi, market=None):
         "ft": ft, "fc": investor.get("comment", "") if investor else "",
         "volRatio": round(vol_ratio, 2),
         "investor": investor, "short": short,
+        "fundamentals": fundamentals,
         "creditRatio": round(meta_d.get("creditRatio", 0), 2),
         "weekly": weekly, "monthly": monthly,
         "relativeStrength": rs, "breakout": breakout, "volSurge": vol_surge,
