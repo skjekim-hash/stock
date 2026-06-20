@@ -1841,7 +1841,7 @@ function renderHabitCard(arr){
     </div>
     ${bar("수익률 (목표 "+h.TARGET+"%)",h.retScore,40,"#00d4ff")}
     ${bar("보유기간 (평균 "+h.avgHold.toFixed(1)+"일)",h.holdScore,40,"#a060ff")}
-    ${bar("회전 속도 (7일내 청산 목표 · "+h.over7+"건 초과)",h.discScore,20,"#ff8c40")}
+    ${bar("청산 규율 (7일+ "+h.over7+"건)",h.discScore,20,"#ff8c40")}
     <div style="font-size:11px;color:#d8e0ec;line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">💡 ${h.comment}</div>
     ${watchHtml}
   </div>`;
@@ -1886,7 +1886,7 @@ function renderJournal(){
       holdHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1a2540">
         <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">보유기간 (평균 ${avgHold}일)</div>
         ${quick.length?`<div style="font-size:11px;color:#a8b4c8;margin-bottom:3px">빠른 익절(3일↓) ${quick.length}건 · 평균 <b style="color:${quickAvg>0?'#00e5a0':'#ff4060'}">${quickAvg>0?'+':''}${quickAvg}%</b></div>`:""}
-        ${long.length?`<div style="font-size:11px;color:#a8b4c8">회전 7일 초과 ${long.length}건 · 평균 <b style="color:${longAvg>0?'#00e5a0':'#ff4060'}">${longAvg>0?'+':''}${longAvg}%</b> <span style="color:#ffc940;font-size:11.5px">⏳ 회전 느림 (30일 넘기면 실패)</span></div>`:""}
+        ${long.length?`<div style="font-size:11px;color:#a8b4c8">장기 보유(7일↑) ${long.length}건 · 평균 <b style="color:${longAvg>0?'#00e5a0':'#ff4060'}">${longAvg>0?'+':''}${longAvg}%</b> <span style="color:#ffc940;font-size:11.5px">⚠️ 물림 의심</span></div>`:""}
       </div>`;
     }
     // 수익 케이스 공통 신호 집계
@@ -2290,17 +2290,12 @@ function simJudge(s){
   const pos = s.breakout?.position ?? 50;
   const ichi = s.ichimoku?.signal || "";
   const rsi = s.rsi ?? 50;
-  // 수급 살아있는지: 외국인 순매수(연속일수>0) 또는 5일 누적 +
-  const inv = s.investor || {};
-  const demandAlive = (inv.streak||0)>0 || (inv.foreign5||0)>0;
-  // 고위치(70%+) & 추세 살아있음 & 수급 살아있음 → 비로소 조건부 분할 진입 허용
+  // 고위치(70%+) & 추세 살아있음 → 건강한 눌림 가능 → 조건부 분할 진입
   if(pos>=70 && ichi==="매수"){
-    if(!demandAlive) return {ok:true, level:"caution", title:"⚠️ 추매 보류 — 수급 약함",
-      msg:"고위치·추세는 살아있으나 외국인 수급이 빠지고 있음. 수급 없는 추매는 물타기로 번지기 쉬움. 수급 전환(외국인 순매수) 확인 전까지 추매 보류."};
     if(rsi>=70) return {ok:true, level:"caution", title:"⚠️ 조건부 가능하나 과열",
-      msg:"강한 종목 + 수급 유지 중이나 지금 과매수라 첫 진입가가 높음. 추매는 '계획된 분할'일 때만 — 지지구간까지 기다렸다 진입 권장. 한도 3주 엄수."};
-    return {ok:true, level:"ok", title:"🟢 조건부 분할 진입 가능 (고위치·추세·수급 3박자)",
-      msg:"52주 고위치 + 추세 유지 + 외국인 수급까지 살아있어야 추매 의미 있음. 셋 중 하나라도 꺾이면 즉시 손절 전환. 추매는 본질적으로 리스크를 키우니 한도(3주) 엄수."};
+      msg:"강한 종목이라 눌림 시 반등 기대되나, 지금 과매수라 첫 진입가가 높음. 추매는 '계획된 분할'일 때만 — 지지구간까지 기다렸다 진입 권장."};
+    return {ok:true, level:"ok", title:"🟢 조건부 분할 진입 가능 (고위치 눌림형)",
+      msg:"52주 고위치 + 추세 유지 중이라면 하락은 눌림일 가능성. 단 추세가 꺾이면 즉시 손절 전환. 추매는 본질적으로 리스크를 키우니 한도(5주) 엄수."};
   }
   // 저위치(60%-) & 하락추세 → 물림 위험 → 추매 경고
   if(pos<60 && ichi==="매도"){
@@ -2331,9 +2326,9 @@ function simRender_levels(s, entry, shares){
   const uniq=[]; cands.forEach(c=>{ if(!uniq.some(u=>Math.abs(u.price-c.price)/entry<0.01)) uniq.push(c); });
   const levels = uniq.slice(0,4); // 최대 4개 지지선
 
-  // 추매 시뮬: 1주씩, 총 3주 한도 (이론 반영 — 추매 엄격 제한)
+  // 추매 시뮬: 1주씩, 총 5주 한도
   let curShares = shares, curCost = entry*shares;
-  const maxShares = 3;
+  const maxShares = 5;
   let rows = "";
   levels.forEach((lv,i)=>{
     const dropPct = ((lv.price-entry)/entry*100);
@@ -2346,7 +2341,7 @@ function simRender_levels(s, entry, shares){
       action = `+1주 추매 → ${curShares+1}주 / 평단 ₩${Math.round(avgAfter).toLocaleString()} (${avgDropPct.toFixed(1)}%)`;
       curShares=newShares; curCost=newCost;
     } else {
-      action = `한도(3주) 도달 → 추매 중단. 이 구간 이탈 시 <b style="color:#ff6b6b">손절 검토</b>`;
+      action = `한도(5주) 도달 → 추매 중단. 이 구간 이탈 시 <b style="color:#ff6b6b">손절 검토</b>`;
     }
     const lossHere = Math.round((lv.price-entry)*shares); // 최초 진입분 기준 평가손
     rows += `<div style="background:#0f1830;border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${canAdd?'#4a9eff':'#ff6b6b'}">
@@ -2362,12 +2357,12 @@ function simRender_levels(s, entry, shares){
   // 추매 리스크 증폭 경고: 한도까지 가면 투입금이 얼마나 커지고, 최악(최저 지지 이탈) 시 손실은?
   if(levels.length){
     const initCost = entry*shares;
-    const maxAddShares = Math.max(0, 3-shares);
+    const maxAddShares = Math.max(0, 5-shares);
     if(maxAddShares>0){
       const lowest = levels[levels.length-1].price;
       // 한도까지 추매했을 때 총 투입 (대략: 추매분을 지지선 가격들로)
       let addCost=0, addN=0, cs=shares;
-      levels.forEach(lv=>{ if(cs<3){ addCost+=lv.price; addN++; cs++; } });
+      levels.forEach(lv=>{ if(cs<5){ addCost+=lv.price; addN++; cs++; } });
       const totalCost = initCost+addCost;
       const worstLoss = Math.round((lowest-entry)*shares + levels.slice(0,addN).reduce((s2,lv)=>s2+(lowest-lv.price),0));
       rows += `<div style="background:#2a1a1a;border:1px solid #ff6b6b40;border-radius:10px;padding:11px 13px;margin-top:4px">
@@ -2456,11 +2451,11 @@ function renderSim(){
       <div style="font-size:12px;color:#cdd9ee;line-height:1.6">${j.msg}</div>
     </div>
 
-    <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">📉 하락 시 대응 시나리오 (1주씩 추매 · 최대 3주)</div>
+    <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">📉 하락 시 대응 시나리오 (1주씩 추매 · 최대 5주)</div>
     ${simRender_levels(s, entry, shares)}
 
     <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #1a2540">
-      ※ 지지선은 피봇·볼린저·이평·일목 기준 자동 산출. 추매는 "계획된 분할"일 때만 유효하며, 한도(3주) 도달 후엔 추매가 아니라 손절을 검토하세요. 본 시뮬레이션은 참고용입니다.
+      ※ 지지선은 피봇·볼린저·이평·일목 기준 자동 산출. 추매는 "계획된 분할"일 때만 유효하며, 한도(5주) 도달 후엔 추매가 아니라 손절을 검토하세요. 본 시뮬레이션은 참고용입니다.
     </div>
   </div>`;
 }
