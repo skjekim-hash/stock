@@ -1593,6 +1593,21 @@ function recordEntry(code){
     entryPrice: entryPrice,
     shares: shares,
     screenPrice: snap.price,  // 진입 시점 화면 현재가 (참고)
+    // ── 백테스트용: 진입 시점 시뮬 판정 스냅샷 ──
+    simSnapshot: (()=>{
+      try{
+        const f = simEntryFit(s);
+        if(!f || f.verdict==="noSupport") return {verdict:"noSupport"};
+        return {
+          verdict: f.verdict,            // ok / caution / hold
+          gapPct: +f.gapAbs.toFixed(1),  // 첫 지지선까지 실제 이격
+          allowPct: +f.allow.toFixed(1), // 허용 이격
+          capped: !!f.capped,
+          firstSup: f.firstSup,
+          recPrice: f.verdict!=="ok" ? Math.round(f.firstSup*(1+f.allow/100)) : null
+        };
+      }catch(_){ return null; }
+    })(),
     exitPrice: null, exitAt: null, exitTs: null, returnPct: null, exitReason: null,
     heldDays: null,
     status: "보유"
@@ -1936,10 +1951,23 @@ function renderJournal(){
         <span style="font-size:11px;color:${held?'#ffc940':retColor};font-weight:700">${held?"보유중":(e.returnPct>0?"+":"")+e.returnPct+"%"}</span>
       </div>
       <div style="font-size:11.5px;color:#8090b0;line-height:1.6">
-        진입 ${e.enteredAt} · 매수 ₩${e.entryPrice.toLocaleString()} · ${e.shares||1}주${e.soldShares&&e.soldShares<(e.shares||1)?` (잔여 ${(e.shares||1)-e.soldShares}주)`:""}<br>
+        진입 ${e.enteredAt} · 매수 ₩${e.entryPrice.toLocaleString()} · ${e.shares||1}주${e.soldShares&&e.soldShares<(e.shares||1)?` (잔여 ${(e.shares||1)-e.soldShares}주)`:""}${e.simSnapshot&&e.simSnapshot.verdict&&e.simSnapshot.verdict!=="noSupport"?` <span style="font-size:9.5px;padding:1px 5px;border-radius:5px;background:${({ok:"#00e5a020",caution:"#ffc94020",hold:"#ff406020"})[e.simSnapshot.verdict]};color:${({ok:"#00e5a0",caution:"#ffc940",hold:"#ff4060"})[e.simSnapshot.verdict]}">시뮬 ${({ok:"진입가능",caution:"경계",hold:"보류"})[e.simSnapshot.verdict]} ${e.simSnapshot.gapPct}/${e.simSnapshot.allowPct}%</span>`:""}<br>
         의견 ${e.opinion}(${e.score>0?"+":""}${e.score}) ${e.star?"★":""} ${e.overheat!=="none"?e.overheat:""} · RSI ${e.rsi||"—"}
         ${[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).length?"<br>매수신호: "+[e.stochRsi==="매수"?"스토캐스틱":"",e.ichimoku==="매수"?"일목":"",e.divergence==="강세"?"강세다이버":"",e.psar==="상승"?"SAR↑":"",e.cci==="매수"?"CCI":""].filter(Boolean).join(" · "):""}
         ${e.partialExits&&e.partialExits.length?`<br><span style="color:#ffc940;font-size:11px">부분청산: ${e.partialExits.map(p=>`${p.date} ${p.shares}주@₩${p.price.toLocaleString()}(${p.pnl>=0?"+":""}${p.pnl.toLocaleString()})`).join(" / ")}</span>`:""}
+        ${held?(()=>{
+          // 보유 경과일 계산 (enteredAt 기준 → 오늘)
+          let hd=null;
+          try{ const ed=new Date(e.enteredAt.slice(0,10)+"T00:00:00"); hd=Math.floor((Date.now()-ed.getTime())/86400000); }catch(_){}
+          if(hd===null) return "";
+          const left=30-hd;
+          let badge,color,msg;
+          if(hd>30){ color="#ff4060"; badge="🔴 30일 초과"; msg=`${hd}일째 — 월 목표 이탈, 정리 검토`; }
+          else if(hd>=25){ color="#ff8c42"; badge="⚠️ 마감 임박"; msg=`${hd}일째 · ${left}일 남음 — 결정 필요`; }
+          else if(hd>=20){ color="#ffc940"; badge="🟡 주의"; msg=`${hd}일째 · ${left}일 남음`; }
+          else { color="#5a9a6a"; badge=""; msg=`${hd}일째 · 30일까지 ${left}일`; }
+          return `<br><span style="display:inline-block;margin-top:4px;background:${color}18;border:1px solid ${color}40;border-radius:6px;padding:2px 8px;font-size:10.5px;color:${color};font-weight:700">${badge?badge+" · ":""}⏱ ${msg}</span>`;
+        })():""}
         ${e.exitAt?`<br>청산 ${e.exitAt} · ₩${(e.exitPrice||0).toLocaleString()} · ${e.exitReason||""}${e.heldDays?` · ${e.heldDays}일 보유${e.heldDays>30?" 🔴실패":""}`:""}`:""}
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
@@ -2262,25 +2290,25 @@ function simJudge(s){
   const pos = s.breakout?.position ?? 50;
   const ichi = s.ichimoku?.signal || "";
   const rsi = s.rsi ?? 50;
-  // 고위치(70%+) & 추세 살아있음 → 건강한 눌림 가능 → 추매 OK
+  // 고위치(70%+) & 추세 살아있음 → 건강한 눌림 가능 → 조건부 분할 진입
   if(pos>=70 && ichi==="매수"){
-    if(rsi>=70) return {ok:true, level:"caution", title:"⚠️ 추매 가능하나 과열",
-      msg:"강한 종목이라 눌림 시 반등 기대되지만, 지금 과매수라 첫 진입가가 높음. 지지구간까지 기다렸다 진입 권장."};
-    return {ok:true, level:"ok", title:"✅ 추매 적합 (고위치 눌림형)",
-      msg:"52주 고위치 + 추세 유지. 하락은 눌림일 가능성. 지지구간 분할 추매가 통계적으로 유효."};
+    if(rsi>=70) return {ok:true, level:"caution", title:"⚠️ 조건부 가능하나 과열",
+      msg:"강한 종목이라 눌림 시 반등 기대되나, 지금 과매수라 첫 진입가가 높음. 추매는 '계획된 분할'일 때만 — 지지구간까지 기다렸다 진입 권장."};
+    return {ok:true, level:"ok", title:"🟢 조건부 분할 진입 가능 (고위치 눌림형)",
+      msg:"52주 고위치 + 추세 유지 중이라면 하락은 눌림일 가능성. 단 추세가 꺾이면 즉시 손절 전환. 추매는 본질적으로 리스크를 키우니 한도(5주) 엄수."};
   }
   // 저위치(60%-) & 하락추세 → 물림 위험 → 추매 경고
   if(pos<60 && ichi==="매도"){
     return {ok:false, level:"danger", title:"🚫 추매 비권장 (저위치 추세하락형)",
-      msg:"52주 저위치 + 하락추세. 추매는 물타기로 번질 위험 큼. 진입 자체를 보류하거나, 진입했다면 손절 우선."};
+      msg:"52주 저위치 + 하락추세. 떨어지는 종목 추매는 손실회피 심리의 함정 — 하락 지속 시 손실만 키움. 진입 보류하거나, 보유 중이면 손절 우선."};
   }
   // 중간지대
   if(pos>=70 && ichi==="매도"){
     return {ok:true, level:"caution", title:"⚠️ 고위치지만 추세 꺾임",
-      msg:"고위치인데 단기 추세가 하락 전환. 1차 추매까지만 보수적으로, 지지 이탈 시 손절 전환."};
+      msg:"고위치인데 단기 추세가 하락 전환. 추매는 1차까지만 보수적으로, 지지 이탈 시 미루지 말고 손절 전환."};
   }
   return {ok:true, level:"caution", title:"⚠️ 중립 — 신중 접근",
-    msg:"뚜렷한 추매 우위 신호 없음. 소량 진입 + 지지구간 확인 후 대응."};
+    msg:"뚜렷한 추매 우위 신호 없음. 추매보다 소량 진입 + 지지구간 확인 후 대응이 안전."};
 }
 
 function simRender_levels(s, entry, shares){
@@ -2325,6 +2353,28 @@ function simRender_levels(s, entry, shares){
     </div>`;
   });
   if(!levels.length) rows = `<div style="color:#8090b0;font-size:12px;padding:10px">현재가 아래 뚜렷한 지지선이 없어요. 신고가 구간이라 추매 기준 잡기 어려움 — 진입 자체를 신중히.</div>`;
+
+  // 추매 리스크 증폭 경고: 한도까지 가면 투입금이 얼마나 커지고, 최악(최저 지지 이탈) 시 손실은?
+  if(levels.length){
+    const initCost = entry*shares;
+    const maxAddShares = Math.max(0, 5-shares);
+    if(maxAddShares>0){
+      const lowest = levels[levels.length-1].price;
+      // 한도까지 추매했을 때 총 투입 (대략: 추매분을 지지선 가격들로)
+      let addCost=0, addN=0, cs=shares;
+      levels.forEach(lv=>{ if(cs<5){ addCost+=lv.price; addN++; cs++; } });
+      const totalCost = initCost+addCost;
+      const worstLoss = Math.round((lowest-entry)*shares + levels.slice(0,addN).reduce((s2,lv)=>s2+(lowest-lv.price),0));
+      rows += `<div style="background:#2a1a1a;border:1px solid #ff6b6b40;border-radius:10px;padding:11px 13px;margin-top:4px">
+        <div style="font-size:12px;font-weight:700;color:#ff8888;margin-bottom:4px">⚖️ 추매는 리스크를 키웁니다</div>
+        <div style="font-size:11px;color:#cdd9ee;line-height:1.6">
+          한도까지 추매 시 투입금 ₩${initCost.toLocaleString()} → <b style="color:#ffc940">₩${totalCost.toLocaleString()}</b> (${addN}주 추가).
+          평단은 내려가지만 <b>물린 금액 자체는 커져요.</b> 최저 지지(${lowest.toLocaleString()})마저 이탈하면 손실이 그만큼 더 깊어집니다.
+          추매는 '추세 유지 + 계획된 분할'일 때만, 한도 넘으면 추매 아닌 손절.
+        </div>
+      </div>`;
+    }
+  }
   return rows;
 }
 
