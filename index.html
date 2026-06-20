@@ -1052,6 +1052,24 @@ function renderCard(s,idx){
     </div>
   </div>`:''}
 
+  ${s.fundamentals&&s.fundamentals.grade&&s.fundamentals.grade!=="정보없음"?`<div class="sec" style="border-left-color:${s.fundamentals.gradeColor}">
+    <div class="sec-head">
+      <span class="sec-num" style="background:${s.fundamentals.gradeColor}22;color:${s.fundamentals.gradeColor}">📊</span>
+      <span class="sec-title" style="color:${s.fundamentals.gradeColor}">실적 점검</span>
+    </div>
+    <div style="background:${s.fundamentals.gradeColor}12;border-radius:10px;padding:11px 13px;margin-bottom:8px">
+      <div style="font-size:14px;font-weight:800;color:${s.fundamentals.gradeColor};margin-bottom:4px">${s.fundamentals.grade}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${s.fundamentals.comment||''}</div>
+    </div>
+    <div class="grid2">
+      ${s.fundamentals.opGrowth!=null?`<div class="stat"><div class="stat-l">영업이익 성장(YoY)</div><div class="stat-v" style="color:${s.fundamentals.opGrowth>=10?'#00e5a0':s.fundamentals.opGrowth<0?'#ff4060':'#ffc940'}">${s.fundamentals.opGrowth>0?'+':''}${s.fundamentals.opGrowth}%</div></div>`:''}
+      ${s.fundamentals.revGrowth!=null?`<div class="stat"><div class="stat-l">매출 성장(YoY)</div><div class="stat-v" style="color:${s.fundamentals.revGrowth>=5?'#00e5a0':s.fundamentals.revGrowth<0?'#ff4060':'#ffc940'}">${s.fundamentals.revGrowth>0?'+':''}${s.fundamentals.revGrowth}%</div></div>`:''}
+      ${s.fundamentals.roe!=null?`<div class="stat"><div class="stat-l">ROE</div><div class="stat-v" style="color:${s.fundamentals.roe>=10?'#00e5a0':s.fundamentals.roe<5?'#ff4060':'#ffc940'}">${s.fundamentals.roe}%</div></div>`:''}
+      ${s.fundamentals.debtRatio!=null?`<div class="stat"><div class="stat-l">부채비율</div><div class="stat-v" style="color:${s.fundamentals.debtRatio<=100?'#00e5a0':s.fundamentals.debtRatio>=200?'#ff4060':'#ffc940'}">${s.fundamentals.debtRatio}%</div></div>`:''}
+    </div>
+    ${s.fundamentals.fwdEpsGrowth!=null?`<div style="font-size:11.5px;color:var(--text3);margin-top:8px;line-height:1.5">💡 증권가 추정이익 성장률 <b style="color:${s.fundamentals.fwdEpsGrowth>=20?'#00e5a0':s.fundamentals.fwdEpsGrowth<0?'#ff4060':'#ffc940'}">${s.fundamentals.fwdEpsGrowth>0?'+':''}${s.fundamentals.fwdEpsGrowth}%</b> — 높을수록 현재 PER이 정당화돼요(실적이 따라옴).</div>`:''}
+  </div>`:''}
+
   <!-- ④ 제안 금액 -->
   <div class="sec" style="border-left-color:#a060ff">
     <div class="sec-head">
@@ -2538,9 +2556,12 @@ function renderSim(){
         <span style="font-family:monospace;font-size:15px;font-weight:800;color:#2ecc71">₩${recPrice.toLocaleString()} <span style="font-size:11px;color:#8090b0">(현재 −${recDropPct.toFixed(1)}%)</span></span>
       </div>` : "";
       const facHtml = fit.factors.map(f=>`<span style="display:inline-block;background:#0d1424;border-radius:6px;padding:2px 7px;margin:2px 3px 2px 0;font-size:10px;color:${f[1][0]==='+'?'#7ec99a':'#e89090'}">${f[0]} ${f[1]}</span>`).join("");
+      const fund = s.fundamentals;
+      const fundHtml = (fund&&fund.grade&&fund.grade!=="정보없음") ? `<div style="background:${fund.gradeColor}15;border:1px solid ${fund.gradeColor}40;border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:#cdd9ee;line-height:1.5"><b style="color:${fund.gradeColor}">${fund.grade}</b> — ${fund.comment}${fund.grade.includes("거품")?' <b style="color:#ff6b6b">진입 재고!</b>':''}</div>` : "";
       return `<div style="background:${vc}18;border:1px solid ${vc}55;border-radius:12px;padding:13px;margin-bottom:12px">
         <div style="font-size:14px;font-weight:800;color:${vc};margin-bottom:6px">${vt}</div>
         <div style="font-size:12px;color:#cdd9ee;line-height:1.6;margin-bottom:8px">${vmsg}</div>
+        ${fundHtml}
         ${recHtml}
         <div style="display:flex;justify-content:space-between;font-size:11px;color:#8090b0;margin-bottom:6px">
           <span>현재 이격 <b style="color:#fff">${fit.gapAbs.toFixed(1)}%</b></span>
