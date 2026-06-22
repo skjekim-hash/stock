@@ -1266,6 +1266,38 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if pos_pat: score += 2
         if neg_pat: score -= 2
     # 수급은 화면에서 직접 확인 후 판단 (점수에서 제외)
+    # ── 레짐 구분 + 외국인 수급 강화 (학술 근거: 추세장에선 과매수=매도가 해롭다) ──
+    # 과매수 페널티를 재계산해서, 추세장(ADX>20 & 일목매수)이면 절반을 되돌려줌
+    ob_penalty = 0
+    if rsi:
+        if rsi > 70: ob_penalty -= 2
+        elif rsi > 60: ob_penalty -= 1
+    if h52 > 0 and l52 > 0:
+        _pos = (price - l52) / (h52 - l52) * 100
+        if _pos > 90: ob_penalty -= 2
+        elif _pos > 85: ob_penalty -= 1
+    if boll_data and boll_data.get("position") is not None:
+        _bp = boll_data["position"]
+        if _bp > 85: ob_penalty -= 2
+        elif _bp > 75: ob_penalty -= 1
+    if stoch and stoch > 80: ob_penalty -= 1
+    if 's20' in dir() and s20 and price > 0:
+        pass
+    _adx_val = adx.get("adx") if adx else None
+    _ichi_buy = ichimoku and ichimoku.get("signal") == "매수"
+    _uptrend = _adx_val is not None and _adx_val > 20 and _ichi_buy
+    if _uptrend and ob_penalty < 0:
+        # 추세장: 과매수 페널티 절반 되돌림 (예: -8 → +4 보정)
+        relief = ob_penalty - round(ob_penalty / 2)  # 음수 페널티의 절반만큼 +
+        score -= relief  # relief가 음수이므로 score 상승
+    # 외국인 수급 강화 (한국시장: 외국인=숙련 차익거래자, 모멘텀 주도)
+    if investor:
+        _f5 = investor.get("foreign5", 0) or 0
+        _streak = investor.get("streak", 0) or 0
+        if _f5 > 0 or _streak >= 2:
+            score += 1   # 외국인 순매수 흐름 → 매수 가산
+        elif _f5 < -1000000:
+            score -= 1   # 외국인 대량 순매도 → 매도 경계 유지
     score = round(score)
     # ──────────────────────────────────────────────────
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
