@@ -1026,7 +1026,18 @@ function renderCard(s,idx){
     </div>`:""}
   </div>
 
-  <!-- ③ 적정주가 (증권사 목표주가 기준) -->
+  ${(()=>{
+    const adx=s.adx?.adx||0, ichiUp=s.ichimoku?.signal==="매수", pos=s.breakout?.position||0;
+    if(adx>=25 && ichiUp && pos>=70){
+      return `<div class="sec" style="border-left-color:#ff8c40">
+        <div style="background:#ff8c4012;border:1px solid #ff8c4040;border-radius:10px;padding:11px 13px">
+          <div style="font-size:13px;font-weight:800;color:#ff8c40;margin-bottom:5px">🔥 추세 강함 — 익절 서두르지 마세요</div>
+          <div style="font-size:11.5px;color:#cdd9ee;line-height:1.6">ADX ${adx.toFixed(0)} · 일목매수 · 52주 ${pos}%로 강한 상승 추세예요. 보유 중이라면 1%에 다 팔지 말고 <b style="color:#ff8c40">분할매도</b>로 추세를 더 따라가는 게 유리해요. (과거 이런 종목을 빨리 팔아 +10~27% 놓친 적 있음)</div>
+        </div>
+      </div>`;
+    }
+    return "";
+  })()}
   ${s.fairValue>0?`<div class="sec" style="border-left-color:#00d4ff">
     <div class="sec-head">
       <span class="sec-num">03</span>
