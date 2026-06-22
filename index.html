@@ -1054,7 +1054,7 @@ function renderCard(s,idx){
 
   ${s.fundamentals&&s.fundamentals.grade&&s.fundamentals.grade!=="정보없음"?`<div class="sec" style="border-left-color:${s.fundamentals.gradeColor}">
     <div class="sec-head">
-      <span class="sec-num" style="background:${s.fundamentals.gradeColor}22;color:${s.fundamentals.gradeColor}">📊</span>
+      <span class="sec-num" style="background:${s.fundamentals.gradeColor}22;color:${s.fundamentals.gradeColor}">04</span>
       <span class="sec-title" style="color:${s.fundamentals.gradeColor}">실적 점검</span>
     </div>
     <div style="background:${s.fundamentals.gradeColor}12;border-radius:10px;padding:11px 13px;margin-bottom:8px">
@@ -1073,7 +1073,7 @@ function renderCard(s,idx){
   <!-- ④ 제안 금액 -->
   <div class="sec" style="border-left-color:#a060ff">
     <div class="sec-head">
-      <span class="sec-num">04</span>
+      <span class="sec-num">05</span>
       <span class="sec-title" style="color:#a060ff">제안 금액</span>
     </div>
     ${chips}
@@ -1092,7 +1092,7 @@ function renderCard(s,idx){
   <!-- ⑤ 거래 · 강도 -->
   <div class="sec" style="border-left-color:#00e5a0">
     <div class="sec-head">
-      <span class="sec-num">04</span>
+      <span class="sec-num">06</span>
       <span class="sec-title" style="color:#00e5a0">거래 · 강도</span>
     </div>
     ${s.investor&&(s.investor.foreign||s.investor.institution)?`<div class="sec-sub">수급 (전일 마감)</div>
@@ -1181,7 +1181,7 @@ function renderCard(s,idx){
   <!-- ⑥ 기술 지표 -->
   <div class="sec" style="border-left-color:#ffc940">
     <div class="sec-head">
-      <span class="sec-num">05</span>
+      <span class="sec-num">07</span>
       <span class="sec-title" style="color:#ffc940">기술 지표</span>
     </div>
     <div class="sec-sub">모멘텀</div>
@@ -1308,7 +1308,7 @@ function renderCard(s,idx){
   <!-- ⑦ DART 공시 -->
   <div class="sec" style="border-left-color:#ffc940">
     <div class="sec-head">
-      <span class="sec-num">07</span>
+      <span class="sec-num">08</span>
       <span class="sec-title" style="color:#ffc940">DART 공시</span>
     </div>
     ${dartHtml}
@@ -1318,7 +1318,7 @@ function renderCard(s,idx){
   <!-- ⑧ 참고 사항 -->
   <div class="sec" style="border-left-color:#00d4ff">
     <div class="sec-head">
-      <span class="sec-num">08</span>
+      <span class="sec-num">09</span>
       <span class="sec-title" style="color:#00d4ff">참고 사항</span>
     </div>
     ${B(s.notes,"#00d4ff")}
@@ -1878,6 +1878,12 @@ function renderJournal(){
   }
   // 통계 (청산 완료 건만)
   const closed = arr.filter(e=>e.returnPct!==null);
+  // 부분청산 실현 집계 (보유/청산 무관 모든 partialExits)
+  const allPartials = arr.flatMap(e=>(e.partialExits||[]).map(p=>({...p, entryPrice:e.entryPrice, name:e.name})));
+  const partialPnl = allPartials.reduce((s,p)=>s+(p.pnl||0),0);
+  const partialWins = allPartials.filter(p=>{
+    const rp = p.entryPrice? (p.price-p.entryPrice)/p.entryPrice*100 : 0; return rp>=1.0;
+  });
   let statsHtml = "";
   if(closed.length>=3){
     // 성공 = 30일 이내 AND 1%+ 수익. 그 외 전부 실패(손실 / 1%미만 / 30일초과).
@@ -1949,6 +1955,11 @@ function renderJournal(){
         🔴 30일 초과 보유 <b style="color:#ff4060">${overHold.length}건</b>은 수익 여부와 무관하게 <b>실패</b>로 집계 — 자금이 오래 묶인 거래예요.
         <span style="color:#8090b0"> · 30일내 평균 ${inTimeAvg>0?"+":""}${inTimeAvg}%</span>
       </div>`:""}
+      ${allPartials.length>0?`<div style="font-size:11px;color:#cdd9ee;margin-bottom:10px;padding:8px 10px;background:#00e5a008;border-radius:8px;border:1px solid #00e5a020">
+        🔄 부분청산 실현 <b style="color:#00e5a0">${allPartials.length}회</b> · 누적 실현손익 <b style="color:${partialPnl>=0?'#00e5a0':'#ff4060'}">${partialPnl>=0?'+':''}₩${partialPnl.toLocaleString()}</b>
+        <span style="color:#8090b0"> · 1%+ ${partialWins.length}회</span><br>
+        <span style="color:#8090b0;font-size:10px">일부 팔고 보유 중인 거래의 실현분 — 전량청산 승률과 별도 집계</span>
+      </div>`:""}
       <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">수익 케이스에서 자주 나온 신호</div>
       <div>${sigSorted.map(([k,v])=>`<span style="display:inline-block;background:#00e5a015;color:#00e5a0;border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:11.5px">${k} ${v}회</span>`).join("")||"<span style='color:#4a5878;font-size:11px'>데이터 부족</span>"}</div>
       ${holdHtml}
@@ -2016,6 +2027,21 @@ function closeTradePrompt(id){
   const totalShares = e.shares||1;
   const soldShares = e.soldShares||0;
   const remaining = totalShares - soldShares;
+  // 추세 강한 종목 익절 시 경고 — "너무 빨리 팔기" 방지 (데이터로 확인된 약점)
+  const stocks = window.__stocks||[];
+  const nameToCode={'삼성전자':'005930','SK하이닉스':'000660','하이닉스':'000660','LG전자':'066570','삼성전기':'009150','현대차':'005380','현대자동차':'005380','KB금융':'105560','SK텔레콤':'017670','NAVER':'035420'};
+  const sc = stocks.find(x=>x.code===(e.code||nameToCode[e.name]));
+  if(sc){
+    const adx = sc.adx?.adx||0;
+    const ichiUp = sc.ichimoku?.signal==="매수";
+    const pos = sc.breakout?.position||0;
+    const curRet = ((sc.price-e.entryPrice)/e.entryPrice*100);
+    // 강추세(ADX25+ & 일목매수 & 고위치) + 아직 수익 작음(2%미만) → 성급한 익절 경고
+    if(adx>=25 && ichiUp && pos>=70 && curRet>0 && curRet<2 && remaining>1){
+      const go = confirm(`⚠️ "${e.name}" 추세가 살아있어요 (ADX ${adx.toFixed(0)} · 일목매수 · 52주 ${pos}%).\n\n지금 현재가 기준 +${curRet.toFixed(1)}%인데, 강한 추세 종목을 일찍 다 팔면 큰 상승을 놓칠 수 있어요. 과거 데이터에서 이런 종목을 빨리 팔아 +10~27%를 놓친 적이 있어요.\n\n💡 전량 말고 '일부만' 익절하고 나머지는 추세 따라가는 분할매도를 권해요.\n\n그래도 전량 청산할까요?\n(취소 = 분할매도하러 돌아가기)`);
+      if(!go) return;
+    }
+  }
   // 청산가
   const px = prompt(`청산가를 입력하세요\n(매수가 ₩${e.entryPrice.toLocaleString()} · 잔여 ${remaining}주)`);
   if(px===null) return;
@@ -2357,7 +2383,7 @@ function renderRecover(){
 }
 
 function simPickStock(code){ _simState.code=code; renderSim(); }
-function simSetShares(n){ _simState.shares=Math.max(1,Math.min(5,n)); renderSim(); }
+function simSetShares(n){ _simState.shares=Math.max(1,Math.min(3,n)); renderSim(); }
 
 // 추매 적합성 판정 — 사용자 데이터 법칙: 고위치 눌림=반등, 저위치 추세하락=물림
 // 동적 허용 이격 — 현재가가 첫 지지선에서 얼마나 떨어져도 "소량 진입 OK"인지 종목별 계산
