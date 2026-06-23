@@ -1217,7 +1217,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   investor, short_ratio, news_list,
                   stoch_rsi=None, divergence=None,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
-                  boll_data=None, weekly_rsi=None, patterns=None):
+                  boll_data=None, weekly_rsi=None, patterns=None, fx_price=0):
     score = 0
     # RSI
     if rsi: score += 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0
@@ -1332,6 +1332,17 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
             score += 1   # 외국인 순매수 흐름 → 매수 가산
         elif _f5 < -1000000:
             score -= 1   # 외국인 대량 순매도 → 매도 경계 유지
+    # ── 환율 위기 + 외국인 보유율 차별 경계 ──
+    # 환율이 위험 수준이면, 외국인 보유율 높은 종목일수록 자금이탈에 취약
+    # (모든 종목 일괄 차감이 아니라 외국인 비중으로 차별화 → 종목 우열 유지)
+    if fx_price and fx_price >= 1550 and investor:
+        try:
+            _hold = float(str(investor.get("holdRatio", "0")).replace("%", ""))
+        except (ValueError, TypeError):
+            _hold = 0
+        if _hold >= 50:   score -= 2   # 외국인 절반 이상 보유 → 환율위기에 크게 취약
+        elif _hold >= 30: score -= 1   # 외국인 상당 보유 → 일부 취약
+        # 30% 미만은 환율 영향 적어 차감 없음 (내수·개인 비중 높은 종목)
     score = round(score)
     # ──────────────────────────────────────────────────
     opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
@@ -1533,7 +1544,8 @@ def analyze_stock(stock, kospi, market=None):
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
-        boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats
+        boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats,
+        fx_price=(market.get("fx", {}).get("price", 0) if market else 0)
     )
 
     # ── 역발상 반등 감지 ──────────────────────────────
