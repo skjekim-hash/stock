@@ -675,6 +675,25 @@ function renderMarketBanner(m){
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
     +(sm.cnyNote?"<div style='font-size:11px;color:#b0c0d8;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🇨🇳 "+sm.cnyNote+"</div>":"")
     +(sm.tsmcNote?"<div style='font-size:11px;color:#b0c0d8;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🔷 "+sm.tsmcNote+"</div>":"")
+    +(m.forecast?(function(){
+        var f=m.forecast;
+        var arr=function(d){return d==="상승"?"▲":d==="하락"?"▼":"●";};
+        var kc=f.kospi.color, sc=f.semi.color;
+        return "<div style='margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)'>"
+          +"<div style='font-size:11px;color:#9fb0cc;font-weight:700;margin-bottom:5px'>📈 내일 경향 <span style='color:#5a6a88;font-weight:400'>(야간지표 참고)</span></div>"
+          +"<div style='display:flex;gap:8px;margin-bottom:5px'>"
+            +"<div style='flex:1;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px'>"
+              +"<div style='font-size:10px;color:#8090b0;margin-bottom:2px'>코스피</div>"
+              +"<div style='font-size:13px;font-weight:800;color:"+kc+"'>"+arr(f.kospi.dir)+" "+f.kospi.dir+" "+f.kospi.strength+"</div>"
+            +"</div>"
+            +"<div style='flex:1;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px'>"
+              +"<div style='font-size:10px;color:#8090b0;margin-bottom:2px'>반도체 <span style='color:#5a6a88'>(SOX·TSMC)</span></div>"
+              +"<div style='font-size:13px;font-weight:800;color:"+sc+"'>"+arr(f.semi.dir)+" "+f.semi.dir+" "+f.semi.strength+"</div>"
+            +"</div>"
+          +"</div>"
+          +"<div style='font-size:10px;color:#6a7a98;line-height:1.5'>💡 "+f.disclaimer+"</div>"
+        +"</div>";
+      })():"")
     +nightAlert
     +"</div>";
 }
