@@ -400,6 +400,38 @@ def fetch_market_signal():
             out["summary"]["tsmcNote"] = f"SOX 약세지만 TSMC는 견조({'+' if tsmc_pct>=0 else ''}{tsmc_pct}%) — 반도체 차별화. 개별 종목 수급 확인."
         elif sox_pct_now >= 1 and tsmc_pct <= 0:
             out["summary"]["tsmcNote"] = f"SOX 강세지만 TSMC는 약세({tsmc_pct}%) — 파운드리 부진. 삼성·하이닉스 신중."
+    # ── 다음날 방향+강도 예측 (참고용 — 정확한 예측 아님, 야간지표 경향) ──
+    # 코스피 전체: 종합 score 기반. 반도체: SOX·TSMC 직결.
+    def _dir_strength(val, strong, mid):
+        a = abs(val)
+        if a >= strong: lvl = "강"
+        elif a >= mid:  lvl = "중"
+        else:           lvl = "약"
+        if val > 0.3:   return "상승", lvl, "#00c896"
+        elif val < -0.3: return "하락", lvl, "#ff5c7a"
+        else:           return "보합", "약", "#9ab"
+
+    # 코스피 방향: 종합 score를 갭% 경향으로 환산 (보수적, score 1당 ~0.3%)
+    kospi_bias = round(score * 0.3, 1)
+    kdir, klvl, kcolor = _dir_strength(kospi_bias, 1.5, 0.6)
+    # 반도체 방향: SOX 60% + TSMC 40% 가중 (반도체 직결 선행)
+    semi_bias = round(sox_pct_now * 0.6 + tsmc_pct * 0.4, 1)
+    sdir, slvl, scolor = _dir_strength(semi_bias, 1.5, 0.7)
+
+    out["forecast"] = {
+        "kospi": {
+            "dir": kdir, "strength": klvl, "color": kcolor,
+            "bias": kospi_bias,
+            "text": f"{kdir} 경향 {klvl} (대략 {'+' if kospi_bias>=0 else ''}{kospi_bias}% 안팎)",
+        },
+        "semi": {
+            "dir": sdir, "strength": slvl, "color": scolor,
+            "bias": semi_bias,
+            "text": f"{sdir} 경향 {slvl} (SOX {'+' if sox_pct_now>=0 else ''}{sox_pct_now}% · TSMC {'+' if tsmc_pct>=0 else ''}{tsmc_pct}%)",
+        },
+        "disclaimer": "야간 해외지표 기반 경향일 뿐, 갭은 자주 빗나가요. 진입은 시장 방향이 아니라 종목 자리(지지·수급)로 판단하세요.",
+    }
+    print(f"  📈 내일 경향: 코스피 {kdir}{klvl}({kospi_bias}%) · 반도체 {sdir}{slvl}({semi_bias}%)", file=sys.stderr)
     parts = []
     for k in ("sox", "nasdaq", "fx", "vix"):
         if k in out:
