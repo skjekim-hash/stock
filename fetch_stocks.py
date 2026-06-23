@@ -1684,6 +1684,27 @@ def analyze_stock(stock, kospi, market=None):
     elif fdir == "매도":
         flow_read = "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응."
 
+    # ── 차익실현성 급락 감지 ──
+    # 펀더멘털·추세 멀쩡한데 단기 급락 → 패닉매도 아닌 차익실현 가능성, 반등 주목
+    profit_taking = ""
+    today_pct = round((price - prev) / prev * 100, 2) if prev else 0
+    if today_pct <= -3:  # 당일 -3% 이상 급락
+        fund_ok = fundamentals and "건전" in fundamentals.get("grade", "")
+        trend_ok = (ichimoku and ichimoku.get("signal") == "매수") or \
+                   (adx and adx.get("adx", 0) >= 25)
+        # 수급 분화: 외국인 팔지만 기관 or 개인이 받음
+        inst_buy = investor and (investor.get("institution", 0) or 0) > 0
+        indiv_buy = investor and (investor.get("individual", 0) or 0) > 0
+        absorbing = inst_buy or indiv_buy
+        if fund_ok and trend_ok and absorbing:
+            who = "기관" if inst_buy else "개인"
+            profit_taking = (f"💡 차익실현성 급락 가능성 — 실적 건전 + 추세 유지 중인데 "
+                             f"{today_pct}% 급락, {who}이 받는 중. 펀더멘털 훼손보다 차익실현 매물일 수 있어요. "
+                             f"패닉 매도보다 과매도 반등 주목 (단, 추세 꺾이면 손절).")
+        elif fund_ok and trend_ok:
+            profit_taking = (f"💡 {today_pct}% 급락이나 실적·추세는 유지 중 — 차익실현 매물일 수 있어요. "
+                             f"다만 받아주는 수급이 약하니 반등은 확인 후 대응.")
+
     def cmt_rsi(v):
         if v is None: return "데이터 부족"
         return ("강한 과매도" if v < 30 else "저점권" if v < 45 else
@@ -1697,6 +1718,7 @@ def analyze_stock(stock, kospi, market=None):
         "opinion": opinion, "score": score, "source": source,
         "nuance": nuance,
         "contrarian": contrarian,
+        "profitTaking": profit_taking,
         "marginCallRisk": margin_call_risk,
         "turnover": turnover,
         "chaseWarning": chase_warning,
