@@ -17,23 +17,28 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#02050e;
-  --bg2:#060b18;
-  --bg3:#0a1122;
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.12);
-  --green:#00e5a0;
-  --red:#ff4060;
-  --yellow:#ffc940;
-  --blue:#4090ff;
-  --purple:#a060ff;
-  --cyan:#00d4ff;
-  --text:#e8edf5;
-  --text2:#8090b0;
-  --text3:#4a5878;
-  --glass-bg:rgba(10,18,38,0.75);
-  --glass-border:rgba(255,255,255,0.08);
-  --glass-blur:16px;
+  --bg:#f2f9f6;
+  --bg2:#ffffff;
+  --bg3:#f5f9fc;
+  --border:rgba(20,40,60,0.08);
+  --border2:rgba(20,40,60,0.14);
+  --green:#16b87a;
+  --red:#f2647b;
+  --yellow:#e0a020;
+  --blue:#4a90d9;
+  --purple:#9b7ede;
+  --cyan:#2bb3c4;
+  --text:#1f2d3a;
+  --text2:#6b7a89;
+  --text3:#9aa8b5;
+  /* ── 라이트 카드 토큰 ── */
+  --glass-bg:#ffffff;
+  --glass-bg2:#f5f9fc;
+  --glass-border:rgba(20,40,60,0.08);
+  --glass-glow:rgba(22,184,122,0.12);
+  --glass-blur:12px;
+  --shadow:0 4px 20px rgba(40,90,120,0.08);
+  --shadow-lg:0 8px 28px rgba(40,90,120,0.12);
 }
 body{
   background:var(--bg);
@@ -48,10 +53,12 @@ body::before{
   content:'';
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:
-    radial-gradient(ellipse at 15% 15%,rgba(64,144,255,0.07) 0%,transparent 55%),
-    radial-gradient(ellipse at 85% 75%,rgba(0,229,160,0.05) 0%,transparent 50%),
-    radial-gradient(ellipse at 50% 50%,rgba(160,96,255,0.03) 0%,transparent 70%);
+    linear-gradient(170deg,#eafaf3 0%,#f2f9f6 42%,#eef6fb 100%);
   pointer-events:none;z-index:-1;
+}
+@keyframes glassDrift{
+  0%{opacity:1}
+  100%{opacity:1}
 }
 
 /* ── ANIMATIONS ── */
@@ -64,7 +71,9 @@ body::before{
 
 /* ── HEADER ── */
 .hdr{
-  background:rgba(2,5,14,0.9);
+  background:rgba(255,255,255,0.82);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
   border-bottom:1px solid var(--border);
   padding:14px 16px 11px;
   position:sticky;top:0;z-index:100;
@@ -77,7 +86,7 @@ body::before{
 
 .btn-main{
   display:flex;align-items:center;gap:6px;
-  background:linear-gradient(135deg,#001a0d,#002a1a);
+  background:linear-gradient(135deg,#16b87a,#13a06c);
   border:1px solid rgba(0,229,160,.25);
   border-radius:12px;padding:9px 16px;
   font-size:12px;font-weight:700;color:var(--green);
@@ -88,9 +97,9 @@ body::before{
 .btn-main:active{transform:scale(.97)}
 .hdr-btns{display:flex;gap:6px;align-items:center}
 .btn-jrnl{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff30;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
-.btn-icon{background:#00d4ff12;border:1px solid #00d4ff30;border-radius:12px;width:38px;height:38px;padding:0;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.btn-icon{background:#ffffff;border:1px solid var(--border);border-radius:14px;width:38px;height:38px;padding:0;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:var(--shadow)}
 .btn-icon:active{transform:scale(.92)}
-.btn-icon-main{background:linear-gradient(135deg,#001a0d,#002a1a);border:1px solid rgba(0,229,160,.35);color:var(--green)}
+.btn-icon-main{background:linear-gradient(135deg,#16b87a,#13a06c);border:1px solid rgba(22,184,122,.4);color:#fff;box-shadow:0 2px 10px rgba(22,184,122,0.3)}
 .btn-icon-main:disabled{opacity:.5}
 .btn-jrnl:active{transform:scale(.97)}
 .spin{animation:spin .7s linear infinite;display:inline-block}
@@ -104,7 +113,7 @@ body::before{
   font-family:'JetBrains Mono',monospace;
   white-space:nowrap;
 }
-.badge-green{background:rgba(0,229,160,.07);border-color:rgba(0,229,160,.2);color:var(--green)}
+.badge-green{background:rgba(240,247,2529,160,.07);border-color:rgba(0,229,160,.2);color:var(--green)}
 .badge-blue{background:rgba(64,144,255,.07);border-color:rgba(64,144,255,.2);color:var(--blue)}
 .badge-red{background:rgba(255,64,96,.07);border-color:rgba(255,64,96,.2);color:var(--red)}
 
@@ -125,7 +134,7 @@ body::before{
 .start-desc b{color:var(--green);font-weight:700}
 .btn-start{
   display:inline-flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,#001a0d,#003020);
+  background:linear-gradient(135deg,#eafaf3,#e0f5ec);
   border:1px solid rgba(0,229,160,.3);
   border-radius:14px;padding:14px 36px;
   font-size:14px;font-weight:900;color:var(--green);
@@ -163,29 +172,31 @@ body::before{
 
 /* ── SUMMARY TABLE ── */
 .market-banner{
-  background:var(--bg2);
+  background:linear-gradient(135deg,#eafaf3,#eef6fb);
   border:1px solid var(--border);
-  border-radius:14px;padding:10px 14px;margin-bottom:12px;
+  border-radius:18px;padding:12px 15px;margin-bottom:12px;
+  box-shadow:var(--shadow);
   animation:fadeUp .3s ease;
 }
 .mb-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .mb-label{font-size:12px;font-weight:800}
-.mb-parts{font-size:11.5px;color:#c8d4e4;font-family:'JetBrains Mono',monospace;line-height:1.7}
-.mb-advice{font-size:11.5px;color:#d8e0ec;line-height:1.55;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-weight:600}
+.mb-parts{font-size:11.5px;color:#3a4a5a;font-family:'JetBrains Mono',monospace;line-height:1.7}
+.mb-advice{font-size:11.5px;color:#3a4a5a;line-height:1.55;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-weight:600}
 .flow-bars{display:flex;align-items:flex-end;gap:3px;height:34px;padding:4px 0}
 .flow-bar{flex:1;min-width:6px;border-radius:2px;position:relative;display:flex;align-items:center;justify-content:center}
 .flow-mid{height:1px;background:rgba(255,255,255,.12);margin:2px 0}
 .summary{
   background:var(--bg2);
   border:1px solid var(--border);
-  border-radius:16px;margin-bottom:14px;
+  border-radius:20px;margin-bottom:14px;
+  box-shadow:var(--shadow);
   overflow:hidden;animation:fadeUp .3s ease;
 }
 .summary-hdr{
   padding:12px 14px;
   border-bottom:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;
-  background:linear-gradient(135deg,#0a1428,#0f1c38);
+  background:linear-gradient(135deg,#eafaf3,#eef6fb);
 }
 .summary-title{font-size:12px;font-weight:800;color:var(--cyan);letter-spacing:.5px}
 .summary-hint{font-size:11.5px;color:var(--text3)}
@@ -207,19 +218,18 @@ body::before{
 .sum-table tr:active{background:rgba(255,255,255,.03)}
 .sum-legend{
   display:flex;gap:10px;padding:8px 14px;
-  background:rgba(0,0,0,.2);flex-wrap:wrap;
+  background:rgba(20,40,60,0.04);flex-wrap:wrap;
 }
 .sum-legend span{font-size:11.5px;color:var(--text3)}
 
 /* ── CARD ── */
 .card{margin-bottom:18px;animation:fadeUp .4s ease;border-radius:20px;overflow:visible;scroll-margin-top:85px}
 .card-hdr{
-  background:var(--glass-bg);
-  backdrop-filter:blur(var(--glass-blur));
-  -webkit-backdrop-filter:blur(var(--glass-blur));
-  border:1px solid var(--glass-border);
-  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-bottom:1px solid rgba(20,40,60,0.05);
   border-radius:20px 20px 0 0;
+  box-shadow:var(--shadow);
   padding:14px 16px 12px;
 }
 .card-hdr-inner{display:flex;justify-content:space-between;align-items:flex-start}
@@ -236,12 +246,11 @@ body::before{
 .card-hdr-icons{display:flex;gap:4px}
 
 .card-body{
-  background:rgba(6,11,24,0.7);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  border:1px solid var(--glass-border);
+  background:var(--bg2);
+  border:1px solid var(--border);
   border-top:none;
   border-radius:0 0 20px 20px;
+  box-shadow:var(--shadow);
   overflow:hidden;
 }
 
@@ -269,7 +278,7 @@ body::before{
 .guide-box{margin:14px 12px 4px;background:rgba(5,9,20,0.8);backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:14px;overflow:hidden}
 .guide-summary{padding:13px 14px;font-size:12px;font-weight:700;color:#00d4ff;cursor:pointer;list-style:none;user-select:none}
 .guide-summary::-webkit-details-marker{display:none}
-.guide-box[open] .guide-summary{border-bottom:1px solid #1a2540}
+.guide-box[open] .guide-summary{border-bottom:1px solid #dde6ee}
 .guide-body{padding:12px 14px}
 .guide-item{font-size:12.5px;color:#b8c4d8;line-height:1.7;margin-bottom:9px}
 .guide-item b{color:#e0e6f0}
@@ -278,10 +287,10 @@ body::before{
 .rec-mini{background:#00d4ff12;color:#00d4ff;border:1px solid #00d4ff35;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
 .rec-mini:active{transform:scale(.95)}
 .jrnl-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-end;justify-content:center}
-.jrnl-sheet{background:rgba(2,5,14,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid #1a2540;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:18px}
-.jrnl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:0;background:#03060f;padding-bottom:8px}
+.jrnl-sheet{background:#ffffff;border-top:1px solid var(--border);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:18px;box-shadow:0 -8px 40px rgba(40,90,120,0.18)}
+.jrnl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:0;background:#eef3f8;padding-bottom:8px}
 .jrnl-title{font-size:16px;font-weight:800;color:#e0e6f0}
-.jrnl-x{background:#1a2540;color:#8090b0;border:none;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer}
+.jrnl-x{background:#dde6ee;color:#8090b0;border:none;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer}
 
 /* ── PRICE SECTION ── */
 .price-big{
@@ -293,7 +302,7 @@ body::before{
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
-.stat{background:var(--bg3);border-radius:10px;padding:8px 10px}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px 10px}
 .stat-l{font-size:11.5px;color:var(--text2);margin-bottom:3px}
 .stat-v{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
 
@@ -478,7 +487,7 @@ body::before{
   <div class="prog" id="progWrap">
     <div class="prog-fill" id="progFill" style="width:0%"></div>
   </div>
-  <div id="stockTabBar" style="display:none;padding:4px 8px 4px;border-top:1px solid #1a2540;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
+  <div id="stockTabBar" style="display:none;padding:4px 8px 4px;border-top:1px solid #dde6ee;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 </div>
 
 <div class="main" id="main">
@@ -663,7 +672,7 @@ function renderMarketBanner(m){
     if(alerts.length){
       nightAlert="<div style='background:#ff406012;border:1px solid #ff406040;border-radius:10px;padding:9px 12px;margin-top:8px'>"
         +"<div style='font-size:11px;font-weight:700;color:#ff8c40;margin-bottom:4px'>⚡ NXT 대응 가이드</div>"
-        +alerts.map(function(a){return "<div style='font-size:11px;color:#d8e0ec;line-height:1.5;margin-top:2px'>• "+a+"</div>";}).join("")
+        +alerts.map(function(a){return "<div style='font-size:11px;color:#3a4a5a;line-height:1.5;margin-top:2px'>• "+a+"</div>";}).join("")
         +"</div>";
     }
   }
@@ -673,14 +682,14 @@ function renderMarketBanner(m){
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
-    +(sm.cnyNote?"<div style='font-size:11px;color:#b0c0d8;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🇨🇳 "+sm.cnyNote+"</div>":"")
-    +(sm.tsmcNote?"<div style='font-size:11px;color:#b0c0d8;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🔷 "+sm.tsmcNote+"</div>":"")
+    +(sm.cnyNote?"<div style='font-size:11px;color:#6b7a89;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🇨🇳 "+sm.cnyNote+"</div>":"")
+    +(sm.tsmcNote?"<div style='font-size:11px;color:#6b7a89;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🔷 "+sm.tsmcNote+"</div>":"")
     +(m.forecast?(function(){
         var f=m.forecast;
         var arr=function(d){return d==="상승"?"▲":d==="하락"?"▼":"●";};
         var kc=f.kospi.color, sc=f.semi.color;
         return "<div style='margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)'>"
-          +"<div style='font-size:11px;color:#9fb0cc;font-weight:700;margin-bottom:5px'>📈 내일 경향 <span style='color:#5a6a88;font-weight:400'>(야간지표 참고)</span></div>"
+          +"<div style='font-size:11px;color:#6b7a89;font-weight:700;margin-bottom:5px'>📈 내일 경향 <span style='color:#5a6a88;font-weight:400'>(야간지표 참고)</span></div>"
           +"<div style='display:flex;gap:8px;margin-bottom:5px'>"
             +"<div style='flex:1;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px'>"
               +"<div style='font-size:10px;color:#8090b0;margin-bottom:2px'>코스피</div>"
@@ -997,7 +1006,7 @@ function renderCard(s,idx){
     </div>
     ${s.chaseWarning?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ff406018;border:1.5px solid #ff406055;font-size:12px;color:#ff6680;font-weight:700;line-height:1.5">${s.chaseWarning}<div style="font-size:11px;color:#a8b4c8;font-weight:400;margin-top:4px">높은 금액에서 물리지 않는 게 우선. 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요.</div></div>`:""}
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
-    ${s.flowRead?'<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">'+s.flowRead.split("│").map(function(t,i){return i===0?'<div style="color:#c8d4e4">📊 '+t.trim()+'</div>':'<div style="color:#00d4ff;margin-top:3px">→ '+t.trim()+'</div>';}).join("")+'</div>':""}
+    ${s.flowRead?'<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">'+s.flowRead.split("│").map(function(t,i){return i===0?'<div style="color:#3a4a5a">📊 '+t.trim()+'</div>':'<div style="color:#00d4ff;margin-top:3px">→ '+t.trim()+'</div>';}).join("")+'</div>':""}
     ${s.overheat&&s.overheat.level!=="none"?`<div style="margin:10px 0;padding:12px 14px;border-radius:12px;background:${s.overheat.color}14;border:1.5px solid ${s.overheat.color}50">
       <div style="font-size:13px;font-weight:800;color:${s.overheat.color};margin-bottom:6px">${s.overheat.title}</div>
       <div style="font-size:11px;color:#a8b4c8;line-height:1.6">
@@ -1032,14 +1041,14 @@ function renderCard(s,idx){
       </div>
       <div style="font-size:11px;color:#8090b0;line-height:1.5">${s.divergence.comment}</div>
     </div>`:""}
-    ${s.cautiousEntry&&s.cautiousEntry.entry?`<div style="margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25)">
+    ${s.cautiousEntry&&s.cautiousEntry.entry?`<div style="margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(240,247,2522,255,.07);border:1px solid rgba(0,212,255,.25)">
       <div style="font-size:11px;font-weight:800;color:#00d4ff;margin-bottom:4px">
         ★ 소량 진입 검토 가능
       </div>
       <div style="font-size:11px;color:#8090b0;line-height:1.5;margin-bottom:6px">${s.cautiousEntry.reason}</div>
       <div style="font-size:11.5px;color:#4a5878;line-height:1.6">
         매수 신호:
-        ${s.cautiousEntry.signals.map(sig=>`<span style="display:inline-block;background:rgba(0,212,255,.1);color:#00d4ff;border-radius:8px;padding:1px 7px;margin:2px 3px 0 0;font-size:11.5px">${sig}</span>`).join("")}
+        ${s.cautiousEntry.signals.map(sig=>`<span style="display:inline-block;background:rgba(240,247,2522,255,.1);color:#00d4ff;border-radius:8px;padding:1px 7px;margin:2px 3px 0 0;font-size:11.5px">${sig}</span>`).join("")}
       </div>
       ${s.cautiousEntry.stopLoss>0?`<div style="font-size:11.5px;color:#ff4060;margin-top:6px;font-family:'JetBrains Mono',monospace">
         ⚠️ 손절선: ${W(s.cautiousEntry.stopLoss)} — 하이닉스급 고가주는 1주, 일반주는 1~2주 권장
@@ -1053,7 +1062,7 @@ function renderCard(s,idx){
       return `<div class="sec" style="border-left-color:#ff8c40">
         <div style="background:#ff8c4012;border:1px solid #ff8c4040;border-radius:10px;padding:11px 13px">
           <div style="font-size:13px;font-weight:800;color:#ff8c40;margin-bottom:5px">🔥 추세 강함 — 익절 서두르지 마세요</div>
-          <div style="font-size:11.5px;color:#cdd9ee;line-height:1.6">ADX ${adx.toFixed(0)} · 일목매수 · 52주 ${pos}%로 강한 상승 추세예요. 보유 중이라면 1%에 다 팔지 말고 <b style="color:#ff8c40">분할매도</b>로 추세를 더 따라가는 게 유리해요. (과거 이런 종목을 빨리 팔아 +10~27% 놓친 적 있음)</div>
+          <div style="font-size:11.5px;color:#2d3d4d;line-height:1.6">ADX ${adx.toFixed(0)} · 일목매수 · 52주 ${pos}%로 강한 상승 추세예요. 보유 중이라면 1%에 다 팔지 말고 <b style="color:#ff8c40">분할매도</b>로 추세를 더 따라가는 게 유리해요. (과거 이런 종목을 빨리 팔아 +10~27% 놓친 적 있음)</div>
         </div>
       </div>`;
     }
@@ -1374,10 +1383,10 @@ function renderCard(s,idx){
       <div class="guide-item"><b>볼린저밴드</b> — 변동성 범위. 하단 근접은 과매도(반등 기대), 상단 근접은 과열.</div>
       <div class="guide-item"><b>거래대금</b> — 가격×거래량. 2배 이상(🔥)이면 큰 자금 유입 = 세력 진입 가능성.</div>
       <div class="guide-item"><b>RS(상대강도)</b> — KOSPI 대비 강도. +면 시장보다 강함(아웃퍼폼), −면 약함.</div>
-      <div class="guide-item" style="border-top:1px solid #1a2540;margin-top:8px;padding-top:8px;color:#00d4ff">
+      <div class="guide-item" style="border-top:1px solid #dde6ee;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>★ 소량 진입 검토</b> — 중립이지만 매수 신호가 2개 이상 모인 자리. 진입가는 본인이 판단, 손절선 꼭 설정.
       </div>
-      <div class="guide-item" style="border-top:1px solid #1a2540;margin-top:8px;padding-top:8px;color:#00d4ff">
+      <div class="guide-item" style="border-top:1px solid #dde6ee;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>🌐 미국 선행 지표 (상단 배너)</b> — 전날 밤 미국 시장으로 오늘 아침 한국 장 분위기를 미리 가늠합니다.
       </div>
       <div class="guide-item"><b>필라델피아 반도체(SOX)</b> — 미국 반도체 종목 지수. 하이닉스·삼성전자가 거의 그대로 따라갑니다. 내리면 우리 반도체주 갭하락 가능.</div>
@@ -1391,7 +1400,7 @@ function renderCard(s,idx){
       <div class="guide-item" style="color:#8090b0;font-size:11.5px">
         이 지표들을 종합해 <b style="color:#00e5a0">🟢 우호적</b> / <b style="color:#ffc940">🟡 중립</b> / <b style="color:#ff4060">🔴 비우호적</b>으로 판정하고, 비우호적인 날은 매수 신호를 보수적으로 누릅니다(경계선 매수는 보류, 강한 매수는 '신중 진입').
       </div>
-      <div class="guide-item" style="border-top:1px solid #1a2540;margin-top:8px;padding-top:8px;color:#00d4ff">
+      <div class="guide-item" style="border-top:1px solid #dde6ee;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>📌 지표별 우리 종목 영향 (시장 읽기 연습용)</b>
       </div>
       <div class="guide-item"><b>SOX(반도체) 상승 →</b> <span style="color:#00e5a0">수혜: SK하이닉스·삼성전자·삼성전기</span> <i>반도체·부품주가 거의 그대로 따라갑니다.</i></div>
@@ -1484,9 +1493,9 @@ async function loadData(){
           btn.style.background=btn.dataset.oc+'22';btn.style.borderColor=btn.dataset.oc;btn.style.fontWeight='700';
         })(this)"
           data-oc="${oc}"
-          style="flex-shrink:0;background:#0a1020;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .2s">
+          style="flex-shrink:0;background:#f5f9fc;border:1px solid ${oc}50;border-radius:20px;padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .2s">
           <span style="font-size:12px">${st.emoji}</span>
-          <span style="font-size:11px;color:#c8d4e4;margin:0 3px">${st.name}</span>
+          <span style="font-size:11px;color:#3a4a5a;margin:0 3px">${st.name}</span>
           ${dispPct?`<span style="font-size:11px;color:${cc};font-weight:700">${dispPct}</span>`:""}
         </button>`;
       }).join("");
@@ -1728,7 +1737,7 @@ function renderPortfolio(arr){
     const c = stockColors[i%stockColors.length];
     return `<div style="margin-bottom:6px">
       <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
-        <span style="color:#c8d4e4">${s.name} <span style="color:#8090b0">${s.shares}주·${s.days}일</span></span>
+        <span style="color:#3a4a5a">${s.name} <span style="color:#8090b0">${s.shares}주·${s.days}일</span></span>
         <span style="color:${c};font-weight:700;font-family:'JetBrains Mono',monospace">${s.weight.toFixed(0)}%</span>
       </div>
       <div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">
@@ -1786,7 +1795,7 @@ function renderExitAlerts(arr, stocksData){
   const rows = alerts.map(a=>{
     const tags = a.reasons.map(r=>`<span style="display:inline-block;background:${r.c}18;color:${r.c};border:1px solid ${r.c}40;border-radius:7px;padding:2px 7px;margin:2px 3px 0 0;font-size:10.5px;font-weight:700">${r.t}</span>`).join("");
     return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
-      <div style="font-size:12px;font-weight:700;color:#e8edf5;margin-bottom:3px">${a.name}</div>
+      <div style="font-size:12px;font-weight:700;color:#1f2d3a;margin-bottom:3px">${a.name}</div>
       <div>${tags}</div>
     </div>`;
   }).join("");
@@ -1875,7 +1884,7 @@ function renderHabitCard(arr){
   const watchHtml = h.watching.length?
     `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,201,64,.08);border:1px solid rgba(255,201,64,.25);border-radius:9px">
       <div style="font-size:10.5px;color:#ffc940;font-weight:700;margin-bottom:3px">⏳ 미청산 주의 (5일+)</div>
-      <div style="font-size:10.5px;color:#c8d4e4;line-height:1.5">${h.watching.map(w=>`${w.name} ${w.days}일`).join(" · ")}<br><span style="color:#8090b0">이게 어떻게 끝나느냐에 따라 실제 점수가 달라져요.</span></div>
+      <div style="font-size:10.5px;color:#3a4a5a;line-height:1.5">${h.watching.map(w=>`${w.name} ${w.days}일`).join(" · ")}<br><span style="color:#8090b0">이게 어떻게 끝나느냐에 따라 실제 점수가 달라져요.</span></div>
     </div>`:"";
 
   return `<div style="background:${h.gBg};border:1.5px solid ${h.gColor}55;border-radius:16px;padding:16px;margin-bottom:14px">
@@ -1893,7 +1902,7 @@ function renderHabitCard(arr){
     ${bar("수익률 (목표 "+h.TARGET+"%)",h.retScore,40,"#00d4ff")}
     ${bar("보유기간 (평균 "+h.avgHold.toFixed(1)+"일)",h.holdScore,40,"#a060ff")}
     ${bar("회전 속도 (7일내 청산 목표 · "+h.over7+"건 초과)",h.discScore,20,"#ff8c40")}
-    <div style="font-size:11px;color:#d8e0ec;line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">💡 ${h.comment}</div>
+    <div style="font-size:11px;color:#3a4a5a;line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)">💡 ${h.comment}</div>
     ${watchHtml}
   </div>`;
 }
@@ -1940,7 +1949,7 @@ function renderJournal(){
       const long = withDays.filter(e=>e.heldDays>=7);
       const quickAvg = quick.length?(quick.reduce((s,e)=>s+e.returnPct,0)/quick.length).toFixed(1):null;
       const longAvg = long.length?(long.reduce((s,e)=>s+e.returnPct,0)/long.length).toFixed(1):null;
-      holdHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1a2540">
+      holdHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #dde6ee">
         <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">보유기간 (평균 ${avgHold}일)</div>
         ${quick.length?`<div style="font-size:11px;color:#a8b4c8;margin-bottom:3px">빠른 익절(3일↓) ${quick.length}건 · 평균 <b style="color:${quickAvg>0?'#00e5a0':'#ff4060'}">${quickAvg>0?'+':''}${quickAvg}%</b></div>`:""}
         ${long.length?`<div style="font-size:11px;color:#a8b4c8">회전 7일 초과 ${long.length}건 · 평균 <b style="color:${longAvg>0?'#00e5a0':'#ff4060'}">${longAvg>0?'+':''}${longAvg}%</b> <span style="color:#ffc940;font-size:11.5px">⏳ 회전 느림 (30일 넘기면 실패)</span></div>`:""}
@@ -1959,7 +1968,7 @@ function renderJournal(){
     };
     wins.forEach(tally);
     const sigSorted = Object.entries(sig).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    statsHtml = `<div style="background:#070c16;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:14px">
+    statsHtml = `<div style="background:#f5f9fc;border:1px solid #dde6ee;border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="font-size:12px;font-weight:800;color:#00e5a0;margin-bottom:10px">📊 통계 (청산 ${closed.length}건)</div>
       <div style="display:flex;gap:16px;margin-bottom:6px">
         <div><div style="font-size:11.5px;color:#8090b0">성공률 <span style="font-size:9px;color:#5a6a88">(30일내 1%+)</span></div><div style="font-size:18px;font-weight:800;color:${realRate>=60?"#00e5a0":realRate>=40?"#ffc940":"#ff4060"}">${realRate}%</div></div>
@@ -1987,7 +1996,7 @@ function renderJournal(){
         🔴 30일 초과 보유 <b style="color:#ff4060">${overHold.length}건</b>은 수익 여부와 무관하게 <b>실패</b>로 집계 — 자금이 오래 묶인 거래예요.
         <span style="color:#8090b0"> · 30일내 평균 ${inTimeAvg>0?"+":""}${inTimeAvg}%</span>
       </div>`:""}
-      ${allPartials.length>0?`<div style="font-size:11px;color:#cdd9ee;margin-bottom:10px;padding:8px 10px;background:#00e5a008;border-radius:8px;border:1px solid #00e5a020">
+      ${allPartials.length>0?`<div style="font-size:11px;color:#2d3d4d;margin-bottom:10px;padding:8px 10px;background:#00e5a008;border-radius:8px;border:1px solid #00e5a020">
         🔄 부분청산 실현 <b style="color:#00e5a0">${allPartials.length}회</b> · 누적 실현손익 <b style="color:${partialPnl>=0?'#00e5a0':'#ff4060'}">${partialPnl>=0?'+':''}₩${partialPnl.toLocaleString()}</b>
         <span style="color:#8090b0"> · 1%+ ${partialWins.length}회</span><br>
         <span style="color:#8090b0;font-size:10px">일부 팔고 보유 중인 거래의 실현분 — 전량청산 승률과 별도 집계</span>
@@ -2007,7 +2016,7 @@ function renderJournal(){
     // 시장 구분: 저장된 market 없으면 타임스탬프(KST)로 자동 추정
     const mkt = e.market || guessMarket(e.enteredTs);
     const mktColor = mkt==="NXT"?"#a060ff":"#4090ff";
-    return `<div style="background:#0a1020;border:1px solid ${held?'#1a2540':retColor+'40'};border-radius:11px;padding:12px;margin-bottom:10px">
+    return `<div style="background:#f5f9fc;border:1px solid ${held?'#dde6ee':retColor+'40'};border-radius:11px;padding:12px;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <span style="font-weight:800;font-size:13px">${e.name} <span style="font-size:10px;color:${mktColor};border:1px solid ${mktColor}50;border-radius:6px;padding:1px 5px;font-weight:600;margin-left:2px">${mkt}</span></span>
         <span style="font-size:11px;color:${held?'#ffc940':retColor};font-weight:700">${held?"보유중":(e.returnPct>0?"+":"")+e.returnPct+"%"}</span>
@@ -2043,7 +2052,7 @@ function renderJournal(){
   const closedRows = closed2.length ? `
     <div style="margin-top:14px">
       <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▶')?'▼ 청산 기록 접기':'▶ 청산 기록 보기 (${closed2.length}건)'"
-        style="width:100%;background:#070c16;border:1px solid #1a2540;border-radius:10px;padding:10px;font-size:12px;color:#8090b0;cursor:pointer;text-align:left;font-weight:700">
+        style="width:100%;background:#f5f9fc;border:1px solid #dde6ee;border-radius:10px;padding:10px;font-size:12px;color:#8090b0;cursor:pointer;text-align:left;font-weight:700">
         ▶ 청산 기록 보기 (${closed2.length}건)
       </button>
       <div style="display:none">${closed2.map(makeRow).join("")}</div>
@@ -2257,13 +2266,13 @@ function renderSwing(){
     // 1회 스윙 차익 예시 (보유의 1/3 회전 가정)
     const swingShares = Math.max(1, Math.floor(r.sh/3));
     const profitPerSwing = Math.round((r.upper-r.lower)*swingShares);
-    return `<div style="background:#0d1424;border-radius:12px;padding:13px;margin-bottom:10px;border-left:3px solid ${vColor}">
+    return `<div style="background:#f5f9fc;border-radius:12px;padding:13px;margin-bottom:10px;border-left:3px solid ${vColor}">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
-        <span style="font-size:14px;font-weight:800;color:#cdd9ee">${r.name} <span style="font-size:10px;color:#5a6a88">${r.sh}주·평단 ₩${fmt(Math.round(r.avg))}</span></span>
+        <span style="font-size:14px;font-weight:800;color:#2d3d4d">${r.name} <span style="font-size:10px;color:#5a6a88">${r.sh}주·평단 ₩${fmt(Math.round(r.avg))}</span></span>
         <span style="font-size:11px;font-weight:700;color:${vColor}">${verdict}</span>
       </div>
-      <div style="font-size:11.5px;color:#cdd9ee;line-height:1.6;margin-bottom:8px">${vMsg}</div>
-      ${r.isBox?`<div style="background:#0a1020;border-radius:8px;padding:9px 11px">
+      <div style="font-size:11.5px;color:#2d3d4d;line-height:1.6;margin-bottom:8px">${vMsg}</div>
+      ${r.isBox?`<div style="background:#f5f9fc;border-radius:8px;padding:9px 11px">
         <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px">
           <span style="color:#ff8888">⬆ 일부매도 ₩${fmt(r.upper)}</span>
           <span style="color:#8090b0">박스폭 ${r.bandPct.toFixed(1)}%</span>
@@ -2272,7 +2281,7 @@ function renderSwing(){
           <span style="color:#7ec99a">⬇ 재매수 ₩${fmt(r.lower)}</span>
           <span style="color:#5a6a88">현재 ₩${fmt(r.cur)}</span>
         </div>
-        <div style="font-size:11px;color:#9fb0cc;border-top:1px solid #1a2540;padding-top:6px">
+        <div style="font-size:11px;color:#6b7a89;border-top:1px solid #dde6ee;padding-top:6px">
           ${swingShares}주 회전 시 1회 차익 약 <b style="color:#00e5a0">+₩${fmt(profitPerSwing)}</b> · 실현 손실 없이 평단 녹이기
         </div>
       </div>`:""}
@@ -2281,11 +2290,11 @@ function renderSwing(){
 
   document.getElementById("swingBody").innerHTML=`
   <div style="padding:14px 16px">
-    <div style="background:#1a2540;border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:11.5px;color:#9fb0cc;line-height:1.6">
-      💡 박스권에서 횡보하는 종목만, 상단 일부매도 → 하단 재매수를 반복해 <b style="color:#cdd9ee">실현 손실 없이 평단을 녹이는</b> 전략이에요. 핵심 안전장치: ① 추세 하락 종목엔 쓰지 않기 ② 재매수는 판 수량 이내(총량 안 늘리기 — 물타기 방지).
+    <div style="background:#dde6ee;border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:11.5px;color:#6b7a89;line-height:1.6">
+      💡 박스권에서 횡보하는 종목만, 상단 일부매도 → 하단 재매수를 반복해 <b style="color:#2d3d4d">실현 손실 없이 평단을 녹이는</b> 전략이에요. 핵심 안전장치: ① 추세 하락 종목엔 쓰지 않기 ② 재매수는 판 수량 이내(총량 안 늘리기 — 물타기 방지).
     </div>
     ${body||'<div style="color:#8090b0;font-size:12px;padding:10px">보유 종목이 없어요.</div>'}
-    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:10px;padding-top:12px;border-top:1px solid #1a2540">
+    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:10px;padding-top:12px;border-top:1px solid #dde6ee">
       ※ 박스권 판별은 ADX&lt;20(추세 약함) 기준. 추세장에서 이 전략을 쓰면 "떨어지는 칼날 잡기"가 되어 손실이 커집니다. 박스 상단/하단은 피봇·볼린저 기준 참고값. 본 기능은 참고용입니다.
     </div>
   </div>`;
@@ -2366,34 +2375,34 @@ function renderRecover(){
     const passed = lineIdx>=0 && i<=lineIdx;
     return `<div style="background:${passed?'#0f1f18':'#0d1424'};border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${tierColor}">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
-        <span style="font-size:13px;font-weight:800;color:#cdd9ee">${i+1}. ${r.name} <span style="font-size:10px;color:#5a6a88">${r.sh}주</span></span>
+        <span style="font-size:13px;font-weight:800;color:#2d3d4d">${i+1}. ${r.name} <span style="font-size:10px;color:#5a6a88">${r.sh}주</span></span>
         <span style="font-size:11px;font-weight:700;color:${tierColor}">${tag}</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;color:#8090b0;margin-bottom:2px">
         <span>평단 ₩${Math.round(r.avg).toLocaleString()} → 현재 ₩${r.cur.toLocaleString()}</span>
         <span style="color:${r.pnl>=0?'#00e5a0':'#ff6b6b'}">${fmt(r.pnl)} (${r.retPct.toFixed(1)}%)</span>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9fb0cc">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7a89">
         <span>💰 회수 ₩${r.recoverCash.toLocaleString()}</span>
         ${!r.hasProfit?`<span>🎯 반등목표 ₩${r.tgt.toLocaleString()} (+${r.tgtPct.toFixed(1)}%) → 매도 시 평단대비 <b style="color:${r.tgtRetVsAvg>=0?'#00e5a0':'#ff8888'}">${r.tgtRetVsAvg>=0?'+':''}${r.tgtRetVsAvg.toFixed(1)}%</b></span>`:`<span style="color:#5a6a88">미련X 고점권</span>`}
       </div>
       ${r.downtrend?`<div style="margin-top:5px;font-size:10px;color:#ff8888;background:#2a1a1a;border-radius:6px;padding:4px 8px;line-height:1.5">⚠️ 저위치+하락추세 — 반등이 안 올 수 있어요(평균회귀 실패 구간). 반등 기다리기보다 손절 우선 검토.</div>`:""}
-      ${r.why.length?`<div style="margin-top:5px">${r.why.map(w=>`<span style="display:inline-block;background:#1a2540;border-radius:5px;padding:1px 6px;margin-right:3px;font-size:9.5px;color:#9fb0cc">${w}</span>`).join("")}</div>`:""}
+      ${r.why.length?`<div style="margin-top:5px">${r.why.map(w=>`<span style="display:inline-block;background:#dde6ee;border-radius:5px;padding:1px 6px;margin-right:3px;font-size:9.5px;color:#6b7a89">${w}</span>`).join("")}</div>`:""}
     </div>`;
   }).join("");
 
   document.getElementById("recoverBody").innerHTML=`
   <div style="padding:14px 16px">
-    <div style="background:#0d1424;border-radius:12px;padding:13px;margin-bottom:14px">
+    <div style="background:#f5f9fc;border-radius:12px;padding:13px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px">
         <div><div style="font-size:11px;color:#8090b0">무손실 회수 쿠션</div>
           <div style="font-size:18px;font-weight:800;color:#00e5a0">₩${cushion.toLocaleString()}</div></div>
         <div style="text-align:right"><div style="font-size:11px;color:#8090b0">손절 필요액(목표)</div>
           <div style="font-size:18px;font-weight:800;color:#4a9eff">₩${_t.toLocaleString()}</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #1a2540;padding-top:9px">
+      <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #dde6ee;padding-top:9px">
         <span style="font-size:11px;color:#8090b0">목표 변경</span>
-        <input id="recoverTargetInput" type="number" value="${_t/10000}" onchange="window.__recoverTarget=Math.round(this.value*10000);renderRecover();" style="width:70px;background:#1a2540;border:none;border-radius:6px;color:#fff;padding:5px 8px;font-size:13px;text-align:right">
+        <input id="recoverTargetInput" type="number" value="${_t/10000}" onchange="window.__recoverTarget=Math.round(this.value*10000);renderRecover();" style="width:70px;background:#eef3f8;border:1px solid rgba(20,40,60,0.1);border-radius:6px;color:#1f2d3a;padding:5px 8px;font-size:13px;text-align:right">
         <span style="font-size:11px;color:#8090b0">만원</span>
         <span style="margin-left:auto;font-size:12px;color:${shortfall>0?'#ffc940':'#00e5a0'};font-weight:700">${shortfall>0?`부족 ₩${shortfall.toLocaleString()}`:'쿠션 충분 ✓'}</span>
       </div>
@@ -2403,12 +2412,12 @@ function renderRecover(){
     <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">회수 우선순위 (평가익·반등 임박 순)</div>
     ${rowHtml||'<div style="color:#8090b0;font-size:12px;padding:10px">보유 종목이 없어요.</div>'}
 
-    ${lineIdx>=0?`<div style="background:#00e5a012;border:1px solid #00e5a040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#cdd9ee;line-height:1.6">
+    ${lineIdx>=0?`<div style="background:#00e5a012;border:1px solid #00e5a040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#2d3d4d;line-height:1.6">
       ✅ 위 <b style="color:#00e5a0">${lineIdx+1}개</b>를 정리(평가익 즉시 + 반등목표 도달 시)하면, 손실 없이 ₩${_t.toLocaleString()} 쿠션이 생겨요. 그걸로 손실 종목(LG 등)을 끊을 여력이 마련돼요.</div>`:
-      shortfall>0?`<div style="background:#ffc94012;border:1px solid #ffc94040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#cdd9ee;line-height:1.6">
+      shortfall>0?`<div style="background:#ffc94012;border:1px solid #ffc94040;border-radius:10px;padding:10px 13px;margin-top:6px;font-size:12px;color:#2d3d4d;line-height:1.6">
       ⚠️ 무손실 회수만으론 목표(₩${_t.toLocaleString()})에 ₩${shortfall.toLocaleString()} 부족해요. 반등을 더 기다리거나, 목표를 낮추거나, 일부는 손실 감수가 필요할 수 있어요.</div>`:""}
 
-    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #1a2540">
+    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #dde6ee">
       ※ 평가익 종목 먼저(손실 없이 현금화) → 반등 임박 종목은 목표가 도달 시 정리. 이렇게 손실 없이 쿠션을 만든 뒤, 그 여력으로 깊이 물린 종목을 끊는 순서입니다. 추매는 권하지 않아요. 참고용.
     </div>
   </div>`;
@@ -2524,12 +2533,12 @@ function simRender_levels(s, entry, shares){
       action = `한도(3주) 도달 → 추매 중단. 이 구간 이탈 시 <b style="color:#ff6b6b">손절 검토</b>`;
     }
     const lossHere = Math.round((lv.price-entry)*shares); // 최초 진입분 기준 평가손
-    rows += `<div style="background:#0f1830;border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${canAdd?'#4a9eff':'#ff6b6b'}">
+    rows += `<div style="background:#eef3f8;border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid ${canAdd?'#4a9eff':'#ff6b6b'}">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
-        <span style="font-size:13px;font-weight:700;color:#cdd9ee">${lv.label}</span>
+        <span style="font-size:13px;font-weight:700;color:#2d3d4d">${lv.label}</span>
         <span style="font-family:monospace;font-size:13px;color:#8fa3c8">₩${lv.price.toLocaleString()} <span style="color:#ff8888">(${dropPct.toFixed(1)}%)</span></span>
       </div>
-      <div style="font-size:12px;color:#9fb0cc;line-height:1.5">${action}</div>
+      <div style="font-size:12px;color:#6b7a89;line-height:1.5">${action}</div>
     </div>`;
   });
   if(!levels.length) rows = `<div style="color:#8090b0;font-size:12px;padding:10px">현재가 아래 뚜렷한 지지선이 없어요. 신고가 구간이라 추매 기준 잡기 어려움 — 진입 자체를 신중히.</div>`;
@@ -2547,7 +2556,7 @@ function simRender_levels(s, entry, shares){
       const worstLoss = Math.round((lowest-entry)*shares + levels.slice(0,addN).reduce((s2,lv)=>s2+(lowest-lv.price),0));
       rows += `<div style="background:#2a1a1a;border:1px solid #ff6b6b40;border-radius:10px;padding:11px 13px;margin-top:4px">
         <div style="font-size:12px;font-weight:700;color:#ff8888;margin-bottom:4px">⚖️ 추매는 리스크를 키웁니다</div>
-        <div style="font-size:11px;color:#cdd9ee;line-height:1.6">
+        <div style="font-size:11px;color:#2d3d4d;line-height:1.6">
           한도까지 추매 시 투입금 ₩${initCost.toLocaleString()} → <b style="color:#ffc940">₩${totalCost.toLocaleString()}</b> (${addN}주 추가).
           평단은 내려가지만 <b>물린 금액 자체는 커져요.</b> 최저 지지(${lowest.toLocaleString()})마저 이탈하면 손실이 그만큼 더 깊어집니다.
           추매는 '추세 유지 + 계획된 분할'일 때만, 한도 넘으면 추매 아닌 손절.
@@ -2568,7 +2577,7 @@ function renderSim(){
   const jBorder = {ok:"#2ecc71",caution:"#ffc940",danger:"#ff6b6b"}[j.level];
 
   // 종목 선택 칩
-  const chips = stocks.map(x=>`<button onclick="simPickStock('${x.code}')" style="background:${x.code===s.code?'#2a4a7a':'#1a2540'};color:${x.code===s.code?'#fff':'#8090b0'};border:none;border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap">${x.code===s.code?'● ':''}${({'000660':'하이닉스','005930':'삼성전자','066570':'LG전자','009150':'삼성전기','005380':'현대차','105560':'KB금융','017670':'SKT','035420':'NAVER'})[x.code]||x.code}</button>`).join("");
+  const chips = stocks.map(x=>`<button onclick="simPickStock('${x.code}')" style="background:${x.code===s.code?'#2a4a7a':'#dde6ee'};color:${x.code===s.code?'#fff':'#8090b0'};border:none;border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap">${x.code===s.code?'● ':''}${({'000660':'하이닉스','005930':'삼성전자','066570':'LG전자','009150':'삼성전기','005380':'현대차','105560':'KB금융','017670':'SKT','035420':'NAVER'})[x.code]||x.code}</button>`).join("");
 
   const totalCost = entry*shares;
   const pos = s.breakout?.position ?? 50;
@@ -2578,28 +2587,28 @@ function renderSim(){
   <div style="padding:14px 16px">
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px">${chips}</div>
 
-    <div style="background:#0d1424;border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="background:#f5f9fc;border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div>
           <div style="font-size:11px;color:#8090b0">진입가 (현재가)</div>
-          <div style="font-size:22px;font-weight:800;color:#fff;font-family:monospace">₩${entry.toLocaleString()}</div>
+          <div style="font-size:22px;font-weight:800;color:#1f2d3a;font-family:monospace">₩${entry.toLocaleString()}</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:11px;color:#8090b0">52주 위치</div>
           <div style="font-size:18px;font-weight:700;color:${pos>=70?'#ffc940':pos<60?'#4a9eff':'#cdd9ee'}">${pos}%</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #1a2540;padding-top:10px">
+      <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #dde6ee;padding-top:10px">
         <span style="font-size:12px;color:#8090b0">진입 주수</span>
-        <button onclick="simSetShares(${shares-1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#1a2540;color:#fff;font-size:16px;cursor:pointer">−</button>
-        <span style="font-size:18px;font-weight:800;color:#fff;min-width:24px;text-align:center">${shares}</span>
-        <button onclick="simSetShares(${shares+1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#1a2540;color:#fff;font-size:16px;cursor:pointer">+</button>
+        <button onclick="simSetShares(${shares-1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#eef3f8;color:#1f2d3a;font-size:16px;cursor:pointer">−</button>
+        <span style="font-size:18px;font-weight:800;color:#1f2d3a;min-width:24px;text-align:center">${shares}</span>
+        <button onclick="simSetShares(${shares+1})" style="width:30px;height:30px;border-radius:8px;border:none;background:#eef3f8;color:#1f2d3a;font-size:16px;cursor:pointer">+</button>
         <span style="font-size:12px;color:#8090b0;margin-left:auto">투입 ₩${totalCost.toLocaleString()}</span>
       </div>
     </div>
 
     ${(()=>{
-      if(fit.verdict==="noSupport") return `<div style="background:#1a2540;border-radius:12px;padding:13px;margin-bottom:12px;font-size:12px;color:#9fb0cc;line-height:1.6">현재가 아래 지지선이 없어요(신고가 구간). 진입 기준 잡기 어려움 — <b style="color:#ff8888">신규 진입 신중</b>.</div>`;
+      if(fit.verdict==="noSupport") return `<div style="background:#dde6ee;border-radius:12px;padding:13px;margin-bottom:12px;font-size:12px;color:#6b7a89;line-height:1.6">현재가 아래 지지선이 없어요(신고가 구간). 진입 기준 잡기 어려움 — <b style="color:#ff8888">신규 진입 신중</b>.</div>`;
       const vc={ok:"#2ecc71",caution:"#ffc940",hold:"#ff6b6b"}[fit.verdict];
       const vt={ok:"✅ 소량 신규 진입 가능",caution:"⚠️ 경계 — 아주 소량만/조금 더 대기",hold:"🚫 진입 보류 — 너무 높은 자리"}[fit.verdict];
       const recPrice = Math.round(fit.firstSup*(1+fit.allow/100)); // 허용 이격 경계가 = 권장 진입 상한
@@ -2609,21 +2618,21 @@ function renderSim(){
         caution:`지지선까지 ${fit.gapAbs.toFixed(1)}% (허용 ${fit.allow.toFixed(1)}%를 살짝 초과). 진입하려면 최소 수량으로, 또는 아래 권장가까지 대기.`,
         hold:`지지선까지 ${fit.gapAbs.toFixed(1)}%인데 허용은 ${fit.allow.toFixed(1)}%뿐. 지금 사면 "높은 데서 물림". 아래 권장가까지 눌림 대기.`
       }[fit.verdict];
-      const recHtml = (fit.verdict!=="ok") ? `<div style="background:#0d1424;border-radius:8px;padding:9px 11px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+      const recHtml = (fit.verdict!=="ok") ? `<div style="background:#f5f9fc;border-radius:8px;padding:9px 11px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:11px;color:#8090b0">💡 권장 진입가 (이하)</span>
         <span style="font-family:monospace;font-size:15px;font-weight:800;color:#2ecc71">₩${recPrice.toLocaleString()} <span style="font-size:11px;color:#8090b0">(현재 −${recDropPct.toFixed(1)}%)</span></span>
       </div>` : "";
-      const facHtml = fit.factors.map(f=>`<span style="display:inline-block;background:#0d1424;border-radius:6px;padding:2px 7px;margin:2px 3px 2px 0;font-size:10px;color:${f[1][0]==='+'?'#7ec99a':'#e89090'}">${f[0]} ${f[1]}</span>`).join("");
+      const facHtml = fit.factors.map(f=>`<span style="display:inline-block;background:#f5f9fc;border-radius:6px;padding:2px 7px;margin:2px 3px 2px 0;font-size:10px;color:${f[1][0]==='+'?'#7ec99a':'#e89090'}">${f[0]} ${f[1]}</span>`).join("");
       const fund = s.fundamentals;
-      const fundHtml = (fund&&fund.grade&&fund.grade!=="정보없음") ? `<div style="background:${fund.gradeColor}15;border:1px solid ${fund.gradeColor}40;border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:#cdd9ee;line-height:1.5"><b style="color:${fund.gradeColor}">${fund.grade}</b> — ${fund.comment}${fund.grade.includes("거품")?' <b style="color:#ff6b6b">진입 재고!</b>':''}</div>` : "";
+      const fundHtml = (fund&&fund.grade&&fund.grade!=="정보없음") ? `<div style="background:${fund.gradeColor}15;border:1px solid ${fund.gradeColor}40;border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:#2d3d4d;line-height:1.5"><b style="color:${fund.gradeColor}">${fund.grade}</b> — ${fund.comment}${fund.grade.includes("거품")?' <b style="color:#ff6b6b">진입 재고!</b>':''}</div>` : "";
       return `<div style="background:${vc}18;border:1px solid ${vc}55;border-radius:12px;padding:13px;margin-bottom:12px">
         <div style="font-size:14px;font-weight:800;color:${vc};margin-bottom:6px">${vt}</div>
-        <div style="font-size:12px;color:#cdd9ee;line-height:1.6;margin-bottom:8px">${vmsg}</div>
+        <div style="font-size:12px;color:#2d3d4d;line-height:1.6;margin-bottom:8px">${vmsg}</div>
         ${fundHtml}
         ${recHtml}
         <div style="display:flex;justify-content:space-between;font-size:11px;color:#8090b0;margin-bottom:6px">
-          <span>현재 이격 <b style="color:#fff">${fit.gapAbs.toFixed(1)}%</b></span>
-          <span>허용 이격 <b style="color:#fff">${fit.allow.toFixed(1)}%</b>${fit.capped?' <span style="color:#ffc940">(상한7%)</span>':''}</span>
+          <span>현재 이격 <b style="color:#1f2d3a">${fit.gapAbs.toFixed(1)}%</b></span>
+          <span>허용 이격 <b style="color:#1f2d3a">${fit.allow.toFixed(1)}%</b>${fit.capped?' <span style="color:#ffc940">(상한7%)</span>':''}</span>
         </div>
         <div style="border-top:1px solid ${vc}33;padding-top:7px">${facHtml}</div>
       </div>`;
@@ -2631,13 +2640,13 @@ function renderSim(){
 
     <div style="background:${jColor}22;border:1px solid ${jBorder}55;border-radius:12px;padding:13px;margin-bottom:16px">
       <div style="font-size:14px;font-weight:800;color:${jBorder};margin-bottom:5px">${j.title}</div>
-      <div style="font-size:12px;color:#cdd9ee;line-height:1.6">${j.msg}</div>
+      <div style="font-size:12px;color:#2d3d4d;line-height:1.6">${j.msg}</div>
     </div>
 
     <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">📉 하락 시 대응 시나리오 (1주씩 추매 · 최대 3주)</div>
     ${simRender_levels(s, entry, shares)}
 
-    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #1a2540">
+    <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #dde6ee">
       ※ 지지선은 피봇·볼린저·이평·일목 기준 자동 산출. 추매는 "계획된 분할"일 때만 유효하며, 한도(3주) 도달 후엔 추매가 아니라 손절을 검토하세요. 본 시뮬레이션은 참고용입니다.
     </div>
   </div>`;
@@ -2658,7 +2667,7 @@ if ('serviceWorker' in navigator) {
     <div class="jrnl-head">
       <span class="jrnl-title">📝 매매 기록</span>
       <div style="display:flex;gap:6px">
-        <button onclick="exportJournal()" style="background:#1a2540;color:#8090b0;border:none;border-radius:8px;padding:0 12px;height:32px;font-size:11px;cursor:pointer">백업</button>
+        <button onclick="exportJournal()" style="background:#dde6ee;color:#8090b0;border:none;border-radius:8px;padding:0 12px;height:32px;font-size:11px;cursor:pointer">백업</button>
         <button class="jrnl-x" onclick="closeJournal()">✕</button>
       </div>
     </div>
