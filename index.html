@@ -1634,6 +1634,51 @@ function recordEntry(code){
   if(!s){ alert("종목 데이터를 찾을 수 없습니다. 새로고침 후 다시 시도하세요."); return; }
   const meta = STOCKS.find(x=>x.code===code) || {};
   const stockName = meta.name || s.name || code;
+
+  // ── 진입 전 체크리스트 (조급함 관문) — 시스템 신호를 확인시킴 ──
+  const fit = (()=>{ try{ return simEntryFit(s); }catch(_){ return null; } })();
+  const mktScore = (window.__market && window.__market.summary) ? window.__market.summary.score : 6;
+  const checks = [];
+  // 1. 진입 시뮬 신호
+  let simOk = true;
+  if(fit && fit.verdict){
+    if(fit.verdict==="ok") checks.push(["✅","진입 시뮬: 진입가능 구간"]);
+    else if(fit.verdict==="caution"){ checks.push(["⚠️","진입 시뮬: 경계 구간 (이격 큼)"]); simOk=false; }
+    else if(fit.verdict==="hold"){ checks.push(["🚫","진입 시뮬: 보류 (지지선에서 너무 멈)"]); simOk=false; }
+    else if(fit.verdict==="noSupport"){ checks.push(["⚠️","진입 시뮬: 지지선 없음 (신고가권)"]); simOk=false; }
+  }
+  // 2. 매수 가격대 범위
+  let rangeOk = true;
+  const br = (()=>{ try{ return buyRange(s); }catch(_){ return null; } })();
+  if(br){
+    if(br.zone==="in") checks.push(["✅",`매수 가격대: 적정 구간 안 (₩${Math.round(br.A).toLocaleString()}~₩${Math.round(br.B).toLocaleString()})`]);
+    else if(br.zone==="above"){ checks.push(["🚫",`매수 가격대: 권장 상단(₩${Math.round(br.B).toLocaleString()}) 초과 — 추격 매수!`]); rangeOk=false; }
+    else if(br.zone==="below"){ checks.push([br.belowMode==="buy"?"✅":"⚠️",`매수 가격대: 지지선 아래 (${br.belowMode==="buy"?"강추세 눌림 OK":"하락추세 주의"})`]); if(br.belowMode!=="buy") rangeOk=false; }
+  }
+  // 3. 종목 의견
+  let opinionOk = true;
+  if(s.opinion==="매도" || (s.score!==undefined && s.score<=-3)){ checks.push(["🚫",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score}) — 매도 우위인데 진입?`]); opinionOk=false; }
+  else if(s.opinion==="매수" || (s.score!==undefined && s.score>=2)) checks.push(["✅",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score})`]);
+  else checks.push(["⚠️",`종목 의견: 중립(${s.score>0?"+":""}${s.score})`]);
+  // 4. 시장 상황
+  let mktOk = true;
+  if(mktScore<=-1){ checks.push(["🚫",`시장: 비우호적 (오늘 같은 하락장 — 서두르지 말 것)`]); mktOk=false; }
+  else if(mktScore>=6) checks.push(["✅","시장: 우호적"]);
+  else checks.push(["⚠️","시장: 중립"]);
+
+  const violations = [!simOk, !rangeOk, !opinionOk, !mktOk].filter(Boolean).length;
+  const signalViolated = violations > 0;
+
+  // 체크리스트 표시 + 확인
+  const checkText = checks.map(c=>`${c[0]} ${c[1]}`).join("\n");
+  let confirmMsg;
+  if(signalViolated){
+    confirmMsg = `⚠️ 진입 전 점검 — ${violations}개 신호 경고\n\n${checkText}\n\n━━━━━━━━━━━━━━\n시스템 신호 ${violations}개가 진입에 부정적이에요.\n오늘처럼 신호를 앞질러 서두르면 위험해요.\n\n그래도 진입하시겠어요?\n(취소 = 기다리기 / 확인 = 신호 무시하고 진입)`;
+  } else {
+    confirmMsg = `✅ 진입 전 점검 — 신호 양호\n\n${checkText}\n\n시스템 신호가 진입에 우호적이에요. 진행할까요?`;
+  }
+  if(!confirm(confirmMsg)) return;
+
   // 실제 매수가 입력 (기본값 = 현재가)
   const px = prompt(`실제 매수가를 입력하세요\n(${stockName} 현재가 ₩${s.price.toLocaleString()})`, s.price);
   if(px===null) return;  // 취소
@@ -1688,6 +1733,8 @@ function recordEntry(code){
     })(),
     exitPrice: null, exitAt: null, exitTs: null, returnPct: null, exitReason: null,
     heldDays: null,
+    signalViolated: signalViolated,        // 신호 무시하고 진입했는지
+    violationCount: violations,             // 어긴 신호 개수
     status: "보유"
   };
   const arr = loadJournal();
@@ -1939,6 +1986,16 @@ function renderJournal(){
   const closed = arr.filter(e=>e.returnPct!==null);
   // 부분청산 실현 집계 (보유/청산 무관 모든 partialExits)
   const allPartials = arr.flatMap(e=>(e.partialExits||[]).map(p=>({...p, entryPrice:e.entryPrice, name:e.name})));
+  // 신호 위반 거래 집계 (시스템 신호 무시하고 진입한 거래의 성과)
+  const closedAll = arr.filter(e=>e.returnPct!==null);
+  const violatedTrades = closedAll.filter(e=>e.signalViolated);
+  const followedTrades = closedAll.filter(e=>e.signalViolated===false);
+  const violWins = violatedTrades.filter(e=>e.returnPct>=1.0 && (!e.heldDays||e.heldDays<=30));
+  const follWins = followedTrades.filter(e=>e.returnPct>=1.0 && (!e.heldDays||e.heldDays<=30));
+  const violRate = violatedTrades.length ? Math.round(violWins.length/violatedTrades.length*100) : null;
+  const follRate = followedTrades.length ? Math.round(follWins.length/followedTrades.length*100) : null;
+  const violAvg = violatedTrades.length ? (violatedTrades.reduce((s,e)=>s+e.returnPct,0)/violatedTrades.length).toFixed(2) : null;
+  const follAvg = followedTrades.length ? (followedTrades.reduce((s,e)=>s+e.returnPct,0)/followedTrades.length).toFixed(2) : null;
   const partialPnl = allPartials.reduce((s,p)=>s+(p.pnl||0),0);
   const partialWins = allPartials.filter(p=>{
     const rp = p.entryPrice? (p.price-p.entryPrice)/p.entryPrice*100 : 0; return rp>=1.0;
@@ -2018,6 +2075,22 @@ function renderJournal(){
         🔄 부분청산 실현 <b style="color:#00e5a0">${allPartials.length}회</b> · 누적 실현손익 <b style="color:${partialPnl>=0?'#00e5a0':'#ff4060'}">${partialPnl>=0?'+':''}₩${partialPnl.toLocaleString()}</b>
         <span style="color:#8090b0"> · 1%+ ${partialWins.length}회</span><br>
         <span style="color:#8090b0;font-size:10px">일부 팔고 보유 중인 거래의 실현분 — 전량청산 승률과 별도 집계</span>
+      </div>`:""}
+      ${(violatedTrades.length>0||followedTrades.length>0)?`<div style="margin-bottom:12px;padding:11px 12px;background:rgba(212,175,106,0.06);border-radius:10px;border:1px solid rgba(212,175,106,0.2)">
+        <div style="font-size:11.5px;color:#d4af6a;font-weight:700;margin-bottom:8px">🪞 신호를 따랐을 때 vs 어겼을 때</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;text-align:center;background:rgba(92,184,138,0.1);border-radius:8px;padding:8px 4px">
+            <div style="font-size:9.5px;color:#9a958c">신호 따름</div>
+            <div style="font-size:17px;font-weight:800;color:#5cb88a">${follRate!==null?follRate+"%":"—"}</div>
+            <div style="font-size:9px;color:#9a958c">${followedTrades.length}건 · 평균 ${follAvg>0?"+":""}${follAvg||"—"}%</div>
+          </div>
+          <div style="flex:1;text-align:center;background:rgba(217,101,122,0.1);border-radius:8px;padding:8px 4px">
+            <div style="font-size:9.5px;color:#9a958c">신호 어김</div>
+            <div style="font-size:17px;font-weight:800;color:#d9657a">${violRate!==null?violRate+"%":"—"}</div>
+            <div style="font-size:9px;color:#9a958c">${violatedTrades.length}건 · 평균 ${violAvg>0?"+":""}${violAvg||"—"}%</div>
+          </div>
+        </div>
+        ${(violRate!==null&&follRate!==null)?`<div style="font-size:10.5px;color:${violRate<follRate?'#d9657a':'#9a958c'};line-height:1.6;margin-top:8px">${violRate<follRate?`💡 신호를 어긴 거래가 ${follRate-violRate}%p 낮아요. 서두르지 말고 신호를 기다리는 게 통계로 증명돼요.`:'신호 따른 거래와 비교해보세요.'}</div>`:`<div style="font-size:10px;color:#5e5a52;margin-top:7px">거래가 쌓이면 "신호를 기다렸어야 했나"가 숫자로 보여요.</div>`}
       </div>`:""}
       <div style="font-size:11.5px;color:#8090b0;margin-bottom:6px">수익 케이스에서 자주 나온 신호</div>
       <div>${sigSorted.map(([k,v])=>`<span style="display:inline-block;background:#00e5a015;color:#00e5a0;border-radius:8px;padding:2px 8px;margin:2px 4px 0 0;font-size:11.5px">${k} ${v}회</span>`).join("")||"<span style='color:#4a5878;font-size:11px'>데이터 부족</span>"}</div>
