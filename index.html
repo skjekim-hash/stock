@@ -685,10 +685,12 @@ function renderMarketBanner(m){
             +"<div style='flex:1;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px'>"
               +"<div style='font-size:10px;color:#8090b0;margin-bottom:2px'>코스피</div>"
               +"<div style='font-size:13px;font-weight:800;color:"+kc+"'>"+arr(f.kospi.dir)+" "+f.kospi.dir+" "+f.kospi.strength+"</div>"
+              +(f.kospi.low!=null?"<div style='font-size:10px;color:"+kc+";opacity:.85;margin-top:2px'>"+(f.kospi.low>=0?"+":"")+f.kospi.low+" ~ "+(f.kospi.high>=0?"+":"")+f.kospi.high+"%</div>":"")
             +"</div>"
             +"<div style='flex:1;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px'>"
               +"<div style='font-size:10px;color:#8090b0;margin-bottom:2px'>반도체 <span style='color:#5a6a88'>(SOX·TSMC)</span></div>"
               +"<div style='font-size:13px;font-weight:800;color:"+sc+"'>"+arr(f.semi.dir)+" "+f.semi.dir+" "+f.semi.strength+"</div>"
+              +(f.semi.low!=null?"<div style='font-size:10px;color:"+sc+";opacity:.85;margin-top:2px'>"+(f.semi.low>=0?"+":"")+f.semi.low+" ~ "+(f.semi.high>=0?"+":"")+f.semi.high+"%</div>":"")
             +"</div>"
           +"</div>"
           +"<div style='font-size:10px;color:#6a7a98;line-height:1.5'>💡 "+f.disclaimer+"</div>"
