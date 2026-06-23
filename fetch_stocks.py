@@ -422,11 +422,13 @@ def fetch_market_signal():
         "kospi": {
             "dir": kdir, "strength": klvl, "color": kcolor,
             "bias": kospi_bias,
+            "low": round(kospi_bias - 0.5, 1), "high": round(kospi_bias + 0.5, 1),
             "text": f"{kdir} 경향 {klvl} (대략 {'+' if kospi_bias>=0 else ''}{kospi_bias}% 안팎)",
         },
         "semi": {
             "dir": sdir, "strength": slvl, "color": scolor,
             "bias": semi_bias,
+            "low": round(semi_bias - 0.6, 1), "high": round(semi_bias + 0.6, 1),
             "text": f"{sdir} 경향 {slvl} (SOX {'+' if sox_pct_now>=0 else ''}{sox_pct_now}% · TSMC {'+' if tsmc_pct>=0 else ''}{tsmc_pct}%)",
         },
         "disclaimer": "야간 해외지표 기반 경향일 뿐, 갭은 자주 빗나가요. 진입은 시장 방향이 아니라 종목 자리(지지·수급)로 판단하세요.",
