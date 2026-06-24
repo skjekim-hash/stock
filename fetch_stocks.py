@@ -434,15 +434,55 @@ def fetch_market_signal():
         "disclaimer": "야간 해외지표 기반 경향일 뿐, 갭은 자주 빗나가요. 진입은 시장 방향이 아니라 종목 자리(지지·수급)로 판단하세요.",
     }
     print(f"  📈 내일 경향: 코스피 {kdir}{klvl}({kospi_bias}%) · 반도체 {sdir}{slvl}({semi_bias}%)", file=sys.stderr)
+
+    # ── 급락 위험 경보 (야간 해외지표로 다음날 갭하락 위험 등급화) ──
+    _sox  = sox_pct_now
+    _tsmc = tsmc_pct
+    _vixp = out.get("vix", {}).get("pct", 0)
+    _fxp  = out.get("fx",  {}).get("pct", 0)
+    _ndq  = out.get("nasdaq", {}).get("pct", 0)
+    _rs = 0
+    _rr = []
+    # 반도체 폭락 (한국 반도체주 직결)
+    if   _sox <= -7: _rs += 3; _rr.append(f"SOX {_sox}% 폭락")
+    elif _sox <= -5: _rs += 2; _rr.append(f"SOX {_sox}% 급락")
+    elif _sox <= -3: _rs += 1; _rr.append(f"SOX {_sox}% 약세")
+    # TSMC (파운드리 선행)
+    if   _tsmc <= -5: _rs += 2; _rr.append(f"TSMC {_tsmc}% 급락")
+    elif _tsmc <= -3: _rs += 1; _rr.append(f"TSMC {_tsmc}% 약세")
+    # VIX 급등 (공포 확산)
+    if   _vixp >= 20: _rs += 2; _rr.append(f"VIX +{_vixp}% 급등")
+    elif _vixp >= 10: _rs += 1; _rr.append(f"VIX +{_vixp}% 상승")
+    # 환율 급등 (외국인 이탈 — 가중치 보강)
+    if   _fxp >= 1.5: _rs += 2; _rr.append(f"환율 +{_fxp}% 급등")
+    elif _fxp >= 0.8: _rs += 1; _rr.append(f"환율 +{_fxp}% 상승")
+    # 나스닥 동반 약세
+    if   _ndq <= -1.5: _rs += 1; _rr.append(f"나스닥 {_ndq}%")
+    # 등급 판정
+    if _rs >= 6:
+        _lv, _adv, _col = "위험", "갭하락 위험 매우 높음. 내일 신규 진입 금지, 보유는 손절선 미리 확인하세요.", "#ef4444"
+    elif _rs >= 4:
+        _lv, _adv, _col = "경계", "갭하락 가능성 높음. 신규 진입 자제, 사더라도 분할로만 대응.", "#f59e0b"
+    elif _rs >= 2:
+        _lv, _adv, _col = "주의", "변동성 확대 가능. 추격 진입 주의, 지지선 확인 후 대응.", "#f59e0b"
+    else:
+        _lv, _adv, _col = "평이", "", "#10b981"
+    out["crashRisk"] = {
+        "level": _lv, "score": _rs, "color": _col,
+        "reasons": _rr, "advice": _adv,
+        "alert": _rs >= 4,  # 경계 이상이면 강조
+    }
+    if _rs >= 2:
+        print(f"  🚨 급락 위험: {_lv} ({_rs}점) — {' · '.join(_rr)}", file=sys.stderr)
     parts = []
     for k in ("sox", "nasdaq", "fx", "vix"):
         if k in out:
             parts.append(f"{out[k]['name']} {'+' if out[k]['pct']>=0 else ''}{out[k]['pct']}%")
     print(f"  🌐 시장 분위기: {label} (score {round(score,1)}) — {' / '.join(parts)}", file=sys.stderr)
     # ── 지수 연계 거래 변동성 경고 (선물옵션 만기·정기변경 달력 기반) ──
-    _today = datetime.now()
+    _today = datetime.date.today()
     _y, _m, _d = _today.year, _today.month, _today.day
-    _first = datetime(_y, _m, 1)
+    _first = datetime.date(_y, _m, 1)
     _first_thu = 1 + (3 - _first.weekday()) % 7   # 첫 목요일
     _second_thu = _first_thu + 7                   # 둘째 목요일 (만기일)
     _is_quad = _m in (3, 6, 9, 12)                 # 분기월 = 동시만기
