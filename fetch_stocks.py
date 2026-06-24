@@ -439,6 +439,28 @@ def fetch_market_signal():
         if k in out:
             parts.append(f"{out[k]['name']} {'+' if out[k]['pct']>=0 else ''}{out[k]['pct']}%")
     print(f"  🌐 시장 분위기: {label} (score {round(score,1)}) — {' / '.join(parts)}", file=sys.stderr)
+    # ── 지수 연계 거래 변동성 경고 (선물옵션 만기·정기변경 달력 기반) ──
+    _today = datetime.date.today()
+    _y, _m, _d = _today.year, _today.month, _today.day
+    _first = datetime.date(_y, _m, 1)
+    _first_thu = 1 + (3 - _first.weekday()) % 7   # 첫 목요일
+    _second_thu = _first_thu + 7                   # 둘째 목요일 (만기일)
+    _is_quad = _m in (3, 6, 9, 12)                 # 분기월 = 동시만기
+    _days_to_exp = _second_thu - _d
+    expiry = {"warn": False, "level": "", "text": ""}
+    if _days_to_exp == 0:
+        if _is_quad:
+            expiry = {"warn": True, "level": "high",
+                      "text": "🔴 오늘 선물·옵션 동시만기일 — 프로그램 매물로 변동성 큼. 지수 연계 급등락 가능, 종목 자체 신호와 분리해서 보세요."}
+        else:
+            expiry = {"warn": True, "level": "mid",
+                      "text": "🟡 오늘 옵션 만기일 — 장 마감 전후 프로그램 매매로 일시 변동성 가능."}
+    elif 0 < _days_to_exp <= 2 and _is_quad:
+        expiry = {"warn": True, "level": "mid",
+                  "text": f"🟡 {_days_to_exp}일 후 선물·옵션 동시만기 — 만기 주간은 지수 변동성 확대 경향. 진입은 신중히."}
+    if _m in (6, 12) and abs(_days_to_exp) <= 2:
+        expiry["rebalance"] = "📊 코스피200 정기변경 시기 — 편입/편출 종목은 인덱스 수급 충격 가능."
+    out["expiry"] = expiry
     return out
 
 
@@ -1156,11 +1178,23 @@ def calc_weekly_signal(weekly_candles):
     return {"opinion": opinion, "rsi": rsi, "macd": macd, "macdSignal": sig, "comment": comment}
 
 def calc_relative_strength(stock_pct, kospi_pct):
-    if kospi_pct == 0: return {"rs": 0, "comment": "KOSPI 데이터 없음", "strong": False}
+    if kospi_pct == 0: return {"rs": 0, "comment": "KOSPI 데이터 없음", "strong": False, "indexLinked": False, "indexNote": ""}
     rs = round(stock_pct - kospi_pct, 2); strong = rs > 0
     comment = (f"KOSPI 대비 +{rs}%p 강세" if rs > 1 else
                f"KOSPI 대비 {rs}%p 약세" if rs < -1 else "KOSPI 대비 중립")
-    return {"rs": rs, "comment": comment, "strong": strong}
+    # 지수 동조도: 종목이 코스피와 거의 같이 움직이면 지수 연계 거래에 휘둘리는 중
+    # (자기 재료 없이 지수 따라감 = 프로그램/ETF 영향 추정)
+    index_linked = False
+    index_note = ""
+    if abs(kospi_pct) >= 0.5:  # 지수가 의미있게 움직인 날만 판단
+        if abs(rs) <= 0.3:     # 종목이 지수와 거의 동일하게 움직임
+            index_linked = True
+            direction = "하락" if kospi_pct < 0 else "상승"
+            index_note = (f"📐 지수 동조 — 코스피와 거의 같이 {direction} 중. "
+                          f"종목 자체 재료보다 지수 연계 거래(ETF·선물·프로그램)에 휘둘리는 흐름일 수 있어요. "
+                          f"지수가 진정되면 종목도 제자리 찾을 가능성.")
+    return {"rs": rs, "comment": comment, "strong": strong,
+            "indexLinked": index_linked, "indexNote": index_note}
 
 def check_52w_breakout(price, high52w, low52w):
     if high52w == 0: return {"nearHigh": False, "nearLow": False, "position": 50, "comment": ""}
@@ -1685,21 +1719,29 @@ def analyze_stock(stock, kospi, market=None):
         flow_read = "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응."
 
     # ── 차익실현성 급락 감지 ──
-    # 펀더멘털·추세 멀쩡한데 단기 급락 → 패닉매도 아닌 차익실현 가능성, 반등 주목
+    # 펀더멘털·추세 멀쩡한데 단기 급락 → 패닉매도 아닌 차익실현 가능성
+    # 단, 누가 받는지가 핵심: 기관이 받으면 차익실현 / 개인만 받고 외국인·기관 동반이탈이면 진짜하락 경고
     profit_taking = ""
     today_pct = round((price - prev) / prev * 100, 2) if prev else 0
     if today_pct <= -3:  # 당일 -3% 이상 급락
         fund_ok = fundamentals and "건전" in fundamentals.get("grade", "")
         trend_ok = (ichimoku and ichimoku.get("signal") == "매수") or \
                    (adx and adx.get("adx", 0) >= 25)
-        # 수급 분화: 외국인 팔지만 기관 or 개인이 받음
-        inst_buy = investor and (investor.get("institution", 0) or 0) > 0
-        indiv_buy = investor and (investor.get("individual", 0) or 0) > 0
-        absorbing = inst_buy or indiv_buy
-        if fund_ok and trend_ok and absorbing:
-            who = "기관" if inst_buy else "개인"
+        f_val = (investor.get("foreign", 0) or 0) if investor else 0
+        i_val = (investor.get("institution", 0) or 0) if investor else 0
+        p_val = (investor.get("individual", 0) or 0) if investor else 0
+        inst_buy = i_val > 0
+        smart_dumping = f_val < 0 and i_val < 0   # 외국인+기관 동반 이탈
+        indiv_only = p_val > 0 and smart_dumping  # 개인만 받음
+        if indiv_only:
+            # 개인만 받고 스마트머니 동반이탈 = 진짜 하락 위험. 차익실현으로 보면 안 됨
+            profit_taking = (f"⚠️ {today_pct}% 급락 — 외국인·기관 동반 대량매도, 개인만 받는 중. "
+                             f"실적은 받쳐줘도 스마트머니 이탈은 경계 신호예요. "
+                             f"섣부른 저가매수보다 외국인 수급 돌아오는지 확인 후 대응.")
+        elif fund_ok and trend_ok and inst_buy:
+            # 기관이 받으면 차익실현 가능성
             profit_taking = (f"💡 차익실현성 급락 가능성 — 실적 건전 + 추세 유지 중인데 "
-                             f"{today_pct}% 급락, {who}이 받는 중. 펀더멘털 훼손보다 차익실현 매물일 수 있어요. "
+                             f"{today_pct}% 급락, 기관이 받는 중. 펀더멘털 훼손보다 차익실현 매물일 수 있어요. "
                              f"패닉 매도보다 과매도 반등 주목 (단, 추세 꺾이면 손절).")
         elif fund_ok and trend_ok:
             profit_taking = (f"💡 {today_pct}% 급락이나 실적·추세는 유지 중 — 차익실현 매물일 수 있어요. "
