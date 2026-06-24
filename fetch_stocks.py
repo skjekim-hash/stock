@@ -480,9 +480,9 @@ def fetch_market_signal():
             parts.append(f"{out[k]['name']} {'+' if out[k]['pct']>=0 else ''}{out[k]['pct']}%")
     print(f"  🌐 시장 분위기: {label} (score {round(score,1)}) — {' / '.join(parts)}", file=sys.stderr)
     # ── 지수 연계 거래 변동성 경고 (선물옵션 만기·정기변경 달력 기반) ──
-    _today = datetime.date.today()
+    _today = datetime.now()
     _y, _m, _d = _today.year, _today.month, _today.day
-    _first = datetime.date(_y, _m, 1)
+    _first = datetime(_y, _m, 1)
     _first_thu = 1 + (3 - _first.weekday()) % 7   # 첫 목요일
     _second_thu = _first_thu + 7                   # 둘째 목요일 (만기일)
     _is_quad = _m in (3, 6, 9, 12)                 # 분기월 = 동시만기
