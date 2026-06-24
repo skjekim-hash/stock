@@ -2632,6 +2632,8 @@ function scanPrepSignals(stocks, journal){
     h.avgEntry = h.shares>0 ? h.totalCost/h.shares : 0;
   });
   (stocks||[]).forEach(s=>{
+    const _meta = (typeof STOCKS!=="undefined") ? STOCKS.find(x=>x.code===s.code) : null;
+    const sName = (_meta && _meta.name) || s.name || s.code;
     const isHeld = heldCodes[s.code];
     // ── 매도 준비 (보유 종목) — 목표 5% 보유 계획 기반 ──
     if(isHeld){
@@ -2705,7 +2707,7 @@ function scanPrepSignals(stocks, journal){
         reasons=[trendBreak[0], "실적·추세 같이 확인"];
       }
       if(mode){
-        prep.sell.push({ code:s.code, name:s.name, price:s.price,
+        prep.sell.push({ code:s.code, name:sName, price:s.price,
           mode, label, reasons:reasons.slice(0,2), color,
           urgent:(mode==="full") });
       }
@@ -2715,11 +2717,11 @@ function scanPrepSignals(stocks, journal){
       const r = (()=>{ try{ return buyRange(s); }catch(_){ return null; } })();
       if(r){
         if(r.zone==="in"){
-          prep.buy.push({ code:s.code, name:s.name, price:s.price,
+          prep.buy.push({ code:s.code, name:sName, price:s.price,
             note:`매수 가격대 안 (₩${Math.round(r.A).toLocaleString()}~₩${Math.round(r.B).toLocaleString()})`,
             urgent:true });
         } else if(r.zone==="below" && r.belowMode==="buy"){
-          prep.buy.push({ code:s.code, name:s.name, price:s.price,
+          prep.buy.push({ code:s.code, name:sName, price:s.price,
             note:`지지선 아래 강추세 눌림 — 더 싼 자리`, urgent:false });
         }
       }
@@ -2728,7 +2730,7 @@ function scanPrepSignals(stocks, journal){
     else if(s.score!==undefined && s.score>-3){
       const r = (()=>{ try{ return buyRange(s); }catch(_){ return null; } })();
       if(r && r.zone==="in"){
-        prep.watch.push({ code:s.code, name:s.name, price:s.price,
+        prep.watch.push({ code:s.code, name:sName, price:s.price,
           note:"지지 구간 도달, 관찰" });
       }
     }
