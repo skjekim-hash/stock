@@ -680,7 +680,24 @@ function renderMarketBanner(m){
         +"</div>";
     }
   }
-  return nightHeader+"<div class='market-banner' style='"+boxStyle+(ki.nxt?";border-color:#6040a0":"")+"'>"
+  var crashBox="";
+  if(m.crashRisk && m.crashRisk.score>=2){
+    var cr=m.crashRisk;
+    var crIcon=cr.level==="위험"?"🚨":cr.level==="경계"?"⚠️":"🟡";
+    var crBg=cr.score>=6?"linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.06))"
+             :cr.score>=4?"linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05))"
+             :"rgba(245,158,11,.08)";
+    crashBox="<div style='background:"+crBg+";border:1.5px solid "+cr.color+"66;border-radius:12px;padding:12px 14px;margin-bottom:10px"+(cr.score>=6?";box-shadow:0 0 0 1px "+cr.color+"44":"")+"'>"
+      +"<div style='display:flex;align-items:center;gap:8px;margin-bottom:6px'>"
+        +"<span style='font-size:18px'>"+crIcon+"</span>"
+        +"<span style='font-size:15px;font-weight:800;color:"+cr.color+"'>급락 위험 — "+cr.level+"</span>"
+        +"<span style='font-size:11px;color:#94a3b8;margin-left:auto'>위험점수 "+cr.score+"</span>"
+      +"</div>"
+      +(cr.reasons&&cr.reasons.length?"<div style='font-size:11px;color:#cbd5e1;line-height:1.6;margin-bottom:6px'>"+cr.reasons.join(" · ")+"</div>":"")
+      +(cr.advice?"<div style='font-size:12px;color:"+cr.color+";line-height:1.6;font-weight:600'>"+cr.advice+"</div>":"")
+    +"</div>";
+  }
+  return crashBox+nightHeader+"<div class='market-banner' style='"+boxStyle+(ki.nxt?";border-color:#6040a0":"")+"'>"
     +"<div class='mb-top'>"
     +"<span class='mb-label' style='color:"+c+";font-size:13px'>"+icon+" 미국 선행 "+sm.label+"</span>"
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
@@ -1496,7 +1513,6 @@ async function loadData(){
     window.__market = data.market;
     document.getElementById("results").innerHTML=
       renderMarketBanner(data.market)+
-      renderPrepSignals(data.stocks, loadJournal())+
       renderSummaryTable(data.stocks)+
       data.stocks.map((s,i)=>`<div class="card-refresh" style="animation-delay:${i*0.05}s">`+renderCard(s,i)+`</div>`).join("");
     document.getElementById("results").style.display="";
@@ -2617,164 +2633,6 @@ function buyRange(s){
 }
 
 // 매수 범위 시각화 HTML (시뮬·상세카드 공통)
-// ── 준비 신호 스캔 — "지금 살펴볼 때" 판정 (행동지시 아닌 점검유도) ──
-function scanPrepSignals(stocks, journal){
-  const prep = { buy: [], sell: [], watch: [] };
-  const heldCodes = {};
-  (journal||[]).filter(e=>e.status==="보유").forEach(e=>{
-    if(!heldCodes[e.code]) heldCodes[e.code]={shares:0, entries:[], totalCost:0};
-    heldCodes[e.code].shares += (e.shares||0);
-    heldCodes[e.code].totalCost += (e.entryPrice||0)*(e.shares||0);
-    heldCodes[e.code].entries.push(e);
-  });
-  // 평균 진입가 계산
-  Object.values(heldCodes).forEach(h=>{
-    h.avgEntry = h.shares>0 ? h.totalCost/h.shares : 0;
-  });
-  (stocks||[]).forEach(s=>{
-    const _meta = (typeof STOCKS!=="undefined") ? STOCKS.find(x=>x.code===s.code) : null;
-    const sName = (_meta && _meta.name) || s.name || s.code;
-    const isHeld = heldCodes[s.code];
-    // ── 매도 준비 (보유 종목) — 목표 5% 보유 계획 기반 ──
-    if(isHeld){
-      const avgEntry = isHeld.avgEntry || 0;
-      const retPct = avgEntry>0 ? (s.price-avgEntry)/avgEntry*100 : null;
-      const adx = s.adx?.adx||0;
-      const ichiUp = s.ichimoku?.signal==="매수";
-      const pos = s.breakout?.position||50;
-      const trendAlive = ichiUp && adx>=20 && pos>=60;
-      // 실적 건전 여부 (펀더멘털이 받쳐주면 보유 계획 유효)
-      const fundSound = s.fundamentals && /건전/.test(s.fundamentals.grade||"");
-      // 추세 꺾임 신호
-      const trendBreak = [];
-      if(s.ichimoku?.signal==="매도") trendBreak.push("일목 매도 전환");
-      if(s.divergence?.bearish) trendBreak.push("약세 다이버전스");
-      if(s.psar?.nearFlip && s.psar?.trend==="상승") trendBreak.push("PSAR 전환 임박");
-      // 보유일 (30일 손절 기한용)
-      let maxHeldDays = 0;
-      (isHeld.entries||[]).forEach(e=>{
-        if(e.enteredTs){ const dd=Math.floor((Date.now()-e.enteredTs)/86400000); if(dd>maxHeldDays) maxHeldDays=dd; }
-      });
-
-      const TARGET = 5.0;  // 목표 수익률
-      const targetReached = retPct!==null && retPct>=TARGET;
-      // 본전 탈출 기회 (손실에서 회복해 0.05~1% 들어옴 = 낮춘 목표)
-      const breakevenEscape = retPct!==null && retPct>=0.05 && retPct<=1.0;
-      let mode=null, label="", reasons=[], color="var(--green)";
-
-      if(targetReached && trendAlive){
-        mode="partial"; color="var(--gold)";
-        label=`일부 매도 검토 (+${retPct.toFixed(1)}%)`;
-        reasons=["목표 +5% 도달 + 추세 살아있음", "일부 익절 후 나머지는 추세 동행"];
-      } else if(targetReached){
-        mode="partial"; color="var(--gold)";
-        label=`매도 검토 (+${retPct.toFixed(1)}%)`;
-        reasons = trendBreak.length>0
-          ? [`목표 +5% 도달 + ${trendBreak[0]}`, "이익 확정하고 나올 자리"]
-          : ["목표 +5% 도달", "이익 챙길지 검토"];
-        if(trendBreak.length>0){ mode="full"; color="var(--red)"; }
-      } else if(maxHeldDays>30){
-        // 30일 초과 → 기한 룰 손절 검토
-        mode="full"; color="var(--red)";
-        label=`기한 초과 (${maxHeldDays}일, ${retPct!==null?(retPct>=0?"+":"")+retPct.toFixed(1)+"%":""})`;
-        reasons=["30일 손절 기한 초과", "기한 룰대로 손절 검토"];
-      } else if(breakevenEscape){
-        // 본전 회복 → 탈출 기회 (낮춘 목표)
-        mode="partial"; color="var(--gold)";
-        label=`탈출 기회 (+${retPct.toFixed(2)}%)`;
-        reasons=["손실에서 본전 회복", "낮춘 목표 도달 — 정리하고 자금 회전 검토"];
-      } else if(maxHeldDays>=25){
-        // 25~30일 → 손절 기한 임박 카운트다운
-        mode="watch"; color="var(--gold)";
-        label=`보유 ${maxHeldDays}일 (${retPct!==null?(retPct>=0?"+":"")+retPct.toFixed(1)+"%":""})`;
-        reasons=[`30일 손절 기한 ${30-maxHeldDays}일 남음`, "기한 임박 — 회복 기회 주시"];
-      } else if(!fundSound && trendBreak.length>=2){
-        // 실적 약함 + 추세 붕괴 → 계획 재검토
-        mode="full"; color="var(--red)";
-        label = retPct!==null ? `계획 재검토 (${retPct>=0?"+":""}${retPct.toFixed(1)}%)` : "계획 재검토";
-        reasons=["실적 약함 + "+trendBreak[0], "보유 근거 약해짐 — 손절 검토"];
-      } else if(fundSound){
-        // 실적 건전 + 목표 미달 → 차분하게 "보유 중"
-        mode="hold"; color="var(--green)";
-        label = retPct!==null ? `목표까지 보유 중 (${retPct>=0?"+":""}${retPct.toFixed(1)}%)` : "보유 중";
-        reasons = trendBreak.length>0
-          ? [`실적은 건전, 단 ${trendBreak[0]} — 추세 점검`]
-          : ["실적 건전 + 추세 유지 — 계획대로 보유"];
-        if(trendBreak.length>=2){ color="var(--gold)"; reasons=[`${trendBreak[0]}·${trendBreak[1]} — 계획 유지할지 점검`]; }
-      } else if(trendBreak.length>=1 && retPct!==null && retPct< -5){
-        mode="watch"; color="var(--gold)";
-        label=`점검 (${retPct.toFixed(1)}%)`;
-        reasons=[trendBreak[0], "실적·추세 같이 확인"];
-      }
-      if(mode){
-        prep.sell.push({ code:s.code, name:sName, price:s.price,
-          mode, label, reasons:reasons.slice(0,2), color,
-          urgent:(mode==="full") });
-      }
-    }
-    // ── 매수 준비 (미보유 + 매수 우위) ──
-    else if(s.opinion==="매수" || (s.score!==undefined && s.score>=2) || s.contrarian){
-      const r = (()=>{ try{ return buyRange(s); }catch(_){ return null; } })();
-      if(r){
-        if(r.zone==="in"){
-          prep.buy.push({ code:s.code, name:sName, price:s.price,
-            note:`매수 가격대 안 (₩${Math.round(r.A).toLocaleString()}~₩${Math.round(r.B).toLocaleString()})`,
-            urgent:true });
-        } else if(r.zone==="below" && r.belowMode==="buy"){
-          prep.buy.push({ code:s.code, name:sName, price:s.price,
-            note:`지지선 아래 강추세 눌림 — 더 싼 자리`, urgent:false });
-        }
-      }
-    }
-    // ── 관찰 (지지선 근접) ──
-    else if(s.score!==undefined && s.score>-3){
-      const r = (()=>{ try{ return buyRange(s); }catch(_){ return null; } })();
-      if(r && r.zone==="in"){
-        prep.watch.push({ code:s.code, name:sName, price:s.price,
-          note:"지지 구간 도달, 관찰" });
-      }
-    }
-  });
-  return prep;
-}
-
-// 준비 신호 박스 렌더 (앱 최상단)
-function renderPrepSignals(stocks, journal){
-  const p = scanPrepSignals(stocks, journal);
-  const total = p.buy.length + p.sell.length;
-  if(total===0 && p.watch.length===0) return "";
-  const row = (item, color, icon)=>
-    `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:6px">
-      <span style="font-size:14px">${icon}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:var(--text)">${item.name}${item.label?` <span style="font-size:11px;color:${item.color||color};font-weight:600">· ${item.label}</span>`:""}</div>
-        <div style="font-size:11px;color:var(--text2)">${item.note||item.reasons?.join(" · ")||""}</div>
-      </div>
-      ${item.urgent?`<span style="font-size:9px;color:${item.color||color};border:1px solid ${item.color||color}55;border-radius:4px;padding:2px 6px">지금</span>`:""}
-    </div>`;
-  let html = `<div class="card-body" style="padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--gold)">
-    <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:4px">🔔 오늘의 준비 신호</div>
-    <div style="font-size:10.5px;color:var(--text2);margin-bottom:10px">아래 종목만 살펴보세요. "지금 사라/팔라"가 아니라 "차분히 점검할 때"예요.</div>`;
-  if(p.sell.length){
-    html += `<div style="font-size:11px;color:var(--gold);font-weight:700;margin:8px 0 4px">📊 보유 종목 점검</div>`;
-    p.sell.forEach(i=>{
-      const icon = i.mode==="hold"?"🟢":i.mode==="partial"?"🟡":i.mode==="watch"?"🟠":"🔴";
-      html += row(i, i.color||"var(--red)", icon);
-    });
-  }
-  if(p.buy.length){
-    html += `<div style="font-size:11px;color:var(--green);font-weight:700;margin:8px 0 4px">📥 매수 검토 (자리 도달)</div>`;
-    p.buy.forEach(i=> html += row(i, "var(--green)", "🟢"));
-  }
-  if(p.watch.length){
-    html += `<div style="font-size:11px;color:var(--blue);font-weight:700;margin:8px 0 4px">👀 관찰</div>`;
-    p.watch.forEach(i=> html += row(i, "var(--blue)", "🔵"));
-  }
-  html += `<div style="font-size:10px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border-sub)">💡 여기 없는 종목은 지금 볼 필요 없어요. 우연히 호가창 보지 말고, 이 신호 뜰 때만 점검하세요.</div>`;
-  html += `</div>`;
-  return html;
-}
-
 function renderBuyRange(s){
   const r = buyRange(s);
   if(!r) return "";
