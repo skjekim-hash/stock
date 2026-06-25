@@ -1510,6 +1510,7 @@ async function loadData(){
 
     hideAll();
     window.__stocks = data.stocks;
+    recordDailySignals(data.stocks);
     window.__market = data.market;
     document.getElementById("results").innerHTML=
       renderMarketBanner(data.market)+
@@ -1659,6 +1660,74 @@ function loadJournal(){
 function saveJournal(arr){
   try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(arr)); }
   catch(e){ alert("저장 실패: 저장 공간이 부족하거나 브라우저 설정을 확인하세요."); }
+}
+
+// ───────── 신호 정확도 추적 (자동) ─────────
+const SIGNAL_TRACK_KEY = "signal_track_v1";
+function loadSignalTrack(){
+  try { return JSON.parse(localStorage.getItem(SIGNAL_TRACK_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveSignalTrack(arr){
+  try { localStorage.setItem(SIGNAL_TRACK_KEY, JSON.stringify(arr)); }
+  catch(e){ /* 저장공간 부족 시 조용히 패스 */ }
+}
+// 매일 1회 현재 신호 스냅샷 저장 (종목별 점수·의견·종가·날짜)
+function recordDailySignals(stocks){
+  if(!stocks || !stocks.length) return;
+  var track = loadSignalTrack();
+  var today = new Date().toISOString().slice(0,10);  // YYYY-MM-DD
+  // 오늘 이미 기록했으면 스킵 (하루 1회)
+  if(track.some(function(t){ return t.date===today; })) return;
+  var snapshot = { date: today, ts: Date.now(), signals: {} };
+  stocks.forEach(function(s){
+    snapshot.signals[s.code] = {
+      score: s.score, opinion: s.opinion, price: s.price,
+      name: (typeof STOCKS!=="undefined" && STOCKS.find(function(x){return x.code===s.code;})||{}).name || s.code
+    };
+  });
+  track.push(snapshot);
+  // 최근 60일치만 보관
+  if(track.length>60) track = track.slice(-60);
+  saveSignalTrack(track);
+}
+// 과거 신호 vs 현재가 채점 (시차 LAG일 후 평가)
+function scoreSignalAccuracy(currentStocks){
+  var track = loadSignalTrack();
+  if(track.length<2) return null;
+  var LAG = 3;          // 3거래일(달력일) 후 평가
+  var HIT = 1.0;        // 맞음 판정 기준 ±1%
+  var curPrice = {};
+  (currentStocks||[]).forEach(function(s){ curPrice[s.code]=s.price; });
+  var today = new Date();
+  var result = {
+    sell:{hit:0,miss:0,total:0}, buy:{hit:0,miss:0,total:0},
+    examples:[]
+  };
+  track.forEach(function(snap){
+    var snapDate = new Date(snap.date);
+    var daysSince = Math.floor((today - snapDate)/86400000);
+    if(daysSince < LAG) return;  // 아직 평가 시점 안 됨
+    Object.keys(snap.signals).forEach(function(code){
+      var sig = snap.signals[code];
+      var now = curPrice[code];
+      if(!now || !sig.price) return;
+      var chg = (now - sig.price)/sig.price*100;
+      // 매도 신호: 이후 떨어지면 적중 / 오르면 빗나감
+      if(sig.opinion==="매도" || sig.score<=-5){
+        result.sell.total++;
+        if(chg <= HIT) result.sell.hit++; else result.sell.miss++;
+        if(chg > 3) result.examples.push({type:"매도빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
+      }
+      // 매수 신호: 이후 오르면 적중 / 떨어지면 빗나감
+      else if(sig.opinion==="매수" || sig.score>=6){
+        result.buy.total++;
+        if(chg >= -HIT) result.buy.hit++; else result.buy.miss++;
+        if(chg < -3) result.examples.push({type:"매수빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
+      }
+    });
+  });
+  return result;
 }
 
 // 진입 기록 (카드 버튼에서 호출)
@@ -1885,6 +1954,54 @@ function getExitAlerts(arr, stocksData){
     if(reasons.length) alerts.push({name:e.name, days:Math.round(days), reasons});
   });
   return alerts;
+}
+
+// 신호 정확도 카드 (자동 추적 결과)
+function renderSignalAccuracy(){
+  var track = loadSignalTrack();
+  var r = scoreSignalAccuracy(window.__stocks);
+  var days = track.length;
+  // 데이터 부족 시 안내
+  if(!r || (r.sell.total===0 && r.buy.total===0)){
+    return `<div class="card-body" style="padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--blue)">
+      <div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px">🎯 신호 정확도 추적</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">매일 신호를 자동 기록 중이에요. 현재 <b>${days}일치</b> 쌓였어요.<br>3일 시차를 두고 채점하니, 의미 있는 결과는 <b>1~2주 뒤</b>부터 나와요. 그동안 평소대로 운영하세요.</div>
+    </div>`;
+  }
+  var sellRate = r.sell.total ? Math.round(r.sell.hit/r.sell.total*100) : null;
+  var buyRate = r.buy.total ? Math.round(r.buy.hit/r.buy.total*100) : null;
+  var html = `<div class="card-body" style="padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--blue)">
+    <div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px">🎯 신호 정확도 추적</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:10px">3일 후 종가로 자동 채점 · ${days}일치 기록</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="flex:1;text-align:center;background:rgba(239,68,68,0.08);border-radius:8px;padding:8px 4px">
+        <div style="font-size:9.5px;color:var(--text2)">매도 신호 적중</div>
+        <div style="font-size:17px;font-weight:800;color:var(--red)">${sellRate!==null?sellRate+"%":"—"}</div>
+        <div style="font-size:9px;color:var(--text2)">${r.sell.total}건 중 ${r.sell.hit}건</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(16,185,129,0.08);border-radius:8px;padding:8px 4px">
+        <div style="font-size:9.5px;color:var(--text2)">매수 신호 적중</div>
+        <div style="font-size:17px;font-weight:800;color:var(--green)">${buyRate!==null?buyRate+"%":"—"}</div>
+        <div style="font-size:9px;color:var(--text2)">${r.buy.total}건 중 ${r.buy.hit}건</div>
+      </div>
+    </div>`;
+  // 빗나간 사례 (사용자가 지적한 "매도인데 오름" 같은 것)
+  if(r.examples.length){
+    var ex = r.examples.slice(-3).reverse();
+    html += `<div style="font-size:10px;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border-sub)">`;
+    ex.forEach(function(e){
+      html += `<div style="margin-bottom:2px">${e.type==="매도빗나감"?"🔴":"🟢"} ${e.name} — ${e.date} ${e.type} (${e.chg>0?"+":""}${e.chg}%)</div>`;
+    });
+    html += `</div>`;
+  }
+  // 해석 안내
+  if(sellRate!==null && sellRate<50 && r.sell.total>=10){
+    html += `<div style="font-size:10.5px;color:var(--gold);line-height:1.6;margin-top:8px">💡 매도 신호 적중률이 낮아요. 강세를 매도로 잘못 읽는지 점검할 시점이에요. (가중치 검토 후보)</div>`;
+  } else if(r.sell.total<10 && r.buy.total<10){
+    html += `<div style="font-size:10px;color:var(--text3);margin-top:8px">아직 표본이 적어요. 더 쌓이면 정확도가 분명해져요.</div>`;
+  }
+  html += `</div>`;
+  return html;
 }
 
 function renderExitAlerts(arr, stocksData){
@@ -2182,7 +2299,7 @@ function renderJournal(){
       <div style="display:none">${closed2.map(makeRow).join("")}</div>
     </div>` : "";
 
-  box.innerHTML = renderExitAlerts(arr, window.__stocks) + renderHabitCard(arr) + renderPortfolio(arr) + statsHtml + activeRows + closedRows;
+  box.innerHTML = renderExitAlerts(arr, window.__stocks) + renderSignalAccuracy() + renderHabitCard(arr) + renderPortfolio(arr) + statsHtml + activeRows + closedRows;
 }
 
 function closeTradePrompt(id){
