@@ -1451,7 +1451,7 @@ def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
         1 if divergence and divergence.get("bearish") else 0,
         1 if psar and psar.get("signal") == "매도" else 0,
     ])
-    if len(matched) >= 3 and bearish_count < 2:
+    if len(matched) >= 2 and bearish_count < 2:
         result["entry"] = True; result["signals"] = matched
         if psar and psar.get("psar"):
             result["stopLoss"] = psar["psar"]
