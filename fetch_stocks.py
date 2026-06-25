@@ -1875,6 +1875,29 @@ def main():
                 nxt = nxt_prices.get(stock["code"])
                 if nxt and nxt.get("status") == "OPEN":
                     result["nxt"] = nxt
+                    # ── NXT 보정 매수 검토 의견 (조건 빡빡하게) ──
+                    # 정규장 매도/중립인데 NXT에서 버티고 + 해외 우호 + 지지 근처면 "검토 가능"
+                    nxt_chg = nxt.get("nxtChgPct", 0)
+                    op = result.get("opinion", "")
+                    ndq = market.get("nasdaq", {}).get("pct", 0)
+                    pos = (result.get("breakout") or {}).get("position", 50)
+                    cond_regular = op in ("매도", "중립")          # 정규장이 적극 매수 아님
+                    cond_nxt_hold = nxt_chg >= -0.2                  # NXT에서 안 빠짐(버팀/상승)
+                    cond_overseas = ndq >= 1.0                       # 해외 선물 뚜렷이 우호
+                    cond_support = pos <= 75                         # 신고가 추격 아님(지지 여지)
+                    if cond_regular and cond_nxt_hold and cond_overseas and cond_support:
+                        result["nxtSignal"] = {
+                            "review": True,
+                            "text": f"정규장은 {op} 신호였으나, NXT에서 버티는 중({'+' if nxt_chg>=0 else ''}{nxt_chg}%) + 나스닥 선물 {'+' if ndq>=0 else ''}{round(ndq,1)}%. 다음 날 상승 이어갈 여지.",
+                            "checks": [
+                                "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
+                                "지지선 아래로 빠질 때 추매할 여력이 있는지",
+                                "신고가권 추격은 아닌지",
+                            ],
+                            "note": "소량 분할로만. NXT는 수급이 적어 다음 날 빗나갈 수 있어요.",
+                        }
+                    else:
+                        result["nxtSignal"] = {"review": False}
                 stocks_data.append(result)
             else: print(f"  ⚠ {stock['name']} 데이터 없음", file=sys.stderr)
         except Exception as e:
