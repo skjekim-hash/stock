@@ -983,24 +983,12 @@ function renderCard(s,idx){
         var distS1=Math.round((np-s1)/np*1000)/10;
         if(distS1<=2&&distS1>=0) reach="<span style='color:#ffc940;font-weight:700'>🟡 S1 근접 (+"+distS1+"%)</span>";
       }
-      var reviewBox="";
-      if(s.nxtSignal && s.nxtSignal.review){
-        var ns=s.nxtSignal;
-        reviewBox=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid #6040a088">
-          <div style="font-size:11px;color:#00e5a0;font-weight:800;margin-bottom:4px">🌙 NXT 보정: 소량 매수 검토 가능</div>
-          <div style="font-size:10.5px;color:#c0c8e0;line-height:1.5;margin-bottom:6px">${ns.text}</div>
-          <div style="font-size:10px;color:#ffc940;font-weight:700;margin-bottom:3px">진입 전 확인:</div>
-          ${ns.checks.map(function(c){return '<div style="font-size:10px;color:#9ab;line-height:1.6">• '+c+'</div>';}).join("")}
-          <div style="font-size:9.5px;color:#8090b0;margin-top:5px;font-style:italic">${ns.note}</div>
-        </div>`;
-      }
       return `<div style="margin-top:8px;padding:10px 12px;border-radius:11px;background:linear-gradient(135deg,#1a1040,#0a1430);border:1px solid #6040a0">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:11px;color:#a060ff;font-weight:700">🌌 NXT 실시간</span>
           <span style="font-size:15px;font-weight:800;color:${nc};font-family:'JetBrains Mono',monospace">${W(np)} <span style="font-size:11px">(${chg>0?"+":""}${chg}%)</span></span>
         </div>
         <div style="font-size:10.5px;color:#8090b0;margin-top:4px">정규장 종가 ${W(s.nxt.closePrice)} 대비 · NXT 거래중${reach?" · "+reach:""}</div>
-        ${reviewBox}
       </div>`;
     })():""}
     ${s.high52w>0?`<div class="grid2">
