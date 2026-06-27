@@ -753,7 +753,7 @@ function renderSummaryTable(stocks){
     var ohIcon=ohLevel==="경고"?"🚫":ohLevel==="주의"?"⚠️":"";
     var ohColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ff8c40":"";
     var ceIcon=ce&&ohLevel==="none"?"★":"";
-    var opLabel=op;
+    var opLabel=op==="중립"?"관망":op;
     var opColor=oc;
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
