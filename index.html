@@ -869,7 +869,7 @@ function renderCard(s,idx){
   var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
   var ce=s.cautiousEntry&&s.cautiousEntry.entry;
   var ohLevel=s.overheat?s.overheat.level:"none";
-  var opLabel={매수:"매수",중립:"중립",매도:"매도"}[op]||op;
+  var opLabel={매수:"매수",중립:"관망",매도:"매도"}[op]||op;
   var kstInfo=kst();
   var rs=s.relativeStrength;
   var rsColor=rs?.strong?"#00e5a0":"#ff4060";
@@ -1059,7 +1059,7 @@ function renderCard(s,idx){
     <div class="score-wrap">
       <div class="score-row">
         <span class="score-lbl">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
-        <span class="score-val" style="color:${sc}">${s.score>=6?"강한 매수":s.score>=4?"매수":s.score<=-5?"강한 매도":s.score<=-3?"매도":"중립"}</span>
+        <span class="score-val" style="color:${sc}">${s.score>=6?"강한 매수":s.score>=4?"매수":s.score<=-5?"강한 매도":s.score<=-3?"매도":"관망"}</span>
       </div>
       <div class="score-track"><div class="score-fill" style="width:${scoreNorm}%;background:${sc}"></div></div>
       <div class="score-ticks"><span>매도</span><span>중립</span><span>매수</span></div>
