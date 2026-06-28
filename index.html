@@ -753,7 +753,7 @@ function renderSummaryTable(stocks){
     var ohIcon=ohLevel==="경고"?"🚫":ohLevel==="주의"?"⚠️":"";
     var ohColor=ohLevel==="경고"?"#ff4060":ohLevel==="주의"?"#ff8c40":"";
     var ceIcon=ce&&ohLevel==="none"?"★":"";
-    var opLabel=op;
+    var opLabel=op==="중립"?"관망":op;
     var opColor=oc;
     var up=(+s.change||0)>=0;
     var cc=up?"#00e5a0":"#ff4060";
@@ -849,7 +849,7 @@ function renderSummaryTable(stocks){
     +"</table></div>"
     +"<div class='sum-legend'>"
     +  "<span style='color:#00e5a0'>▲ 매수</span>"
-    +  "<span style='color:#ffc940'>◆ 중립</span>"
+    +  "<span style='color:#ffc940'>◆ 관망</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
     +  "<span style='color:#00d4ff'>★ 소량 진입 검토</span>"
     +  "<span style='color:#ff8c40'>⚠️ 과열 주의</span>"
@@ -869,7 +869,7 @@ function renderCard(s,idx){
   var cp=s.changePct?(up?"+":"")+s.changePct+"%":"—";
   var ce=s.cautiousEntry&&s.cautiousEntry.entry;
   var ohLevel=s.overheat?s.overheat.level:"none";
-  var opLabel={매수:"매수",중립:"중립",매도:"매도"}[op]||op;
+  var opLabel={매수:"매수",중립:"관망",매도:"매도"}[op]||op;
   var kstInfo=kst();
   var rs=s.relativeStrength;
   var rsColor=rs?.strong?"#00e5a0":"#ff4060";
@@ -1044,7 +1044,7 @@ function renderCard(s,idx){
     </div>
     <div class="op-box" style="background:${oc}10;border:1px solid ${oc}25">
       <span class="op-ico" style="color:${oc}">${oi}</span>
-      <span class="op-txt" style="color:${oc}">${op}</span>
+      <span class="op-txt" style="color:${oc}">${opLabel}</span>
     </div>
     ${s.chaseWarning?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ff406018;border:1.5px solid #ff406055;font-size:12px;color:#ff6680;font-weight:700;line-height:1.5">${s.chaseWarning}<div style="font-size:11px;color:#a8b4c8;font-weight:400;margin-top:4px">높은 금액에서 물리지 않는 게 우선. 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요.</div></div>`:""}
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
@@ -1059,10 +1059,10 @@ function renderCard(s,idx){
     <div class="score-wrap">
       <div class="score-row">
         <span class="score-lbl">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
-        <span class="score-val" style="color:${sc}">${s.score>=6?"강한 매수":s.score>=4?"매수":s.score<=-5?"강한 매도":s.score<=-3?"매도":"중립"}</span>
+        <span class="score-val" style="color:${sc}">${s.score>=6?"강한 매수":s.score>=4?"매수":s.score<=-5?"강한 매도":s.score<=-3?"매도":"관망"}</span>
       </div>
       <div class="score-track"><div class="score-fill" style="width:${scoreNorm}%;background:${sc}"></div></div>
-      <div class="score-ticks"><span>매도</span><span>중립</span><span>매수</span></div>
+      <div class="score-ticks"><span>매도</span><span>관망</span><span>매수</span></div>
     </div>
     <div class="tf-box">
       <div class="tf-row">
