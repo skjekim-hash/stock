@@ -14,6 +14,7 @@
 <title>주식 AI 분석</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -45,7 +46,7 @@
 }
 body{
   background:var(--bg);
-  font-family:'Noto Sans KR',sans-serif;
+  font-family:'Pretendard','Noto Sans KR',sans-serif;
   color:var(--text);
   max-width:480px;
   margin:0 auto;
@@ -61,8 +62,19 @@ body::before{
     #0a0a0c;
   pointer-events:none;z-index:-1;
 }
-/* 세리프 숫자체 — 가격·핵심 수치용 */
-.num{font-family:'JetBrains Mono',monospace}
+/* 🌌 떠다니는 오로라 (홀로그램 분위기) */
+body::after{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:-1;
+  background:
+    radial-gradient(280px circle at 15% 12%, rgba(0,240,255,0.10), transparent 60%),
+    radial-gradient(300px circle at 85% 88%, rgba(168,144,208,0.12), transparent 60%);
+  animation:auroraFloat 16s ease-in-out infinite alternate;
+}
+@keyframes auroraFloat{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(20px,30px) scale(1.1)}
+}
 @keyframes glassDrift{0%{opacity:1}100%{opacity:1}}
 
 /* ── ANIMATIONS ── */
@@ -85,7 +97,7 @@ body::before{
 }
 .hdr-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .hdr-brand{display:flex;flex-direction:column;gap:1px}
-.hdr-label{font-size:11.5px;letter-spacing:3px;color:var(--gold);font-family:'JetBrains Mono',monospace;opacity:.9}
+.hdr-label{font-size:11.5px;letter-spacing:3px;color:var(--gold);font-family:'JetBrains Mono',monospace;opacity:.9;text-shadow:0 0 10px rgba(212,175,106,0.45)}
 .hdr-title{font-size:21px;font-weight:900;letter-spacing:-.5px}
 
 .btn-main{
@@ -227,7 +239,8 @@ body::before{
 .sum-legend span{font-size:11.5px;color:var(--text3)}
 
 /* ── CARD ── */
-.card{margin-bottom:18px;animation:fadeUp .4s ease;border-radius:14px;overflow:visible;scroll-margin-top:85px}
+.card{margin-bottom:18px;animation:fadeUp .4s ease;border-radius:14px;overflow:visible;scroll-margin-top:85px;transition:transform .35s cubic-bezier(0.25,0.8,0.25,1)}
+.card:hover{transform:translateY(-3px)}
 .card-hdr{
   background:var(--glass-bg);
   border:1px solid var(--border);
@@ -315,7 +328,9 @@ body::before{
 .bar52-lbl{font-size:11.5px;color:var(--text2)}
 .bar52-val{font-size:11px;font-weight:700}
 .bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px;transition:width 1.2s}
+.bar-fill{height:100%;border-radius:3px;transition:width 1.2s;position:relative;overflow:hidden}
+.bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);animation:barSweep 2.4s infinite}
+@keyframes barSweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .bar52-note{font-size:11.5px;color:var(--text2);margin-top:4px}
 
 .src-row{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px;margin-top:6px;font-family:'JetBrains Mono',monospace}
