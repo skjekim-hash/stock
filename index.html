@@ -498,7 +498,7 @@ body::after{
 <div class="hdr">
   <div class="hdr-row1">
     <div class="hdr-brand">
-      <div class="hdr-label">KRX · AI ANALYSIS · NEON8 06-29</div>
+      <div class="hdr-label">KRX · AI ANALYSIS · NEON7 06-29</div>
       <div class="hdr-title">국내 주식 분석</div>
     </div>
     <div class="hdr-btns">
@@ -1675,20 +1675,6 @@ async function loadData(){
 }
 
 setInterval(()=>{ if(document.getElementById("results").style.display!=="none") loadData(); }, 90*1000);
-// 화면이 다시 보이면 즉시 갱신 (백그라운드·절전으로 타이머 멈춘 사이 데이터가 묵는 것 방지)
-// 단, 방금 갱신했으면 중복 호출 안 함 (1분 가드)
-let _lastLoadTs = 0;
-(function(){
-  const origLoad = loadData;
-  loadData = function(){ _lastLoadTs = Date.now(); return origLoad.apply(this, arguments); };
-})();
-document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState==="visible"
-     && document.getElementById("results").style.display!=="none"
-     && Date.now()-_lastLoadTs > 60*1000){
-    loadData();
-  }
-});
 document.getElementById("mktBadge").textContent=kst().status;
 // 적립금 배지 초기화 - 항상 매매기록 기준으로 재계산 (저장값이 매매기록과 어긋나는 버그 방지)
 setTimeout(function(){
