@@ -498,7 +498,7 @@ body::after{
 <div class="hdr">
   <div class="hdr-row1">
     <div class="hdr-brand">
-      <div class="hdr-label">KRX · AI ANALYSIS · NEON6 06-29</div>
+      <div class="hdr-label">KRX · AI ANALYSIS · NEON7 06-29</div>
       <div class="hdr-title">국내 주식 분석</div>
     </div>
     <div class="hdr-btns">
@@ -601,6 +601,63 @@ const P=n=>n==null?"—":`${+n>0?"+":""}${(+n).toFixed(2)}%`;
 const F1=n=>n==null?"—":(+n).toFixed(1);
 const F2=n=>n==null?"—":(+n).toFixed(2);
 const F3=n=>n==null?"—":(+n).toFixed(3);
+
+// ── 데이터 신선도 판정 ── (옛 데이터로 매매 판단하는 사고 방지)
+function checkDataFreshness(updatedAt){
+  if(!updatedAt) return null;
+  // "2026-06-29 14:30:00 KST" → Date
+  var m = String(updatedAt).match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
+  if(!m) return null;
+  // 저장값은 KST. 현재 KST와 비교 (기기 시간대 무관)
+  var dataKstMin = (+m[4])*60 + (+m[5]);
+  var dataDate = m[1]+"-"+m[2]+"-"+m[3];
+  var ki = kst();  // 현재 KST 정보
+  var nowParts = new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  // 경과 분 계산 (같은 날이면 분 차이, 다른 날이면 큰 값)
+  var ageMin;
+  if(nowParts === dataDate){
+    var nowMin = (function(){
+      var p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
+      var h=+p.find(x=>x.type==="hour").value; if(h===24)h=0;
+      return h*60 + (+p.find(x=>x.type==="minute").value);
+    })();
+    ageMin = nowMin - dataKstMin;
+  } else {
+    ageMin = 9999;  // 다른 날 = 확실히 오래됨
+  }
+  if(ageMin < 0) ageMin = 0;
+  // 판정: 장중(09:00~15:30)이면 30분, 그 외엔 더 여유. 단 하루 넘으면 무조건 경고
+  var threshold = ki.open ? 30 : 180;
+  var stale = ageMin >= threshold;
+  var severe = ageMin >= 1440;  // 하루 이상 = 심각
+  // 사람이 읽기 좋은 경과 표현
+  var ageText;
+  if(ageMin >= 1440) ageText = Math.floor(ageMin/1440)+"일 전";
+  else if(ageMin >= 60) ageText = Math.floor(ageMin/60)+"시간 "+(ageMin%60)+"분 전";
+  else ageText = ageMin+"분 전";
+  return { ageMin, ageText, stale, severe, isOpen: ki.open };
+}
+
+function renderFreshnessBanner(updatedAt){
+  var f = checkDataFreshness(updatedAt);
+  if(!f || !f.stale) return "";  // 신선하면 배너 없음
+  var c = f.severe ? "#ff4060" : "#ff8c40";
+  var bg = f.severe ? "rgba(255,64,96,0.12)" : "rgba(255,140,64,0.10)";
+  var icon = f.severe ? "🚨" : "⚠️";
+  var msg = f.severe
+    ? "데이터가 "+f.ageText+" 기준이에요. 자동 수집이 멈춘 것 같아요 — 지금 화면 가격으로 매매 판단하지 마세요."
+    : "데이터가 "+f.ageText+" 기준이에요"+(f.isOpen?" (장중인데 갱신이 지연됨)":"")+". 최신이 아닐 수 있으니 실제 호가를 확인하세요.";
+  return "<div style='background:"+bg+";border:1.5px solid "+c+"66;border-radius:12px;padding:12px 14px;margin-bottom:14px"+(f.severe?";box-shadow:0 0 0 1px "+c+"44":"")+"'>"
+    +"<div style='display:flex;align-items:center;gap:8px'>"
+      +"<span style='font-size:18px'>"+icon+"</span>"
+      +"<div style='flex:1'>"
+        +"<div style='font-size:13px;font-weight:800;color:"+c+";margin-bottom:2px'>데이터 신선도 경고</div>"
+        +"<div style='font-size:11.5px;color:#cbd5e1;line-height:1.5'>"+msg+"</div>"
+      +"</div>"
+    +"</div>"
+    +(f.severe?"<div style='font-size:10.5px;color:#94a3b8;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,0.08);line-height:1.5'>해결: 갱신 버튼(⚡)을 눌러보고, 그래도 안 되면 GitHub Actions에서 수동 실행하세요.</div>":"")
+  +"</div>";
+}
 
 function hideAll(){
   ["startScreen","loadingScreen","errBox","results","footer"]
@@ -1555,6 +1612,7 @@ async function loadData(){
     recordDailySignals(data.stocks);
     window.__market = data.market;
     document.getElementById("results").innerHTML=
+      renderFreshnessBanner(data.updatedAt)+
       renderMarketBanner(data.market)+
       renderPrepSignals(data.stocks, loadJournal())+
       renderSummaryTable(data.stocks)+
