@@ -65,8 +65,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   // HTML(index.html, './')은 네트워크 우선 — 코드 갱신 즉시 반영
+  // cache:'no-cache' = 브라우저 HTTP 캐시를 건너뛰고 서버에 재검증 (GitHub Pages의 10분 캐시 무시)
   if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(new Request(request, { cache: 'no-cache' })));
     return;
   }
 
