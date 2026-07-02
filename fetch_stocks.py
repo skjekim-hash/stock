@@ -35,6 +35,38 @@ STOCKS = [
 KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
 
+# ── ③ 종목별 매크로 감응도 ──────────────────────────────────────────────
+# 지표 등락률(%) × 계수 = 점수 기여 (합산 후 ±2로 캡)
+# 부호 규칙: fx·tnx·vix는 '오르면' 각 종목에 유리한지(+)/불리한지(-)를 계수 부호로 표현
+#   fx +  : 원화 약세 → 수출주(현대차·LG전자) 수혜
+#   tnx + : 금리 상승 → 은행(KB) 마진 개선 / 성장주(NAVER) 부담(-)
+MACRO_SENS = {
+    "000660": {"sox": 0.5, "tsmc": 0.3, "nasdaq": 0.2},    # SK하이닉스: 반도체 직결
+    "005930": {"sox": 0.4, "tsmc": 0.25, "nasdaq": 0.2},   # 삼성전자: 반도체 + 지수 대표
+    "009150": {"sox": 0.3, "nasdaq": 0.2},                 # 삼성전기: 반도체 부품
+    "066570": {"fx": 0.2, "nasdaq": 0.15},                 # LG전자: 수출가전 (원화약세 수혜)
+    "005380": {"fx": 0.3},                                 # 현대차: 원화약세 수혜 대표
+    "105560": {"tnx": 0.3, "vix": -0.1},                   # KB금융: 금리↑ 수혜, 공포↑ 부담
+    "017670": {"vix": 0.05},                               # SK텔레콤: 방어주 (감응 미미)
+    "035420": {"nasdaq": 0.4, "tnx": -0.3},                # NAVER: 성장주 (나스닥 동행·금리 역행)
+}
+MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC"}
+
+def calc_macro_adj(code, market):
+    """종목별 매크로 조정치와 근거 설명. 반환: (adj(-2~+2), parts[])"""
+    if not market: return 0.0, []
+    sens = MACRO_SENS.get(code, {})
+    adj, parts = 0.0, []
+    for key, coef in sens.items():
+        pct = (market.get(key) or {}).get("pct")
+        if pct is None: continue
+        contrib = pct * coef
+        if abs(contrib) < 0.15: continue  # 미미한 기여는 잡음으로 무시
+        adj += contrib
+        parts.append(f"{MACRO_LABEL.get(key,key)} {'+' if pct>=0 else ''}{pct}% → {'+' if contrib>=0 else ''}{contrib:.1f}")
+    adj = max(-2.0, min(2.0, adj))  # 개별 지표 합의를 압도하지 않게 캡
+    return round(adj, 1), parts
+
 
 def http_get(url, timeout=8, headers=None, retries=2):
     h = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
@@ -384,6 +416,12 @@ def fetch_market_signal():
         advice = "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요."
 
     out["summary"] = {"mood": mood, "label": label, "score": round(score, 1), "advice": advice}
+    # ② 오늘의 매수 문턱 (레짐 가변): master_signal과 동일 컷오프(±1.5)
+    _bt = 5 if score >= 1.5 else 7 if score <= -1.5 else 6
+    out["summary"]["buyThreshold"] = _bt
+    out["summary"]["thresholdNote"] = ("시장 우호 — 문턱 5로 완화 (반 박자 빠른 진입)" if _bt == 5 else
+                                        "시장 비우호 — 문턱 7로 강화 (더 보수적)" if _bt == 7 else
+                                        "기본 문턱 6")
 
     # 위안/원화 짝 읽기 (점수 미반영, 해석 가이드용)
     # 위안 약세 + 원화 약세 = 아시아 전반 자금이탈 / 원화만 약세 = 한국 고유 악재
@@ -1302,7 +1340,8 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   investor, short_ratio, news_list,
                   stoch_rsi=None, divergence=None,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
-                  boll_data=None, weekly_rsi=None, patterns=None, fx_price=0):
+                  boll_data=None, weekly_rsi=None, patterns=None, fx_price=0,
+                  market_score=None, macro_adj=0.0):
     score = 0
     # RSI
     if rsi: score += 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0
@@ -1426,23 +1465,33 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if _hold >= 50:   score -= 2   # 외국인 절반 이상 보유 → 환율위기에 크게 취약
         elif _hold >= 30: score -= 1   # 외국인 상당 보유 → 일부 취약
         # 30% 미만은 환율 영향 적어 차감 없음 (내수·개인 비중 높은 종목)
+    # ── ③ 종목별 매크로 조정 (SOX·나스닥·환율·금리 감응 차등, ±2 캡) ──
+    score += macro_adj
     score = round(score)
-    # ──────────────────────────────────────────────────
-    opinion = "매수" if score >= 6 else "매도" if score <= -5 else "중립"
-    # 중립의 결: 점수가 어느 쪽으로 기울었는지 (매수문턱 6 / 매도문턱 -5)
+    # ── ② 레짐 가변 매수 문턱 ──────────────────────────
+    # 확인형 지표들이 모두 동의해야 +6이라 타이밍이 늦음 → 시장이 우호적일 때만
+    # 문턱을 한 칸 낮춰 반 박자 빠르게, 비우호적일 땐 한 칸 높여 더 보수적으로.
+    SELL_TH = -5
+    buy_th, th_label = 6, "기본"
+    if market_score is not None:
+        if market_score >= 1.5:   buy_th, th_label = 5, "시장 우호 → 완화"
+        elif market_score <= -1.5: buy_th, th_label = 7, "시장 비우호 → 강화"
+    opinion = "매수" if score >= buy_th else "매도" if score <= SELL_TH else "중립"
+    # 중립의 결: 점수가 어느 쪽으로 기울었는지 (문턱은 레짐에 따라 가변)
     nuance = ""
     if opinion == "중립":
-        if   score >= 4:  nuance = "관찰 구간 (소량만)"
+        if   score >= buy_th - 2: nuance = "관찰 구간 (소량만)"
         elif score >= 1:  nuance = "관찰 — 신호 부족"
         elif score == 0:  nuance = "완전 중립 (관망)"
         elif score >= -2: nuance = "약한 매도 우위"
         else:             nuance = "매도 우위 (문턱 근접)"
-    return opinion, score, nuance
+    th_info = {"buy": buy_th, "sell": SELL_TH, "label": th_label}
+    return opinion, score, nuance, th_info
 
 def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
-                          psar, investor, cci, price, pivot):
+                          psar, investor, cci, price, pivot, buy_th=6):
     result = {"entry": False, "signals": [], "reason": "", "stopLoss": 0}
-    if opinion != "중립" or score < 2 or score > 5: return result
+    if opinion != "중립" or score < 2 or score > buy_th - 1: return result
     matched = []
     if ichimoku and ichimoku.get("signal") == "매수":
         matched.append("일목균형표 " + ("강세" if "강한" in ichimoku.get("comment","") else "매수"))
@@ -1468,7 +1517,7 @@ def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
             result["stopLoss"] = pivot["s1"]
         else:
             result["stopLoss"] = round(price * 0.95)
-        result["reason"] = f"중립이지만 매수 신호 {len(matched)}개 확인 — 소량 진입 검토 가능"
+        result["reason"] = f"중립이지만 선행 매수 신호 {len(matched)}개 확인 — 1/3 물량 선취 검토 (손절가 필수)"
     return result
 
 def assess_overheat_warning(rsi, stoch_rsi, price, high52w, fair_value, fg_score):
@@ -1622,13 +1671,18 @@ def analyze_stock(stock, kospi, market=None):
         if boll_pos is not None:
             boll_result["position"] = boll_pos
 
-    opinion, score, nuance = master_signal(
+    # ③ 종목별 매크로 감응 조정치
+    macro_adj, macro_parts = calc_macro_adj(code, market)
+    _mkt_score = (market.get("summary", {}) or {}).get("score") if market else None
+
+    opinion, score, nuance, th_info = master_signal(
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
         boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats,
-        fx_price=(market.get("fx", {}).get("price", 0) if market else 0)
+        fx_price=(market.get("fx", {}).get("price", 0) if market else 0),
+        market_score=_mkt_score, macro_adj=macro_adj
     )
 
     # ── 역발상 반등 감지 ──────────────────────────────
@@ -1729,7 +1783,22 @@ def analyze_stock(stock, kospi, market=None):
             else:
                 market_brake = "시장 비우호적 — 신중 진입 권장"
     cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
-                                     divergence, psar, investor, cci, price, pivot)
+                                     divergence, psar, investor, cci, price, pivot,
+                                     buy_th=th_info["buy"])
+    # ── ① 매수 2트랙 판정 ──────────────────────────────
+    # confirm(확인 매수): 합산 점수가 문턱 도달 — 추세 확인형, 계획 물량
+    # early(선취 매수): 중립이지만 선행 신호 결집 — 1/3 물량 소량 선취
+    if opinion == "매수":
+        buy_track = {"type": "confirm", "label": "확인 매수",
+                     "size": "계획 물량",
+                     "desc": f"합산 {score:+d}점 ≥ 문턱 {th_info['buy']} ({th_info['label']})"}
+    elif cautious.get("entry"):
+        buy_track = {"type": "early", "label": "선취 매수",
+                     "size": "1/3 물량",
+                     "desc": f"선행 신호 {len(cautious.get('signals', []))}개 결집 — 손절가 {cautious.get('stopLoss', 0):,}원 필수",
+                     "stopLoss": cautious.get("stopLoss", 0)}
+    else:
+        buy_track = {"type": "none"}
     overheat = assess_overheat_warning(rsi, stoch_rsi, price, high52w,
                                        fair.get("fair_value", 0), fg["score"])
 
@@ -1808,6 +1877,9 @@ def analyze_stock(stock, kospi, market=None):
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
         "nuance": nuance,
+        "buyTrack": buy_track,
+        "buyThreshold": th_info,
+        "macro": {"adj": macro_adj, "parts": macro_parts},
         "contrarian": contrarian,
         "profitTaking": profit_taking,
         "marginCallRisk": margin_call_risk,
