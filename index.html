@@ -501,7 +501,7 @@ body::after{
 <div class="hdr">
   <div class="hdr-row1">
     <div class="hdr-brand">
-      <div class="hdr-label">KRX · AI ANALYSIS · NEON9 07-02</div>
+      <div class="hdr-label">KRX · AI ANALYSIS · <span id="hdrVer">NEON9</span></div>
       <div class="hdr-title">국내 주식 분석</div>
     </div>
     <div class="hdr-btns">
@@ -585,10 +585,14 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-02-r4";
+const APP_VERSION = "v2026-07-02-r5";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
+  // 헤더 라벨에 리비전 표시 (v2026-07-02-r5 → NEON r5)
+  var hv=document.getElementById("hdrVer");
+  var m=APP_VERSION.match(/(r\d+)$/);
+  if(hv && m) hv.textContent="NEON "+m[1];
 });
 const STOCKS=[
   {code:"000660",name:"SK하이닉스", emoji:"🔵"},
