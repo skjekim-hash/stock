@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-03-r6";
+const APP_VERSION = "v2026-07-03-r7";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -714,6 +714,93 @@ function B(items,color){
   ).join("");
 }
 
+/* ── SVG 시각화 (스파크라인 · 게이지 · 레이더) ── */
+// 네온 스파크라인 — 최근 가격 흐름을 한 줄 곡선으로
+function svgSpark(data,w,h,color){
+  if(!data||data.length<2) return "";
+  var min=Math.min.apply(null,data), max=Math.max.apply(null,data);
+  var span=(max-min)||1;
+  var pts=data.map(function(v,i){
+    var x=(i/(data.length-1))*(w-6)+3;
+    var y=h-3-((v-min)/span)*(h-6);
+    return x.toFixed(1)+","+y.toFixed(1);
+  });
+  var last=pts[pts.length-1].split(",");
+  var c=color||((data[data.length-1]>=data[0])?"#00e5a0":"#ff4060");
+  return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>"
+    +"<polyline points='"+pts.join(" ")+"' fill='none' stroke='"+c+"' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round' style='filter:drop-shadow(0 0 3px "+c+"88)'/>"
+    +"<circle cx='"+last[0]+"' cy='"+last[1]+"' r='2.2' fill='"+c+"' style='filter:drop-shadow(0 0 4px "+c+");animation:pulse 2.4s infinite'/>"
+    +"</svg>";
+}
+// 반원 게이지 — 점수와 매수/매도 문턱을 아크 위에 표시
+function svgGauge(score,min,max,buyTh,sellTh,w){
+  var h=Math.round(w*0.62), cx=w/2, cy=h-10, r=w/2-12;
+  var clamp=function(v){return Math.max(min,Math.min(max,v));};
+  var ang=function(v){return 180-((clamp(v)-min)/(max-min))*180;};  // 값→각도 (180°=min, 0°=max)
+  var pt=function(a,rr){var rad=a*Math.PI/180;return [(cx+rr*Math.cos(rad)).toFixed(1),(cy-rr*Math.sin(rad)).toFixed(1)];};
+  var arc=function(a1,a2,col,sw,op){
+    var s=pt(a1,r), e=pt(a2,r);
+    return "<path d='M"+s[0]+" "+s[1]+" A"+r+" "+r+" 0 0 1 "+e[0]+" "+e[1]+"' fill='none' stroke='"+col+"' stroke-width='"+sw+"' stroke-linecap='round' opacity='"+op+"'/>";
+  };
+  // 구간: [min~매도문턱]=빨강, [매도~매수]=노랑, [매수~max]=초록
+  var g=arc(ang(min),ang(sellTh),"#ff4060",5,.75)
+       +arc(ang(sellTh),ang(buyTh),"#ffc940",5,.55)
+       +arc(ang(buyTh),ang(max),"#00e5a0",5,.75);
+  // 문턱 눈금 (매수 문턱은 오늘 레짐에 따라 움직임)
+  var tick=function(v,col){
+    var a=ang(v), p1=pt(a,r-5), p2=pt(a,r+6);
+    return "<line x1='"+p1[0]+"' y1='"+p1[1]+"' x2='"+p2[0]+"' y2='"+p2[1]+"' stroke='"+col+"' stroke-width='2' style='filter:drop-shadow(0 0 3px "+col+")'/>";
+  };
+  g+=tick(buyTh,"#00e5a0")+tick(sellTh,"#ff4060");
+  // 바늘
+  var sc=score>=buyTh?"#00e5a0":score<=sellTh?"#ff4060":"#ffc940";
+  var na=ang(score), np=pt(na,r-9);
+  g+="<line x1='"+cx+"' y1='"+cy+"' x2='"+np[0]+"' y2='"+np[1]+"' stroke='"+sc+"' stroke-width='2.4' stroke-linecap='round' style='filter:drop-shadow(0 0 4px "+sc+")'/>"
+    +"<circle cx='"+cx+"' cy='"+cy+"' r='3.4' fill='"+sc+"'/>"
+    +"<text x='"+cx+"' y='"+(cy-r*0.34)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.14)+"' font-weight='800' font-family='JetBrains Mono,monospace'>"+(score>0?"+":"")+score+"</text>";
+  return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible'>"+g+"</svg>";
+}
+// 육각 레이더 — 6개 지표의 '체형'을 한 도형으로
+function svgRadar(s){
+  var axes=[
+    ["RSI",        (+s.rsi||50)/100],
+    ["스토캐K",    ((s.stochRsi&&s.stochRsi.k!=null)?s.stochRsi.k:50)/100],
+    ["MFI",        (+s.mfi||50)/100],
+    ["볼린저",     ((s.boll&&s.boll.position!=null)?s.boll.position:50)/100],
+    ["52주",       ((s.breakout&&s.breakout.position!=null)?s.breakout.position:50)/100],
+    ["추세(ADX)",  Math.min(((s.adx&&s.adx.adx)||20)/50,1)]
+  ];
+  var W=230,H=158,cx=W/2,cy=H/2+4,R=54;
+  var pt=function(i,rr){
+    var a=(i*60-90)*Math.PI/180;
+    return [(cx+rr*Math.cos(a)).toFixed(1),(cy+rr*Math.sin(a)).toFixed(1)];
+  };
+  var ring=function(f){
+    var p=[]; for(var i=0;i<6;i++) p.push(pt(i,R*f).join(","));
+    return "<polygon points='"+p.join(" ")+"' fill='none' stroke='rgba(0,240,255,.14)' stroke-width='1'/>";
+  };
+  var g=ring(1/3)+ring(2/3)+ring(1);
+  for(var i=0;i<6;i++){ var e=pt(i,R); g+="<line x1='"+cx+"' y1='"+cy+"' x2='"+e[0]+"' y2='"+e[1]+"' stroke='rgba(0,240,255,.1)' stroke-width='1'/>"; }
+  // 데이터 폴리곤
+  var dp=[], dots="";
+  axes.forEach(function(ax,i){
+    var v=Math.max(0.06,Math.min(1,ax[1]));
+    var p=pt(i,R*v); dp.push(p.join(","));
+    var hot=ax[1]>=0.8, cold=ax[1]<=0.2;
+    var dc=hot?"#ff4060":cold?"#00e5a0":"#00f0ff";
+    dots+="<circle cx='"+p[0]+"' cy='"+p[1]+"' r='2.4' fill='"+dc+"' style='filter:drop-shadow(0 0 3px "+dc+")'/>";
+  });
+  g+="<polygon points='"+dp.join(" ")+"' fill='rgba(0,240,255,.13)' stroke='#00f0ff' stroke-width='1.5' stroke-linejoin='round' style='filter:drop-shadow(0 0 5px rgba(0,240,255,.5))'/>"+dots;
+  // 라벨 (값 색: 과열 빨강 · 과매도 초록)
+  axes.forEach(function(ax,i){
+    var p=pt(i,R+17);
+    var col=ax[1]>=0.8?"#ff8090":ax[1]<=0.2?"#7de8c0":"#8090b0";
+    var anchor=(i===0||i===3)?"middle":(i<3?"start":"end");
+    g+="<text x='"+p[0]+"' y='"+(+p[1]+3)+"' text-anchor='"+anchor+"' fill='"+col+"' font-size='9.5' font-weight='600'>"+ax[0]+" "+Math.round(ax[1]*100)+"</text>";
+  });
+  return "<svg width='"+W+"' height='"+H+"' viewBox='0 0 "+W+" "+H+"' style='overflow:visible'>"+g+"</svg>";
+}
+
 /* ── SUMMARY TABLE ── */
 function renderFlowBars(daily){
   if(!daily||!daily.length) return "";
@@ -827,7 +914,10 @@ function renderMarketBanner(m){
   }
   return crashBox+nightHeader+"<div class='market-banner' style='"+boxStyle+(ki.nxt?";border-color:#6040a0":"")+"'>"
     +"<div class='mb-top'>"
-    +"<span class='mb-label' style='color:"+c+";font-size:13px'>"+icon+" 미국 선행 "+sm.label+"</span>"
+    +"<span style='display:flex;align-items:center;gap:8px'>"
+    +  (typeof sm.score==="number"?svgGauge(Math.round(sm.score*10)/10,-12,12,1.5,-1.5,72):"")
+    +  "<span class='mb-label' style='color:"+c+";font-size:13px'>"+icon+" 미국 선행 "+sm.label+"</span>"
+    +"</span>"
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
@@ -915,6 +1005,7 @@ function renderSummaryTable(stocks){
     rows+="<tr class='sum-row' data-id='"+cid+"'>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"
       +  "<span style='font-size:11px;font-weight:700'>"+st.emoji+" "+st.name+"</span>"+sigRow
+      +  (s.spark&&s.spark.length?"<div style='margin-top:3px'>"+svgSpark(s.spark,58,14)+"</div>":"")
       +"</td>"
       +"<td style='padding:9px 4px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
       +  "<span style='color:"+opColor+";font-weight:800;font-size:11px'>"+oi+" "+opLabel+"</span>"+(ohIcon?"<span style='color:"+ohColor+";margin-left:3px;font-size:11px'>"+ohIcon+"</span>":"")+(ceIcon?"<span style='color:#00d4ff;margin-left:3px;font-size:11px'>"+ceIcon+"</span>":"")
@@ -1064,6 +1155,7 @@ function renderCard(s,idx){
         <div class="card-hdr-prices">
           <span class="card-cur-price" style="color:${cc}">${W(s.price)}</span>
           <span class="card-change-pct" style="color:${cc}">${cp}</span>
+          ${s.spark&&s.spark.length?`<span style="display:inline-block;margin-left:4px">${svgSpark(s.spark,86,24,cc)}</span>`:""}
         </div>
       </div>
       <div class="card-hdr-right">
@@ -1186,14 +1278,18 @@ function renderCard(s,idx){
       </div>
       ${s.overheat.level==="경고"?`<div style="font-size:11.5px;color:#8090b0;margin-top:8px;line-height:1.5">여러 위험 신호가 겹친 구간입니다. 신규 진입보다 조정 후 지지선 매수를 권장합니다.</div>`:""}
     </div>`:""}
-    <div class="score-wrap">
-      <div class="score-row">
-        <span class="score-lbl">신호 강도 (${s.score>0?"+":""}${s.score}점)</span>
-        <span class="score-val" style="color:${sc}">${s.score>=6?"강한 매수":s.score>=4?"매수":s.score<=-5?"강한 매도":s.score<=-3?"매도":"관망"}</span>
+    ${(function(){
+      var bt=(s.buyThreshold&&s.buyThreshold.buy)||6;
+      var st2=(s.buyThreshold&&s.buyThreshold.sell)||-5;
+      return `<div class="score-wrap" style="display:flex;align-items:center;gap:14px;margin-top:4px">
+      <div style="flex-shrink:0">${svgGauge(s.score,-8,8,bt,st2,124)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:3px">신호 강도</div>
+        <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=st2?"강한 매도":s.score<=-3?"매도":"관망"}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">🎯 매수 문턱 <b style="color:#00e5a0">${bt}</b>${s.buyThreshold&&s.buyThreshold.label!=="기본"?" ("+s.buyThreshold.label+")":""} · 매도 <b style="color:#ff4060">${st2}</b><br>문턱까지 <b style="color:${sc}">${s.score>=bt?"도달":(bt-s.score)+"점"}</b> 남음</div>
       </div>
-      <div class="score-track"><div class="score-fill" style="width:${scoreNorm}%;background:${sc}"></div></div>
-      <div class="score-ticks"><span>매도</span><span>관망</span><span>매수</span></div>
-    </div>
+    </div>`;
+    })()}
     <div class="tf-box">
       <div class="tf-row">
         <span class="tf-lbl">📅 주봉</span>
@@ -1422,6 +1518,8 @@ function renderCard(s,idx){
       <span class="sec-num">07</span>
       <span class="sec-title" style="color:#ffc940">기술 지표</span>
     </div>
+    <div style="display:flex;justify-content:center;margin:2px 0 8px">${svgRadar(s)}</div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px">도형이 클수록 과열, 작을수록 과매도 · <span style="color:#ff8090">빨강 꼭짓점=과열(80+)</span> · <span style="color:#7de8c0">초록=과매도(20↓)</span></div>
     <div class="sec-sub">모멘텀</div>
     <div class="rsi-wrap">
       <div class="rsi-row">
