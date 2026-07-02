@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-03-r7";
+const APP_VERSION = "v2026-07-03-r9";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1155,7 +1155,7 @@ function renderCard(s,idx){
         <div class="card-hdr-prices">
           <span class="card-cur-price" style="color:${cc}">${W(s.price)}</span>
           <span class="card-change-pct" style="color:${cc}">${cp}</span>
-          ${s.spark&&s.spark.length?`<span style="display:inline-block;margin-left:4px">${svgSpark(s.spark,86,24,cc)}</span>`:""}
+          ${s.spark&&s.spark.length?`<span style="display:inline-block;margin-left:4px">${svgSpark(s.spark,86,24)}</span>`:""}
         </div>
       </div>
       <div class="card-hdr-right">
@@ -1519,7 +1519,7 @@ function renderCard(s,idx){
       <span class="sec-title" style="color:#ffc940">기술 지표</span>
     </div>
     <div style="display:flex;justify-content:center;margin:2px 0 8px">${svgRadar(s)}</div>
-    <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px">도형이 클수록 과열, 작을수록 과매도 · <span style="color:#ff8090">빨강 꼭짓점=과열(80+)</span> · <span style="color:#7de8c0">초록=과매도(20↓)</span></div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px;line-height:1.6">도형이 클수록 과열, 작을수록 과매도 · <span style="color:#ff8090">빨강 꼭짓점=과열(80+)</span> · <span style="color:#7de8c0">초록=과매도(20↓)</span><br>💡 살 자리 = 쪼그라든 도형 · 들고 갈 모양 = 추세(ADX)만 긴 도형 · 피할 것 = 꽉 찬 도형</div>
     <div class="sec-sub">모멘텀</div>
     <div class="rsi-wrap">
       <div class="rsi-row">
@@ -1678,6 +1678,12 @@ function renderCard(s,idx){
       <div class="guide-item"><b>볼린저밴드</b> — 변동성 범위. 하단 근접은 과매도(반등 기대), 상단 근접은 과열.</div>
       <div class="guide-item"><b>거래대금</b> — 가격×거래량. 2배 이상(🔥)이면 큰 자금 유입 = 세력 진입 가능성.</div>
       <div class="guide-item"><b>RS(상대강도)</b> — KOSPI 대비 강도. +면 시장보다 강함(아웃퍼폼), −면 약함.</div>
+      <div class="guide-item" style="border-top:1px solid #2a2820;margin-top:8px;padding-top:8px;color:#00d4ff">
+        <b>📐 시각화 읽는 법 (게이지 · 추세선 · 레이더)</b>
+      </div>
+      <div class="guide-item"><b>신호 게이지 (반원)</b> — <b>바늘 = 현재 점수</b>, <b>I 눈금 = 오늘의 문턱선</b>이에요. 초록 눈금이 매수 문턱, 빨간 눈금이 매도 문턱(-5)이고, 바늘이 눈금을 넘으면 판정이 바뀝니다. <b>구간 크기가 날마다 다른 건 의도</b>예요: 매수 문턱이 시장 상황 따라 5(우호)~7(비우호)로 움직여서, 비우호적인 날엔 초록 구간이 좁아집니다 = "오늘은 매수 판정받기 어려운 날". 초록이 좁으면 보수 모드, 넓으면 기회의 날로 읽으세요.</div>
+      <div class="guide-item"><b>추세선 (스파크라인)</b> — 최근 20일 가격 흐름 한 줄 요약. <b>선 색은 20일 전 대비</b>: 초록 = 20일 전보다 위, 빨강 = 아래 (당일 등락 아님). 끝의 빛나는 점이 현재가예요. 모양으로 읽기: 완만한 우상향 = 건강한 추세, 급락 후 꼬리 들림 = 반등 시도, 계단식 하락 = 추세 붕괴 진행 중.</div>
+      <div class="guide-item"><b>지표 레이더 (육각형)</b> — RSI·스토캐K·MFI·볼린저·52주·추세(ADX) 6개 축의 '체형'. <b>도형이 클수록 과열, 작을수록 과매도</b>이고, 꼭짓점 색은 <span style="color:#ff8090">빨강=과열(80+)</span> / <span style="color:#7de8c0">초록=과매도(20↓)</span>. 목적별 이상형: ① <b>살 자리</b> = 쪼그라들고 초록 꼭짓점 많은 도형(과매도 바닥권) ② <b>들고 갈 모양</b> = 모멘텀 축은 중간인데 추세(ADX)만 길게 뻗은 비대칭(과열 없이 추세가 끄는 상태) ③ <b>피할 것</b> = 빨간 꼭짓점 가득한 꽉 찬 도형(과열 정점 — 여기서 사면 물림). 단, 살 자리형이라도 오늘 매수 문턱이 높은 날(비우호)엔 선취 규칙(1/3 물량+손절가)을 지키세요.</div>
       <div class="guide-item" style="border-top:1px solid #2a2820;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>★ 선취 매수 트랙</b> — 중립이지만 선행 매수 신호가 2개 이상 모인 자리. <b>1/3 물량</b>으로 제한하고 손절선 꼭 설정.
       </div>
