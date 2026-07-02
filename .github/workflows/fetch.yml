@@ -40,8 +40,9 @@ jobs:
           # 푸시 경합(5분 주기 + 사용자 업로드) 대비 최대 3회 재시도
           for i in 1 2 3; do
             git fetch origin main
-            # 최신 main으로 워킹트리·인덱스 완전 동기화 — 사용자가 올린 파일 그대로 유지됨
-            git checkout -B main origin/main
+            # 최신 main으로 워킹트리·인덱스 완전 동기화
+            # (파이썬이 만든 data.json 로컬 변경은 /tmp에 보관돼 있으므로 버려도 안전)
+            git reset --hard origin/main
             cp /tmp/data.json data.json
             git add data.json
             if git diff --staged --quiet; then
