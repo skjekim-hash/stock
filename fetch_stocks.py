@@ -1876,6 +1876,8 @@ def analyze_stock(stock, kospi, market=None):
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        # 프런트 스파크라인용 최근 20일 종가 (마지막 값은 현재가로 갱신)
+        "spark": ([round(c) for c in closes_d[-20:-1]] + [round(price)]) if len(closes_d) >= 5 else [],
         "nuance": nuance,
         "buyTrack": buy_track,
         "buyThreshold": th_info,
