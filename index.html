@@ -574,11 +574,18 @@ body::after{
   </details>
   <div class="footer" id="footer" style="display:none">
     주가: 네이버·KIS 통합시세 · 지표: 60일 OHLCV<br>
-    본 분석은 참고용입니다. 투자 판단과 책임은 투자자 본인에게 있습니다.
+    본 분석은 참고용입니다. 투자 판단과 책임은 투자자 본인에게 있습니다.<br>
+    <span id="appVer" style="font-family:'JetBrains Mono',monospace;font-size:10px;opacity:.6"></span>
   </div>
 </div>
 
 <script>
+// 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
+const APP_VERSION = "v2026-07-02-r3";
+document.addEventListener("DOMContentLoaded", function(){
+  var v=document.getElementById("appVer");
+  if(v) v.textContent="빌드 "+APP_VERSION;
+});
 const STOCKS=[
   {code:"000660",name:"SK하이닉스", emoji:"🔵"},
   {code:"005930",name:"삼성전자",   emoji:"🟡"},
@@ -2291,6 +2298,74 @@ function renderHabitCard(arr){
   </div>`;
 }
 
+// ── 편향 없는 전체 성적 (보유분 미실현 포함, mark-to-market) ──
+// 성공 기준: 수익률 1% 이상 (1% 미만 익절은 사실상 손절로 분류 — 사용자 규칙)
+// 청산만 보면 익절만 남아 승률이 부풀려지므로, 보유분을 현재가로 함께 평가해 편향 제거
+function calcTrueRecord(arr){
+  const WIN = 1.0;
+  const cur = {};
+  (window.__stocks||[]).forEach(s=>{ cur[s.code]=s.price; });
+  const closed = arr.filter(e=>e.status==="청산" && e.returnPct!==null && e.entryPrice);
+  const held = arr.filter(e=>e.status==="보유" && e.entryPrice);
+  const rows = [];
+  closed.forEach(e=>{
+    rows.push({ ret:e.returnPct, pnl:(e.exitPrice-e.entryPrice)*(e.shares||1), realized:true, name:e.name });
+  });
+  let skippedHeld = 0;
+  held.forEach(e=>{
+    const p = cur[e.code];
+    if(!p){ skippedHeld++; return; }  // 현재가 없으면 평가 불가 (분석 미로드 등)
+    rows.push({ ret:(p-e.entryPrice)/e.entryPrice*100, pnl:(p-e.entryPrice)*(e.shares||1), realized:false, name:e.name });
+  });
+  if(rows.length<3) return null;
+  const wins = rows.filter(r=>r.ret>=WIN);
+  const closedWins = closed.filter(e=>e.returnPct>=WIN);
+  const realPnl = rows.filter(r=>r.realized).reduce((s,r)=>s+r.pnl,0);
+  const unrealPnl = rows.filter(r=>!r.realized).reduce((s,r)=>s+r.pnl,0);
+  // 미실현 손실 상위 3건 (직시용)
+  const worst = rows.filter(r=>!r.realized && r.ret<0).sort((a,b)=>a.ret-b.ret).slice(0,3);
+  return {
+    n: rows.length, nClosed: closed.length, nHeld: rows.length-closed.length, skippedHeld,
+    winRate: Math.round(wins.length/rows.length*100),
+    closedOnlyRate: closed.length?Math.round(closedWins.length/closed.length*100):null,
+    avgRet: rows.reduce((s,r)=>s+r.ret,0)/rows.length,
+    realPnl, unrealPnl, totalPnl: realPnl+unrealPnl, worst
+  };
+}
+
+function renderTrueRecord(arr){
+  const t = calcTrueRecord(arr);
+  if(!t) return "";
+  const money = v=>(v>=0?"+":"")+Math.round(v).toLocaleString()+"원";
+  const totColor = t.totalPnl>=0?"#00e5a0":"#ff4060";
+  const rateColor = t.winRate>=60?"#00e5a0":t.winRate>=40?"#ffc940":"#ff4060";
+  const gapNote = (t.closedOnlyRate!==null && t.closedOnlyRate-t.winRate>=15)
+    ? `<div style="font-size:10.5px;color:var(--gold);line-height:1.6;margin-top:8px">💡 청산만 보면 승률 ${t.closedOnlyRate}%지만 보유분을 포함하면 ${t.winRate}%예요. 이 차이가 클수록 손실 종목이 '보유'로 쌓이고 있다는 신호입니다.</div>`
+    : "";
+  let worstHtml = "";
+  if(t.worst.length){
+    worstHtml = `<div style="font-size:10px;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.08)">미실현 손실 상위: `
+      + t.worst.map(w=>`${w.name} ${w.ret.toFixed(1)}%`).join(" · ")
+      + `</div>`;
+  }
+  return `<div class="card-body" style="padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--gold)">
+    <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:2px">📊 전체 성적 (보유 포함 · 편향 제거)</div>
+    <div style="font-size:10.5px;color:var(--text2);margin-bottom:10px">성공 = 수익 1% 이상 · 보유 ${t.nHeld}건은 현재가 기준 평가${t.skippedHeld?` · ${t.skippedHeld}건 현재가 없음`:""}</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="flex:1;text-align:center;background:rgba(255,255,255,.03);border-radius:8px;padding:8px 4px">
+        <div style="font-size:10.5px;color:var(--text2)">종합 승률</div>
+        <div style="font-size:17px;font-weight:800;color:${rateColor}">${t.winRate}%</div>
+        <div style="font-size:10px;color:var(--text2)">청산 ${t.nClosed} + 보유 ${t.nHeld}</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(255,255,255,.03);border-radius:8px;padding:8px 4px">
+        <div style="font-size:10.5px;color:var(--text2)">전체 손익</div>
+        <div style="font-size:15px;font-weight:800;color:${totColor};font-family:'JetBrains Mono',monospace">${money(t.totalPnl)}</div>
+        <div style="font-size:10px;color:var(--text2)">실현 ${money(t.realPnl)} · 미실현 ${money(t.unrealPnl)}</div>
+      </div>
+    </div>${gapNote}${worstHtml}
+  </div>`;
+}
+
 function renderJournal(){
   const arr = loadJournal();
   // 보유중 먼저, 청산은 아래로
@@ -2468,7 +2543,7 @@ function renderJournal(){
       <div style="display:none">${closed2.map(makeRow).join("")}</div>
     </div>` : "";
 
-  box.innerHTML = renderExitAlerts(arr, window.__stocks) + renderSignalAccuracy() + renderHabitCard(arr) + renderPortfolio(arr) + statsHtml + activeRows + closedRows;
+  box.innerHTML = renderTrueRecord(arr) + renderExitAlerts(arr, window.__stocks) + renderSignalAccuracy() + renderHabitCard(arr) + renderPortfolio(arr) + statsHtml + activeRows + closedRows;
 }
 
 function closeTradePrompt(id){
