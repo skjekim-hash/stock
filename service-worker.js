@@ -4,7 +4,7 @@
 //   - 정적 파일(html/css/svg/manifest): 캐시 우선, 백그라운드에서 갱신
 //   - 그 외: 네트워크 우선
 
-const CACHE_VERSION = 'v2026-07-02-polish';
+const CACHE_VERSION = 'v2026-07-02-r2';
 const STATIC_CACHE  = `stock-static-${CACHE_VERSION}`;
 const DATA_CACHE    = `stock-data-${CACHE_VERSION}`;
 
@@ -34,10 +34,12 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      // 현재 STATIC_CACHE만 남기고 나머지(옛 data 캐시 포함) 전부 삭제
+      // 현재 버전의 static/data 캐시만 남기고 옛 캐시 전부 삭제
+      // (DATA_CACHE까지 지우면 새 버전 활성화 직후 오프라인 폴백이 비어버림)
+      const keep = [STATIC_CACHE, DATA_CACHE];
       return Promise.all(
         keys
-          .filter((k) => k !== STATIC_CACHE)
+          .filter((k) => !keep.includes(k))
           .map((k) => caches.delete(k))
       );
     }).then(() => self.clients.claim())
