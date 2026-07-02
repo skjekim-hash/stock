@@ -36,12 +36,20 @@ KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
 
 
-def http_get(url, timeout=8, headers=None):
+def http_get(url, timeout=8, headers=None, retries=2):
     h = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     if headers: h.update(headers)
     req = Request(url, headers=h)
-    with urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8")
+    last_err = None
+    for attempt in range(retries):
+        try:
+            with urlopen(req, timeout=timeout) as r:
+                return r.read().decode("utf-8")
+        except Exception as e:
+            last_err = e
+            if attempt < retries - 1:
+                time.sleep(0.5 * (attempt + 1))  # 0.5s, 1.0s 백오프
+    raise last_err
 
 def http_json(url, timeout=15, headers=None):
     return json.loads(http_get(url, timeout, headers))
@@ -115,10 +123,13 @@ def fetch_kis_price(code):
             change = to_n(out.get("prdy_vrss") or 0)
             sign   = out.get("prdy_vrss_sign") or "3"
             if sign in ("4", "5"): change = -abs(change)
+            # prdy_ctrt는 이미 부호를 포함해 올 수 있어 -1 곱셈은 이중 반전 위험 → change와 동일하게 -abs로 통일
+            chg_pct = to_n(out.get("prdy_ctrt") or 0)
+            if sign in ("4", "5"): chg_pct = -abs(chg_pct)
             return {
                 "price": round(price), "prevClose": round(prev) if prev else round(price - change),
                 "change": round(change),
-                "changePct": round(to_n(out.get("prdy_ctrt") or 0), 2) * (-1 if sign in ("4","5") else 1),
+                "changePct": round(chg_pct, 2),
                 "high52w": round(high52), "low52w": round(low52),
                 "tradedAt": out.get("stck_bsop_date", ""), "source": "KIS API (통합시세)",
                 "creditRatio": to_n(out.get("crdt_rsrs_rt") or 0),   # 신용잔고율
@@ -1389,8 +1400,6 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         if _bp > 85: ob_penalty -= 2
         elif _bp > 75: ob_penalty -= 1
     if stoch and stoch > 80: ob_penalty -= 1
-    if 's20' in dir() and s20 and price > 0:
-        pass
     _adx_val = adx.get("adx") if adx else None
     _ichi_buy = ichimoku and ichimoku.get("signal") == "매수"
     _uptrend = _adx_val is not None and _adx_val > 20 and _ichi_buy
@@ -1903,6 +1912,15 @@ def main():
         except Exception as e:
             print(f"  ❌ {stock['name']} 오류: {e}", file=sys.stderr)
         time.sleep(0.2)
+
+    # ── 운영 안전장치 ──
+    # 전 종목 실패 시 기존 data.json을 빈 데이터로 덮어쓰지 않고 실패 종료
+    # (exit 1 → GitHub Actions가 빨간불로 표시되어 장애를 바로 인지 가능)
+    if not stocks_data:
+        print("\n❌ 수집된 종목 없음 — data.json 보존, 실패로 종료", file=sys.stderr)
+        sys.exit(1)
+    if len(stocks_data) < len(STOCKS) // 2:
+        print(f"\n⚠ 절반 이상 수집 실패 ({len(stocks_data)}/{len(STOCKS)}) — 데이터 품질 주의", file=sys.stderr)
 
     output = {
         "updatedAt": now.strftime("%Y-%m-%d %H:%M:%S KST"),
