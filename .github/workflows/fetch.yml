@@ -29,13 +29,32 @@ jobs:
         run: python fetch_stocks.py
 
       - name: data.json 커밋 & 푸시
+        # ⚠️ 이전 방식(reset --soft)은 체크아웃 시점의 전체 파일을 커밋해서,
+        #    실행 도중 사용자가 올린 index.html 등을 옛 버전으로 되돌리는 버그가 있었음.
+        #    새 방식: 항상 '지금 이 순간의 최신 main' 위에 data.json 한 파일만 얹어 커밋.
         run: |
           git config user.name "StockBot"
           git config user.email "bot@github.com"
-          git fetch origin
-          git reset --soft origin/main
-          git add data.json
-          git diff --staged --quiet || git commit -m "📊 주가 업데이트 $(date +'%Y-%m-%d %H:%M KST' -d '+9 hours')"
-          git push
-          
-
+          # 방금 생성된 data.json을 안전한 곳에 보관
+          cp data.json /tmp/data.json
+          # 푸시 경합(5분 주기 + 사용자 업로드) 대비 최대 3회 재시도
+          for i in 1 2 3; do
+            git fetch origin main
+            # 최신 main으로 워킹트리·인덱스 완전 동기화 — 사용자가 올린 파일 그대로 유지됨
+            git checkout -B main origin/main
+            cp /tmp/data.json data.json
+            git add data.json
+            if git diff --staged --quiet; then
+              echo "data.json 변경 없음 — 커밋 생략"
+              exit 0
+            fi
+            git commit -m "📊 주가 업데이트 $(date +'%Y-%m-%d %H:%M KST' -d '+9 hours')"
+            if git push origin main; then
+              echo "푸시 완료"
+              exit 0
+            fi
+            echo "푸시 경합 발생 — 재시도 ($i/3)"
+            sleep 3
+          done
+          echo "3회 재시도 후에도 푸시 실패"
+          exit 1
