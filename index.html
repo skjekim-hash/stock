@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-03-r13";
+const APP_VERSION = "v2026-07-03-r14";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1463,6 +1463,17 @@ function renderCard(s,idx){
       <span class="sec-num">06</span>
       <span class="sec-title" style="color:#00e5a0">거래 · 강도</span>
     </div>
+    ${s.micro&&(s.micro.strength||s.micro.bidAskRatio)?(function(){
+      var st3=s.micro.strength, ba=s.micro.bidAskRatio;
+      var fire=(st3&&st3>=120)||(st3&&st3>=100&&ba&&ba>=1.3);
+      var stc=st3>=120?"#00e5a0":st3>=100?"#ffc940":"#ff6680";
+      var bac=ba>=1.2?"#00e5a0":ba>=0.85?"#8090b0":"#ff6680";
+      return `<div style="margin-bottom:10px;padding:9px 12px;border-radius:11px;background:${fire?'rgba(0,229,160,.08)':'rgba(255,255,255,.03)'};border:1px solid ${fire?'rgba(0,229,160,.4)':'rgba(255,255,255,.08)'};display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:800;color:${fire?'#00e5a0':'#8090b0'}">🔫 방아쇠 ${fire?'충족':'대기'}</span>
+        ${st3?`<span style="font-size:11px;color:var(--text2)">체결강도 <b style="color:${stc};font-family:'JetBrains Mono',monospace">${st3}%</b></span>`:""}
+        ${ba?`<span style="font-size:11px;color:var(--text2)">매수/매도 호가 <b style="color:${bac};font-family:'JetBrains Mono',monospace">${ba}배</b></span>`:""}
+      </div>`;
+    })():""}
     ${s.intradayFlow?(function(){
       var fl=s.intradayFlow;
       var fc2=fl.foreign>0?"#00e5a0":fl.foreign<0?"#ff4060":"#8090b0";
@@ -1476,6 +1487,7 @@ function renderCard(s,idx){
           외국인 <b style="color:${fc2}">${fl.foreign>0?"+":""}${fl.foreign.toLocaleString()}</b> · 기관 <b style="color:${ic2}">${fl.institution>0?"+":""}${fl.institution.toLocaleString()}</b>
         </div>
         ${turn?`<div style="font-size:11px;color:#00e5a0;font-weight:700;margin-top:5px">🌊 외국인 당일 순매수 전환 — ${Math.abs(s.investor.streak)}일 연속 순매도 후 첫 매수 신호</div>`:""}
+        ${s.program?`<div style="font-size:11px;color:var(--text2);margin-top:5px">🤖 프로그램 당일 <b style="color:${s.program.netQty>0?"#00e5a0":"#ff6680"};font-family:'JetBrains Mono',monospace">${s.program.netQty>0?"+":""}${s.program.netQty.toLocaleString()}주</b> — ${s.program.netQty>0?"기계 자금 유입":"기계 자금 이탈"} 중</div>`:""}
         <div style="font-size:11px;color:var(--text3);margin-top:4px">잠정치는 장중 집계라 마감 확정치와 다를 수 있어요. 아래 확정 수급(T-1)과 함께 보세요.</div>
       </div>`;
     })():""}
@@ -1728,6 +1740,8 @@ function renderCard(s,idx){
       <div class="guide-item"><b>볼린저밴드</b> — 변동성 범위. 하단 근접은 과매도(반등 기대), 상단 근접은 과열.</div>
       <div class="guide-item"><b>거래대금</b> — 가격×거래량. 2배 이상(🔥)이면 큰 자금 유입 = 세력 진입 가능성.</div>
       <div class="guide-item"><b>RS(상대강도)</b> — KOSPI 대비 강도. +면 시장보다 강함(아웃퍼폼), −면 약함.</div>
+      <div class="guide-item"><b>🔫 방아쇠 (체결강도·호가)</b> — 다른 지표가 '자리'를 말한다면 이건 <b>지금 이 순간 힘이 실렸는지</b>를 봅니다. 체결강도 100% 이상 = 매수 체결 우위, 120% 이상 = 강한 매수세. 매수/매도 호가 배율은 대기 주문의 벽 방향이에요. <b>살 자리에 도달했어도 방아쇠 '대기'면 서두를 이유가 없고, '충족'이면 반등에 힘이 실린 것</b> — 자리+방아쇠가 겹치는 순간이 진입 타이밍입니다. 🤖 프로그램 순매수는 지수 연계 기계 자금의 방향(대형주 당일 등락의 숨은 주체)이에요.</div>
+      <div class="guide-item"><b>🛡 변동성 손절 (2×ATR)</b> — 고정 % 손절은 변동성이 큰 장에서 노이즈에 걸려 털립니다. ATR은 그 종목의 일평균 진폭이라, <b>2×ATR 아래 = 정상 출렁임이 아닌 진짜 이탈</b>로 볼 수 있는 선이에요. 지지선 손절과 비교해 더 넉넉한 쪽을 쓰면 데일 확률이 줄어듭니다.</div>
       <div class="guide-item"><b>⚡ 오늘 장중 잠정 수급</b> — 확정 수급은 하루 늦은(T-1) 정보인데, 잠정치는 <b>오늘 장중 외국인·기관이 사고 있는지</b>를 실시간 집계로 보여주는 선행 정보예요. 특히 <b style="color:#00e5a0">🌊 외인 당일 순매수 전환</b>(연속 순매도 중이던 외국인이 오늘 매수로 돌아섬)은 수급 반전의 첫 신호라 타이밍 판단에 가장 값진 순간입니다. 단, 장중 집계라 마감 확정치와 다를 수 있고 점수에는 반영하지 않아요 — 진입 방아쇠 판단의 참고로만 쓰세요.</div>
       <div class="guide-item" style="border-top:1px solid #2a2820;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>📐 시각화 읽는 법 (게이지 · 추세선 · 레이더)</b>
@@ -3297,6 +3311,7 @@ function renderBuyRange(s){
         <div style="font-size:11px;color:${mc};font-weight:700;text-align:center">현재가 ${s.price>r.B?"매수 범위 위 — 추격 구간":s.price<r.A?"지지선 아래 — 지지 확인 구간":"매수 범위 안 ✓"}</div>
       </div>`;
     })()}
+    ${s.atr?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(212,175,106,0.1)">🛡 <b style="color:#9ab">변동성 손절 참고</b>: 지금 진입 시 2×ATR = <b style="color:#ff8090;font-family:'JetBrains Mono',monospace">${W(s.atr.stop2x)}</b> <span style="opacity:.8">(일평균 변동 ±${s.atr.pct}%${s.atr.pct>=4?" — 고변동 장세, 손절폭 넉넉히":""})</span></div>`:""}
     <div style="font-size:11px;color:#9a958c;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px solid rgba(212,175,106,0.1)">
       <b style="color:${r.belowColor}">A 이하</b>: ${r.belowText}
     </div>
