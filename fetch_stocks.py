@@ -180,9 +180,13 @@ def fetch_kis_investor(code):
                         "FHKST01010900")
         if not d: return None
         out = d.get("output", {})
+        # 이 엔드포인트는 output이 '일자별 리스트'로 옴 — 가장 최근 행 사용
+        if isinstance(out, list):
+            if not out: return None
+            out = out[0]
         f    = round(to_n(out.get("frgn_ntby_qty") or out.get("frgn_seln_vol") or 0))
         inst = round(to_n(out.get("orgn_ntby_qty") or out.get("inst_ntby_vol") or 0))
-        indv = round(to_n(out.get("indvdl_ntby_qty") or 0))
+        indv = round(to_n(out.get("indvdl_ntby_qty") or out.get("prsn_ntby_qty") or 0))
         if f > 0 and inst > 0:
             trend, comment = "매수우세", f"외국인 +{f:,}주 · 기관 +{inst:,}주 동반 순매수"
         elif f > 0:
@@ -197,6 +201,34 @@ def fetch_kis_investor(code):
                 "foreignTrend": trend, "comment": comment, "date": "당일"}
     except Exception as e:
         print(f"  KIS 수급 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
+def fetch_kis_intraday_flow(code):
+    """장중 외국인·기관 '잠정' 순매수 (당일 실시간 집계).
+    확정치(T-1)보다 하루 빠른 선행 정보 — 점수엔 미반영, 표시·신호용.
+    가장 최근 행의 날짜가 오늘(KST)일 때만 잠정치로 인정."""
+    if not KIS_AVAILABLE: return None
+    if "openapivts" in KIS_BASE_URL: return None
+    try:
+        d = kis_request("/uapi/domestic-stock/v1/quotations/inquire-investor",
+                        {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+                        "FHKST01010900")
+        if not d: return None
+        out = d.get("output")
+        if isinstance(out, dict): out = [out]
+        if not out: return None
+        row = out[0]
+        row_date = str(row.get("stck_bsop_date") or "")
+        today = datetime.now(KST).strftime("%Y%m%d")
+        if row_date != today:
+            return None  # 아직 당일 집계 없음 (개장 전 등)
+        f    = round(to_n(row.get("frgn_ntby_qty") or 0))
+        inst = round(to_n(row.get("orgn_ntby_qty") or 0))
+        indv = round(to_n(row.get("prsn_ntby_qty") or row.get("indvdl_ntby_qty") or 0))
+        return {"foreign": f, "institution": inst, "individual": indv,
+                "asOf": datetime.now(KST).strftime("%H:%M"), "provisional": True}
+    except Exception as e:
+        print(f"  KIS 장중 잠정 실패 ({code}): {e}", file=sys.stderr)
     return None
 
 def fetch_kis_short(code):
@@ -1588,6 +1620,8 @@ def analyze_stock(stock, kospi, market=None):
     investor = fetch_naver_investor(code) or (fetch_kis_investor(code) if is_real_kis else None) or {
                            "foreign": 0, "institution": 0, "individual": 0,
                            "foreignTrend": "중립", "comment": "수급 데이터 없음"}
+    # 당일 장중 '잠정' 수급 (T-1 확정치보다 하루 빠른 선행 정보 · 점수 미반영)
+    intraday_flow = fetch_kis_intraday_flow(code) if is_real_kis else None
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {"ratio": 0, "volume": 0, "comment": "없음"}
     news = []
@@ -1876,6 +1910,10 @@ def analyze_stock(stock, kospi, market=None):
         "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
         "high52w": high52w, "low52w": low52w,
         "opinion": opinion, "score": score, "source": source,
+        # 당일 장중 잠정 수급 + 전환 감지 (연속 순매도 중이던 외국인이 당일 순매수로 돌아섰는지)
+        "intradayFlow": intraday_flow,
+        "flowTurnaround": bool(intraday_flow and intraday_flow.get("foreign", 0) > 0
+                               and investor.get("streak", 0) <= -3),
         # 프런트 스파크라인용 최근 20일 종가 (마지막 값은 현재가로 갱신)
         "spark": ([round(c) for c in closes_d[-20:-1]] + [round(price)]) if len(closes_d) >= 5 else [],
         "nuance": nuance,
