@@ -250,6 +250,55 @@ def fetch_kis_intraday_flow(code):
         print(f"  KIS 장중 잠정 실패 ({code}): {e}", file=sys.stderr)
     return None
 
+def fetch_kis_micro(code):
+    """① 장중 미시 압력: 체결강도(매수/매도 체결 비율) + 호가잔량 비율.
+    가격이 움직이기 직전의 '힘' — 진입 방아쇠 판단용, 점수 미반영."""
+    if not KIS_AVAILABLE: return None
+    if "openapivts" in KIS_BASE_URL: return None
+    out = {}
+    try:  # 체결강도 (최근 체결 내역의 cttr)
+        d = kis_request("/uapi/domestic-stock/v1/quotations/inquire-ccnl",
+                        {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+                        "FHKST01010300")
+        rows = (d or {}).get("output") or []
+        if isinstance(rows, dict): rows = [rows]
+        if rows:
+            c = to_n(rows[0].get("cttr") or 0)
+            if c > 0: out["strength"] = round(c, 1)
+    except Exception as e:
+        print(f"  체결강도 실패 ({code}): {e}", file=sys.stderr)
+    try:  # 호가잔량 (총매수/총매도 잔량 비율)
+        d = kis_request("/uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn",
+                        {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+                        "FHKST01010200")
+        o1 = (d or {}).get("output1") or {}
+        bid = to_n(o1.get("total_bidp_rsqn") or 0)
+        ask = to_n(o1.get("total_askp_rsqn") or 0)
+        if bid > 0 and ask > 0:
+            out["bidAskRatio"] = round(bid/ask, 2)
+    except Exception as e:
+        print(f"  호가잔량 실패 ({code}): {e}", file=sys.stderr)
+    return out or None
+
+def fetch_kis_program(code):
+    """② 종목별 프로그램 매매 당일 순매수 — 대형주 당일 등락의 숨은 주체."""
+    if not KIS_AVAILABLE: return None
+    if "openapivts" in KIS_BASE_URL: return None
+    try:
+        d = kis_request("/uapi/domestic-stock/v1/quotations/program-trade-by-stock",
+                        {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
+                        "FHPPG04650100")
+        rows = (d or {}).get("output") or []
+        if isinstance(rows, dict): rows = [rows]
+        if not rows: return None
+        row = rows[0]  # 최신 행
+        net = round(to_n(row.get("whol_ntby_qty") or row.get("ntby_qty") or 0))
+        if net == 0: return None
+        return {"netQty": net, "asOf": datetime.now(KST).strftime("%H:%M")}
+    except Exception as e:
+        print(f"  프로그램매매 실패 ({code}): {e}", file=sys.stderr)
+    return None
+
 def fetch_kis_short(code):
     if not KIS_AVAILABLE: return None
     if "openapivts" in KIS_BASE_URL: return None
@@ -363,15 +412,25 @@ def fetch_short_selling(code):
     return {"ratio": 0, "volume": 0, "comment": "공매도 데이터 없음"}
 
 def fetch_kospi():
+    pct5 = 0
+    try:
+        # 5일 수익률 (RS 폴백용): 개장 전엔 당일 등락률이 0이라 5일 기준으로 대체
+        h = http_json("https://m.stock.naver.com/api/index/KOSPI/price?pageSize=6&page=1")
+        rows = h if isinstance(h, list) else (h.get("priceInfos") or h.get("result") or [])
+        closes = [to_n(r.get("closePrice")) for r in rows if to_n(r.get("closePrice") or 0) > 0]
+        if len(closes) >= 2:
+            pct5 = round((closes[0] - closes[-1]) / closes[-1] * 100, 2)
+    except Exception:
+        pass
     try:
         d = http_json("https://m.stock.naver.com/api/index/KOSPI/basic")
         price  = to_n(d.get("closePrice") or d.get("indexValue") or 0)
         change = to_n(d.get("compareToPreviousClosePrice") or 0)
         pct    = to_n(d.get("fluctuationsRatio") or 0)
-        return {"price": round(price, 2), "change": round(change, 2), "changePct": round(pct, 2)}
+        return {"price": round(price, 2), "change": round(change, 2), "changePct": round(pct, 2), "pct5": pct5}
     except Exception as e:
         print(f"  KOSPI 실패: {e}", file=sys.stderr)
-    return {"price": 0, "change": 0, "changePct": 0}
+    return {"price": 0, "change": 0, "changePct": 0, "pct5": pct5}
 
 
 def fetch_market_signal():
@@ -1317,7 +1376,13 @@ def calc_weekly_signal(weekly_candles):
     comment = f"주봉 RSI {rsi or '-'} · MACD {'골든크로스' if macd and sig and macd > sig else '데드크로스' if macd and sig else '-'}"
     return {"opinion": opinion, "rsi": rsi, "macd": macd, "macdSignal": sig, "comment": comment}
 
-def calc_relative_strength(stock_pct, kospi_pct):
+def calc_relative_strength(stock_pct, kospi_pct, stock_pct5=None, kospi_pct5=None):
+    # 당일 지수가 안 움직였으면(개장 전 등) 5일 기준으로 폴백
+    if kospi_pct == 0 and stock_pct5 is not None and kospi_pct5:
+        rs = round(stock_pct5 - kospi_pct5, 2); strong = rs > 0
+        comment = (f"KOSPI 대비 +{rs}%p 강세 (5일)" if rs > 1 else
+                   f"KOSPI 대비 {rs}%p 약세 (5일)" if rs < -1 else "KOSPI 대비 중립 (5일)")
+        return {"rs": rs, "comment": comment, "strong": strong, "indexLinked": False, "indexNote": ""}
     if kospi_pct == 0: return {"rs": 0, "comment": "KOSPI 데이터 없음", "strong": False, "indexLinked": False, "indexNote": ""}
     rs = round(stock_pct - kospi_pct, 2); strong = rs > 0
     comment = (f"KOSPI 대비 +{rs}%p 강세" if rs > 1 else
@@ -1641,6 +1706,8 @@ def analyze_stock(stock, kospi, market=None):
                            "foreignTrend": "중립", "comment": "수급 데이터 없음"}
     # 당일 장중 '잠정' 수급 (T-1 확정치보다 하루 빠른 선행 정보 · 점수 미반영)
     intraday_flow = fetch_kis_intraday_flow(code) if is_real_kis else None
+    micro   = fetch_kis_micro(code) if is_real_kis else None      # ① 체결강도·호가잔량
+    program = fetch_kis_program(code) if is_real_kis else None    # ② 프로그램 매매
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
     short     = kis_short or fetch_short_selling(code) or {"ratio": 0, "volume": 0, "comment": "없음"}
     news = []
@@ -1705,7 +1772,17 @@ def analyze_stock(stock, kospi, market=None):
     weekly  = calc_weekly_signal(candles_w)
     monthly = calc_weekly_signal(candles_m); monthly["timeframe"] = "월봉"
     rs      = calc_relative_strength(
-        round((price - prev) / prev * 100, 2) if prev else 0, kospi.get("changePct", 0))
+        round((price - prev) / prev * 100, 2) if prev else 0, kospi.get("changePct", 0),
+        round((price - closes_d[-6]) / closes_d[-6] * 100, 2) if has_data and len(closes_d) >= 6 else None,
+        kospi.get("pct5", 0))
+    # ③ ATR(14) — 변동성 기반 손절폭 (지지선 손절과 함께 참고)
+    atr_v = None
+    if has_data and len(closes_d) >= 15:
+        _trs = [max(highs_d[i]-lows_d[i], abs(highs_d[i]-closes_d[i-1]), abs(lows_d[i]-closes_d[i-1]))
+                for i in range(1, len(closes_d))]
+        atr_v = sum(_trs[-14:]) / 14
+    atr = ({"value": round(atr_v), "pct": round(atr_v/price*100, 1),
+            "stop2x": round(price - 2*atr_v)} if atr_v and price > 0 else None)
     breakout  = check_52w_breakout(price, high52w, low52w)
     vol_surge = check_volume_surge(volumes_d) if has_data else {"surge": False, "ratio": 1.0, "comment": ""}
 
@@ -1931,6 +2008,9 @@ def analyze_stock(stock, kospi, market=None):
         "opinion": opinion, "score": score, "source": source,
         # 당일 장중 잠정 수급 + 전환 감지 (연속 순매도 중이던 외국인이 당일 순매수로 돌아섰는지)
         "intradayFlow": intraday_flow,
+        "micro": micro,          # ① 체결강도·호가잔량 (방아쇠)
+        "program": program,      # ② 프로그램 당일 순매수
+        "atr": atr,              # ③ 변동성 손절 참고 (2×ATR)
         "flowTurnaround": bool(intraday_flow and intraday_flow.get("foreign", 0) > 0
                                and investor.get("streak", 0) <= -3),
         # 프런트 스파크라인용 최근 20일 종가 (마지막 값은 현재가로 갱신)
