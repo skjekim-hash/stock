@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-04-r19";
+const APP_VERSION = "v2026-07-04-r20";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -845,6 +845,18 @@ function renderFlowBars(daily){
   return "<div style='display:flex;align-items:stretch;gap:2px'>"+bars+"</div>";
 }
 
+// 브리핑에서 카드로 점프 — 고정 헤더·탭바 높이를 보정해 카드 '제목'부터 보이게
+function jumpToCard(code){
+  var el=document.getElementById('card-'+code);
+  if(!el) return;
+  var tb=document.getElementById('stockTabBar');
+  var hd=document.querySelector('.hdr');
+  var off=8;
+  if(tb&&tb.style.display!=='none') off=tb.getBoundingClientRect().bottom+8;
+  else if(hd) off=hd.getBoundingClientRect().bottom+8;
+  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});
+}
+
 // 🧭 오늘의 액션 브리핑 — "오늘 뭘 해야 하지?"에 3초 안에 답하는 첫 화면 카드
 // 데이터는 전부 기존 필드 조합 (점수 로직 무관한 표시 레이어)
 function renderActionBriefing(stocks){
@@ -863,7 +875,7 @@ function renderActionBriefing(stocks){
     var jump=function(s){
       var st=(typeof STOCKS!=="undefined"&&STOCKS.find(function(x){return x.code===s.code;}))||{};
       var nm=(st.emoji?st.emoji+" ":"")+(st.name||s.name||s.code);
-      return "<b style=\"color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer\" onclick=\"var el=document.getElementById('card-"+s.code+"');if(el)el.scrollIntoView({behavior:'smooth'})\">"+nm+"</b>";
+      return "<b style=\"color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer\" onclick=\"jumpToCard('"+s.code+"')\">"+nm+"</b>";
     };
     var lines=[];
     if(buy.length)   lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>✅ 매수 문턱 도달 "+buy.length+"</span> — "+buy.map(jump).join(", ")+" <span style='color:var(--text3)'>(계획 물량)</span></div>");
