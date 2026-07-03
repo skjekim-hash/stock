@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-03-r12";
+const APP_VERSION = "v2026-07-03-r13";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -799,6 +799,31 @@ function svgRadar(s){
     g+="<text x='"+p[0]+"' y='"+(+p[1]+3)+"' text-anchor='"+anchor+"' fill='"+col+"' font-size='9.5' font-weight='600'>"+ax[0]+" "+Math.round(ax[1]*100)+"</text>";
   });
   return "<svg width='"+W+"' height='"+H+"' viewBox='0 0 "+W+" "+H+"' style='overflow:visible'>"+g+"</svg>";
+}
+
+// 점수 추세 미니차트 — 신호추적(일별 스냅샷)에서 해당 종목 점수 흐름을 그림
+// 같은 -3이라도 "올라오는 중"과 "무너지는 중"은 타이밍 판단이 정반대
+function svgScoreTrend(code,w,h){
+  try{
+    var track=loadSignalTrack(), vals=[];
+    track.slice(-10).forEach(function(t){
+      var g=t.signals&&t.signals[code];
+      if(g&&typeof g.score==="number") vals.push(g.score);
+    });
+    if(vals.length<2) return null;
+    var min=Math.min.apply(null,vals.concat([0])), max=Math.max.apply(null,vals.concat([0]));
+    var span=(max-min)||1;
+    var X=function(i){return (i/(vals.length-1))*(w-6)+3;};
+    var Y=function(v){return h-3-((v-min)/span)*(h-6);};
+    var pts=vals.map(function(v,i){return X(i).toFixed(1)+","+Y(v).toFixed(1);});
+    var c=vals[vals.length-1]>=vals[0]?"#00e5a0":"#ff4060";
+    var zero=Y(0).toFixed(1);
+    return {first:vals[0], last:vals[vals.length-1], n:vals.length,
+      svg:"<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>"
+      +"<line x1='3' y1='"+zero+"' x2='"+(w-3)+"' y2='"+zero+"' stroke='rgba(255,255,255,.15)' stroke-width='1' stroke-dasharray='3 3'/>"
+      +"<polyline points='"+pts.join(" ")+"' fill='none' stroke='"+c+"' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' style='filter:drop-shadow(0 0 3px "+c+"88)'/>"
+      +"<circle cx='"+X(vals.length-1).toFixed(1)+"' cy='"+Y(vals[vals.length-1]).toFixed(1)+"' r='2.2' fill='"+c+"' style='filter:drop-shadow(0 0 4px "+c+")'/></svg>"};
+  }catch(e){ return null; }
 }
 
 /* ── SUMMARY TABLE ── */
@@ -1289,6 +1314,13 @@ function renderCard(s,idx){
         <div style="font-size:12px;color:var(--text2);margin-bottom:3px">신호 강도</div>
         <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=st2?"강한 매도":s.score<=-3?"매도":"관망"}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">🎯 매수 문턱 <b style="color:#00e5a0">${bt}</b>${s.buyThreshold&&s.buyThreshold.label!=="기본"?" ("+s.buyThreshold.label+")":""} · 매도 <b style="color:#ff4060">${st2}</b><br>문턱까지 <b style="color:${sc}">${s.score>=bt?"도달":(bt-s.score)+"점"}</b> 남음</div>
+        ${(function(){
+          var t=svgScoreTrend(s.code,88,20);
+          if(!t) return "";
+          var dir=t.last>t.first?"↑ 개선 중":t.last<t.first?"↓ 악화 중":"→ 유지";
+          var dc=t.last>t.first?"#00e5a0":t.last<t.first?"#ff6680":"#8090b0";
+          return `<div style="font-size:11px;color:var(--text3);margin-top:6px">점수 흐름 ${t.svg} <b style="color:${dc}">${t.first>0?"+":""}${t.first}→${t.last>0?"+":""}${t.last} ${dir}</b></div>`;
+        })()}
       </div>
     </div>`;
     })()}
@@ -3246,6 +3278,25 @@ function renderBuyRange(s){
       </div>
     </div>
     <div style="font-size:11px;color:${curColor};line-height:1.6;font-weight:600">${curMsg}</div>
+    ${(function(){
+      if(!(r.A>0&&r.B>r.A&&s.price>0)) return "";
+      var span=r.B-r.A, lo=r.A-span*0.9, hi=r.B+span*0.9;
+      var P=function(v){return Math.max(2,Math.min(98,(v-lo)/(hi-lo)*100));};
+      var pp=P(s.price), pa=P(r.A), pb=P(r.B);
+      var mc=s.price>r.B?"#d9657a":s.price<r.A?"#f5b942":"#00e5a0";
+      return `<div style="margin-top:10px">
+        <div style="position:relative;height:10px;border-radius:6px;background:rgba(255,255,255,.05)">
+          <div style="position:absolute;left:${pa}%;width:${pb-pa}%;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,rgba(92,184,138,.45),rgba(217,101,122,.45))"></div>
+          <div style="position:absolute;left:${pp}%;top:-4px;bottom:-4px;width:2.5px;transform:translateX(-50%);background:${mc};border-radius:2px;box-shadow:0 0 6px ${mc}"></div>
+        </div>
+        <div style="position:relative;height:15px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">
+          <span style="position:absolute;left:${pa}%;transform:translateX(-50%)">A</span>
+          <span style="position:absolute;left:${pb}%;transform:translateX(-50%)">B</span>
+          <span style="position:absolute;left:${pp}%;transform:translateX(-50%);color:${mc};font-weight:700">▲</span>
+        </div>
+        <div style="font-size:11px;color:${mc};font-weight:700;text-align:center">현재가 ${s.price>r.B?"매수 범위 위 — 추격 구간":s.price<r.A?"지지선 아래 — 지지 확인 구간":"매수 범위 안 ✓"}</div>
+      </div>`;
+    })()}
     <div style="font-size:11px;color:#9a958c;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px solid rgba(212,175,106,0.1)">
       <b style="color:${r.belowColor}">A 이하</b>: ${r.belowText}
     </div>
