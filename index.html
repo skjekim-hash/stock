@@ -585,7 +585,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-03-r9";
+const APP_VERSION = "v2026-07-03-r11";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -994,6 +994,7 @@ function renderSummaryTable(stocks){
     var cid=s.code;
     // 신호 배지 (요약에서 한눈에) — 경고(빨강) 우선, 기회(청록) 다음
     var sigBadges=[];
+    if(s.flowTurnaround) sigBadges.push("<span style='color:#00e5a0'>🌊외인전환</span>");
     if(s.chaseWarning) sigBadges.push("<span style='color:#ff4060'>🚫추격</span>");
     if(s.marginCallRisk) sigBadges.push("<span style='color:#ff4060'>⚠️반대매매</span>");
     if(ohLevel==="경고") sigBadges.push("<span style='color:#ff4060'>🚫과열</span>");
@@ -1162,6 +1163,7 @@ function renderCard(s,idx){
         <div class="card-opinion-pill" style="background:${oc}18;color:${oc};border:1px solid ${oc}35">${oi} ${opLabel}</div>
         ${op==="중립"&&s.nuance?`<div style="font-size:11px;color:${s.nuance.indexOf("관찰")>=0?"#f5b942":s.score<=-1?"#ff6680":"#9ab"};text-align:right;margin-top:2px;font-weight:600">${s.nuance}</div>`:""}
         ${s.macro&&s.macro.adj?`<div style="font-size:11px;color:#8090b0;text-align:right;margin-top:2px">🌐 매크로 ${s.macro.adj>0?"+":""}${s.macro.adj} <span style="opacity:.75">(${(s.macro.parts||[]).join(" · ")})</span></div>`:""}
+        ${s.flowTurnaround?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00e5a020;border:1px solid #00e5a060;border-radius:20px;padding:2px 8px;font-size:11px;color:#00e5a0;font-weight:700">🌊 외인 당일 순매수 전환</span></div>`:""}
         ${s.contrarian?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ffc94020;border:1px solid #ffc94050;border-radius:20px;padding:2px 8px;font-size:11px;color:#ffc940;font-weight:700">⚡ 역발상 반등 주목</span></div>`:""}
         ${s.marginCallRisk?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ff406020;border:1px solid #ff406050;border-radius:20px;padding:2px 8px;font-size:11px;color:#ff4060;font-weight:700">⚠️ 반대매매 주의</span></div>`:""}
         ${s.turnover?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00d4ff20;border:1px solid #00d4ff50;border-radius:20px;padding:2px 8px;font-size:11px;color:#00d4ff;font-weight:700">🔄 물갈이 진행</span></div>`:""}
@@ -1429,6 +1431,22 @@ function renderCard(s,idx){
       <span class="sec-num">06</span>
       <span class="sec-title" style="color:#00e5a0">거래 · 강도</span>
     </div>
+    ${s.intradayFlow?(function(){
+      var fl=s.intradayFlow;
+      var fc2=fl.foreign>0?"#00e5a0":fl.foreign<0?"#ff4060":"#8090b0";
+      var ic2=fl.institution>0?"#4090ff":fl.institution<0?"#ff4060":"#8090b0";
+      var turn=s.flowTurnaround;
+      return `<div style="margin-bottom:10px;padding:10px 12px;border-radius:11px;background:${turn?'rgba(0,229,160,.1)':'rgba(0,240,255,.04)'};border:1.5px solid ${turn?'rgba(0,229,160,.45)':'rgba(0,240,255,.15)'}${turn?';box-shadow:0 0 12px rgba(0,229,160,.15)':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:11px;font-weight:800;color:${turn?'#00e5a0':'#00d4ff'}">⚡ 오늘 장중 잠정 <span style="font-weight:400;color:var(--text3)">(${fl.asOf} 집계)</span></span>
+        </div>
+        <div style="font-size:12px;font-family:'JetBrains Mono',monospace">
+          외국인 <b style="color:${fc2}">${fl.foreign>0?"+":""}${fl.foreign.toLocaleString()}</b> · 기관 <b style="color:${ic2}">${fl.institution>0?"+":""}${fl.institution.toLocaleString()}</b>
+        </div>
+        ${turn?`<div style="font-size:11px;color:#00e5a0;font-weight:700;margin-top:5px">🌊 외국인 당일 순매수 전환 — ${Math.abs(s.investor.streak)}일 연속 순매도 후 첫 매수 신호</div>`:""}
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">잠정치는 장중 집계라 마감 확정치와 다를 수 있어요. 아래 확정 수급(T-1)과 함께 보세요.</div>
+      </div>`;
+    })():""}
     ${s.investor&&(s.investor.foreign||s.investor.institution)?`<div class="sec-sub">수급 (전일 마감)</div>
     <div class="irow">
       <span class="irow-l">외국인</span>
@@ -1678,6 +1696,7 @@ function renderCard(s,idx){
       <div class="guide-item"><b>볼린저밴드</b> — 변동성 범위. 하단 근접은 과매도(반등 기대), 상단 근접은 과열.</div>
       <div class="guide-item"><b>거래대금</b> — 가격×거래량. 2배 이상(🔥)이면 큰 자금 유입 = 세력 진입 가능성.</div>
       <div class="guide-item"><b>RS(상대강도)</b> — KOSPI 대비 강도. +면 시장보다 강함(아웃퍼폼), −면 약함.</div>
+      <div class="guide-item"><b>⚡ 오늘 장중 잠정 수급</b> — 확정 수급은 하루 늦은(T-1) 정보인데, 잠정치는 <b>오늘 장중 외국인·기관이 사고 있는지</b>를 실시간 집계로 보여주는 선행 정보예요. 특히 <b style="color:#00e5a0">🌊 외인 당일 순매수 전환</b>(연속 순매도 중이던 외국인이 오늘 매수로 돌아섬)은 수급 반전의 첫 신호라 타이밍 판단에 가장 값진 순간입니다. 단, 장중 집계라 마감 확정치와 다를 수 있고 점수에는 반영하지 않아요 — 진입 방아쇠 판단의 참고로만 쓰세요.</div>
       <div class="guide-item" style="border-top:1px solid #2a2820;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>📐 시각화 읽는 법 (게이지 · 추세선 · 레이더)</b>
       </div>
@@ -1961,6 +1980,8 @@ function recordDailySignals(stocks){
   stocks.forEach(function(s){
     snapshot.signals[s.code] = {
       score: s.score, opinion: s.opinion, price: s.price,
+      turn: !!s.flowTurnaround,                       // 🌊 외인 당일 전환 여부 (적중률 검증용)
+      th: (s.buyThreshold&&s.buyThreshold.buy)||6,    // 당일 매수 문턱 (레짐별 성적 분석용)
       name: (typeof STOCKS!=="undefined" && STOCKS.find(function(x){return x.code===s.code;})||{}).name || s.code
     };
   });
@@ -1981,6 +2002,7 @@ function scoreSignalAccuracy(currentStocks){
   var today = new Date(kstDateStr());
   var result = {
     sell:{hit:0,miss:0,total:0}, buy:{hit:0,miss:0,total:0},
+    turn:{hit:0,miss:0,total:0},   // 🌊 외인 전환 신호: 3일 후 +1% 이상이면 적중
     examples:[]
   };
   track.forEach(function(snap){
@@ -2001,6 +2023,11 @@ function scoreSignalAccuracy(currentStocks){
               : (daysSince<=LAG+EVAL_WINDOW ? curPrice[code] : null);
       if(!now || !sig.price) return;
       var chg = (now - sig.price)/sig.price*100;
+      // 🌊 외인 전환 신호: 진짜 반등(+1%↑)으로 이어졌는지 (의견과 독립 집계)
+      if(sig.turn){
+        result.turn.total++;
+        if(chg >= HIT) result.turn.hit++; else result.turn.miss++;
+      }
       // 매도 신호: 이후 떨어지면 적중 / 오르면 빗나감
       if(sig.opinion==="매도" || sig.score<=-5){
         result.sell.total++;
@@ -2276,6 +2303,19 @@ function renderSignalAccuracy(){
         <div style="font-size:11px;color:var(--text2)">${r.buy.total}건 중 ${r.buy.hit}건</div>
       </div>
     </div>`;
+  // 🌊 외인 전환 신호 성적 (표본이 생기면 표시)
+  if(r.turn && r.turn.total>0){
+    var turnRate = Math.round(r.turn.hit/r.turn.total*100);
+    var tc3 = turnRate>=60?"#00e5a0":turnRate>=40?"#ffc940":"#ff4060";
+    html += `<div style="display:flex;align-items:center;gap:10px;background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2);border-radius:8px;padding:8px 12px;margin-bottom:8px">
+      <span style="font-size:11px;color:var(--text2);flex:1">🌊 외인 전환 → 3일 후 +1%↑</span>
+      <span style="font-size:15px;font-weight:800;color:${tc3}">${turnRate}%</span>
+      <span style="font-size:11px;color:var(--text2)">${r.turn.total}건 중 ${r.turn.hit}</span>
+    </div>`;
+    if(r.turn.total>=10){
+      html += `<div style="font-size:11px;color:var(--gold);line-height:1.6;margin-bottom:6px">${turnRate>=60?"💡 🌊 신호 적중률이 확인됐어요. 점수 정식 편입(+1점)을 검토할 만합니다.":"🌊 신호 적중률이 아직 낮아요 — 점수 편입은 보류가 맞습니다."}</div>`;
+    }
+  }
   // 빗나간 사례 (사용자가 지적한 "매도인데 오름" 같은 것)
   if(r.examples.length){
     var ex = r.examples.slice(-3).reverse();
