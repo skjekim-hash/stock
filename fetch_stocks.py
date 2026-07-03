@@ -204,11 +204,30 @@ def fetch_kis_investor(code):
     return None
 
 def fetch_kis_intraday_flow(code):
-    """장중 외국인·기관 '잠정' 순매수 (당일 실시간 집계).
-    확정치(T-1)보다 하루 빠른 선행 정보 — 점수엔 미반영, 표시·신호용.
-    가장 최근 행의 날짜가 오늘(KST)일 때만 잠정치로 인정."""
+    """당일 외국인·기관 순매수. 2단계:
+    ① 장중: '추정가집계' API (KRX 잠정, 약 30분 단위 갱신)
+    ② 폴백: inquire-investor의 당일 행 (장 마감 후 생성됨)
+    실패/데이터 없음 → None (프런트에서 박스 숨김)."""
     if not KIS_AVAILABLE: return None
     if "openapivts" in KIS_BASE_URL: return None
+    # ① 장중 추정가집계
+    try:
+        d = kis_request("/uapi/domestic-stock/v1/quotations/investor-trend-estimate",
+                        {"MKSC_SHRN_ISCD": code},
+                        "HHPTJ04160200")
+        rows = (d or {}).get("output2") or (d or {}).get("output") or []
+        if isinstance(rows, dict): rows = [rows]
+        if rows:
+            row = rows[0]  # 최신 집계 행
+            f    = round(to_n(row.get("frgn_fake_ntby_qty") or row.get("frgn_ntby_qty") or 0))
+            inst = round(to_n(row.get("orgn_fake_ntby_qty") or row.get("orgn_ntby_qty") or 0))
+            if f != 0 or inst != 0:
+                return {"foreign": f, "institution": inst, "individual": 0,
+                        "asOf": datetime.now(KST).strftime("%H:%M"),
+                        "provisional": True, "src": "잠정집계"}
+    except Exception as e:
+        print(f"  KIS 추정가집계 실패 ({code}): {e}", file=sys.stderr)
+    # ② 마감 후 당일 확정 행
     try:
         d = kis_request("/uapi/domestic-stock/v1/quotations/inquire-investor",
                         {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code},
@@ -226,7 +245,7 @@ def fetch_kis_intraday_flow(code):
         inst = round(to_n(row.get("orgn_ntby_qty") or 0))
         indv = round(to_n(row.get("prsn_ntby_qty") or row.get("indvdl_ntby_qty") or 0))
         return {"foreign": f, "institution": inst, "individual": indv,
-                "asOf": datetime.now(KST).strftime("%H:%M"), "provisional": True}
+                "asOf": datetime.now(KST).strftime("%H:%M"), "provisional": True, "src": "당일마감"}
     except Exception as e:
         print(f"  KIS 장중 잠정 실패 ({code}): {e}", file=sys.stderr)
     return None
