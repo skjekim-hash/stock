@@ -1794,14 +1794,6 @@ def analyze_stock(stock, kospi, market=None):
         round((price - prev) / prev * 100, 2) if prev else 0, kospi.get("changePct", 0),
         round((price - closes_d[-6]) / closes_d[-6] * 100, 2) if has_data and len(closes_d) >= 6 else None,
         kospi.get("pct5", 0))
-    # ③ ATR(14) — 변동성 기반 손절폭 (지지선 손절과 함께 참고)
-    atr_v = None
-    if has_data and len(closes_d) >= 15:
-        _trs = [max(highs_d[i]-lows_d[i], abs(highs_d[i]-closes_d[i-1]), abs(lows_d[i]-closes_d[i-1]))
-                for i in range(1, len(closes_d))]
-        atr_v = sum(_trs[-14:]) / 14
-    atr = ({"value": round(atr_v), "pct": round(atr_v/price*100, 1),
-            "stop2x": round(price - 2*atr_v)} if atr_v and price > 0 else None)
     breakout  = check_52w_breakout(price, high52w, low52w)
     vol_surge = check_volume_surge(volumes_d) if has_data else {"surge": False, "ratio": 1.0, "comment": ""}
 
@@ -2029,7 +2021,6 @@ def analyze_stock(stock, kospi, market=None):
         "intradayFlow": intraday_flow,
         "micro": micro,          # ① 체결강도·호가잔량 (방아쇠)
         "program": program,      # ② 프로그램 당일 순매수
-        "atr": atr,              # ③ 변동성 손절 참고 (2×ATR)
         "flowTurnaround": bool(intraday_flow and intraday_flow.get("foreign", 0) > 0
                                and investor.get("streak", 0) <= -3),
         # 프런트 스파크라인용 최근 20일 종가 (마지막 값은 현재가로 갱신)
