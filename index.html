@@ -490,6 +490,12 @@ body::after{
 
 /* ── RS BADGE ── */
 .rs-badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 9px}
+/* 스크롤 시 헤더 축소 — 라벨·배지를 접어 콘텐츠 영역 확보 */
+.hdr{transition:padding .25s ease}
+.hdr-compact{padding-top:8px;padding-bottom:4px}
+.hdr-compact .hdr-label{display:none}
+.hdr-compact .hdr-badges{display:none}
+.hdr-compact .hdr-title{font-size:17px}
 /* 접근성: 움직임 최소화 설정 시 모든 애니메이션 정지 (오로라·빔·시머 포함) */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -585,10 +591,19 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-04-r20";
+const APP_VERSION = "v2026-07-04-r23";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
+  // 헤더 자동 축소: 아래로 스크롤하면 접고, 최상단 근처로 오면 펼침
+  var hdr=document.querySelector(".hdr");
+  if(hdr){
+    window.addEventListener("scroll", function(){
+      var y=window.scrollY;
+      if(y>140) hdr.classList.add("hdr-compact");
+      else if(y<50) hdr.classList.remove("hdr-compact");
+    }, {passive:true});
+  }
   // 헤더 라벨에 리비전 표시 (v2026-07-02-r5 → NEON r5)
   var hv=document.getElementById("hdrVer");
   var m=APP_VERSION.match(/(r\d+)$/);
@@ -898,6 +913,41 @@ function renderActionBriefing(stocks){
   }catch(e){ return ""; }
 }
 
+// 📈 예측 자가 채점 — 어제 저장한 '내일 경향'을 오늘 실제 코스피로 채점
+// "시장이 예상과 다르게 흘러가는 경우"를 시스템 스스로 인정하고 적중률로 신뢰도를 보여줌
+function trackForecast(m,kospi){
+  try{
+    if(!m||!m.forecast||!m.forecast.kospi) return "";
+    var today=kstDateStr();
+    var hist=JSON.parse(localStorage.getItem('mkt_forecast_hist_v1')||'[]');
+    var pct=(kospi&&typeof kospi.changePct==="number")?kospi.changePct:null;
+    // 1) 과거 미채점 예측 중 가장 최근 것을 오늘 실제로 채점
+    var pending=null;
+    hist.forEach(function(h){ if(h.date<today&&h.actual==null) pending=h; });
+    if(pending&&pct!=null&&pct!==0){
+      pending.actual=pct;
+      var d=pending.dir;
+      pending.verdict = d==="하락"?(pct<=-0.3?"hit":pct>=0.5?"miss":"flat")
+                      : d==="상승"?(pct>=0.3?"hit":pct<=-0.5?"miss":"flat")
+                      : (Math.abs(pct)<=0.7?"hit":"miss");
+    }
+    // 2) 오늘의 예측 저장 (내일 채점됨) — 하루 1회
+    if(!hist.some(function(h){return h.date===today;})){
+      hist.push({date:today,dir:m.forecast.kospi.dir,low:m.forecast.kospi.low,high:m.forecast.kospi.high,actual:null});
+    }
+    if(hist.length>30) hist=hist.slice(-30);
+    localStorage.setItem('mkt_forecast_hist_v1',JSON.stringify(hist));
+    // 3) 최근 결과 + 누적 적중률
+    var scored=hist.filter(function(h){return h.verdict;});
+    if(!scored.length) return "";
+    var last=scored[scored.length-1];
+    var hits=scored.filter(function(h){return h.verdict==="hit";}).length;
+    var mark=last.verdict==="hit"?"✅ 적중":last.verdict==="miss"?"❌ 빗나감":"◐ 보합권";
+    var mc=last.verdict==="hit"?"#00e5a0":last.verdict==="miss"?"#ff6680":"#ffc940";
+    return "<div style='font-size:11px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.08);color:#6a7a98'>전일 예측 <b>"+last.dir+"</b> → 실제 <b>"+(last.actual>0?"+":"")+last.actual+"%</b> <b style='color:"+mc+"'>"+mark+"</b> · 최근 적중 <b>"+hits+"/"+scored.length+"</b>"+(last.verdict==="miss"?" — 빗나간 날엔 야간지표 의존을 낮추세요":"")+"</div>";
+  }catch(e){ return ""; }
+}
+
 function renderMarketBanner(m){
   if(!m||!m.summary) return "";
   var sm=m.summary;
@@ -1000,6 +1050,15 @@ function renderMarketBanner(m){
     +"</div>"
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
     +(sm.buyThreshold?"<div style='font-size:11px;font-weight:700;margin-top:6px;color:"+(sm.buyThreshold===5?"#00e5a0":sm.buyThreshold===7?"#ff6680":"#9ab")+"'>🎯 오늘 매수 문턱: "+sm.buyThreshold+"점 — "+(sm.thresholdNote||"")+"</div>":"")
+    +(function(){
+      var kp=(window.__kospi&&typeof window.__kospi.changePct==="number")?window.__kospi.changePct:null;
+      if(kp==null||typeof sm.score!=="number") return "";
+      var msg="";
+      if(sm.score<=-1.5&&kp>=1.5) msg="⚡ 역행 장세 — 야간지표는 약세인데 코스피 +"+kp+"% 강세. 야간 기반 예측과 매크로 감점의 신뢰를 낮추고, 지금의 수급·자리(포지션 바) 중심으로 판단하세요.";
+      else if(sm.score>=1.5&&kp<=-1.5) msg="⚡ 역행 장세 — 야간지표는 우호인데 코스피 "+kp+"% 약세. 완화된 매수 문턱을 그대로 믿지 말고 보수적으로.";
+      if(!msg) return "";
+      return "<div style='margin-top:8px;padding:9px 11px;background:rgba(255,201,64,.08);border:1.5px solid rgba(255,201,64,.45);border-radius:9px;font-size:11px;color:#ffc940;font-weight:600;line-height:1.6'>"+msg+"</div>";
+    })()
     +(sm.cnyNote?"<div style='font-size:11px;color:#6b7a89;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🇨🇳 "+sm.cnyNote+"</div>":"")
     +(sm.tsmcNote?"<div style='font-size:11px;color:#6b7a89;line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)'>🔷 "+sm.tsmcNote+"</div>":"")
     +(m.forecast?(function(){
@@ -1021,6 +1080,7 @@ function renderMarketBanner(m){
             +"</div>"
           +"</div>"
           +"<div style='font-size:11px;color:#6a7a98;line-height:1.5'>💡 "+f.disclaimer+"</div>"
+          +trackForecast(m, window.__kospi)
         +"</div>";
       })():"")
     +(m.expiry&&m.expiry.warn?(function(){
@@ -1031,6 +1091,7 @@ function renderMarketBanner(m){
           +(e.rebalance?"<div style='font-size:11px;color:#9a958c;line-height:1.5;margin-top:4px'>"+e.rebalance+"</div>":"")
         +"</div>";
       })():"")
+    +(m.fomc&&m.fomc.warn?"<div style='margin-top:8px;padding:9px 11px;background:rgba(64,144,255,0.09);border:1px solid rgba(64,144,255,0.4);border-radius:8px'><div style='font-size:11px;color:#7ab2ff;line-height:1.6;font-weight:600'>"+m.fomc.text+"</div></div>":"")
     +nightAlert
     +"</div>";
 }
@@ -1877,6 +1938,7 @@ async function loadData(silent){
       await new Promise(r=>setTimeout(r,200));
     }
 
+    window.__kospi=data.kospi;
     if(data.kospi?.price){
       const k=data.kospi;
       const up=k.changePct>=0;
@@ -2442,16 +2504,34 @@ function renderSignalAccuracy(){
 function renderExitAlerts(arr, stocksData){
   const alerts = getExitAlerts(arr, stocksData);
   if(!alerts.length) return "";
-  const rows = alerts.map(a=>{
-    const tags = a.reasons.map(r=>`<span style="display:inline-block;background:${r.c}18;color:${r.c};border:1px solid ${r.c}40;border-radius:7px;padding:2px 7px;margin:2px 3px 0 0;font-size:11px;font-weight:700">${r.t}</span>`).join("");
+  // 종목별 그룹핑 — 같은 종목 여러 랏의 알림을 한 줄로 압축
+  const groups = {};
+  alerts.forEach(a=>{
+    if(!groups[a.name]) groups[a.name] = {name:a.name, n:0, losses:[], days:[], others:{}};
+    const g = groups[a.name]; g.n++;
+    a.reasons.forEach(r=>{
+      const lm = /손실\s*(-?[\d.]+)%/.exec(r.t);
+      const dm = /(\d+)일 보유/.exec(r.t);
+      if(lm) g.losses.push(parseFloat(lm[1]));
+      else if(dm) g.days.push(parseInt(dm[1]));
+      else g.others[r.t] = r.c;  // 그 외 사유는 텍스트 기준 중복 제거
+    });
+  });
+  const tag = (t,c)=>`<span style="display:inline-block;background:${c}18;color:${c};border:1px solid ${c}40;border-radius:7px;padding:2px 7px;margin:2px 3px 0 0;font-size:11px;font-weight:700">${t}</span>`;
+  const rng = (a,su)=>{const mn=Math.min.apply(null,a),mx=Math.max.apply(null,a);return mn===mx?mn+su:mn+"~"+mx+su;};
+  const rows = Object.values(groups).map(g=>{
+    let tags="";
+    if(g.losses.length) tags += tag("손실 "+rng(g.losses.map(v=>Math.round(v*10)/10),"%")+" — 손절선 점검","#ff4060");
+    if(g.days.length)   tags += tag(rng(g.days,"일")+" 보유 — 장기 점검","#ff8c40");
+    Object.keys(g.others).forEach(t=>{ tags += tag(t, g.others[t]); });
     return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
-      <div style="font-size:12px;font-weight:700;color:#e8e4dc;margin-bottom:3px">${a.name}</div>
+      <div style="font-size:12px;font-weight:700;color:#e8e4dc;margin-bottom:3px">${g.name}${g.n>1?` <span style="color:#ffb070;font-family:'JetBrains Mono',monospace">×${g.n}</span>`:""}</div>
       <div>${tags}</div>
     </div>`;
   }).join("");
   return `<div style="background:linear-gradient(135deg,#2a1810,#3a2010);border:1.5px solid #ff8c4055;border-radius:16px;padding:16px;margin-bottom:14px">
     <div style="font-size:11px;color:#ffb070;letter-spacing:1px;font-weight:700;margin-bottom:4px">🔔 청산 점검 알림</div>
-    <div style="font-size:11px;color:#a8b4c8;margin-bottom:10px">강제가 아닌 점검 신호예요. 최종 판단은 직접 하세요.</div>
+    <div style="font-size:11px;color:#a8b4c8;margin-bottom:10px">강제가 아닌 점검 신호예요. 같은 종목 여러 건은 묶어서 표시합니다. 최종 판단은 직접 하세요.</div>
     ${rows}
   </div>`;
 }
@@ -2534,7 +2614,14 @@ function renderHabitCard(arr){
   const watchHtml = h.watching.length?
     `<div style="margin-top:10px;padding:8px 10px;background:rgba(255,201,64,.08);border:1px solid rgba(255,201,64,.25);border-radius:9px">
       <div style="font-size:11px;color:#ffc940;font-weight:700;margin-bottom:3px">⏳ 미청산 주의 (5일+)</div>
-      <div style="font-size:11px;color:#b8b4ac;line-height:1.5">${h.watching.map(w=>`${w.name} ${w.days}일`).join(" · ")}<br><span style="color:#8090b0">이게 어떻게 끝나느냐에 따라 실제 점수가 달라져요.</span></div>
+      <div style="font-size:11px;color:#b8b4ac;line-height:1.5">${(function(){
+        var g={};
+        h.watching.forEach(function(w){ (g[w.name]=g[w.name]||[]).push(w.days); });
+        return Object.keys(g).map(function(n){
+          var d=g[n], mn=Math.min.apply(null,d), mx=Math.max.apply(null,d);
+          return n+(d.length>1?" ×"+d.length:"")+" ("+(mn===mx?mn:mn+"~"+mx)+"일)";
+        }).join(" · ");
+      })()}<br><span style="color:#8090b0">이게 어떻게 끝나느냐에 따라 실제 점수가 달라져요.</span></div>
     </div>`:"";
 
   return `<div style="background:${h.gBg};border:1.5px solid ${h.gColor}55;border-radius:16px;padding:16px;margin-bottom:14px">
