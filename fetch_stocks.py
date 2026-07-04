@@ -41,16 +41,16 @@ KST = timezone(timedelta(hours=9))
 #   fx +  : 원화 약세 → 수출주(현대차·LG전자) 수혜
 #   tnx + : 금리 상승 → 은행(KB) 마진 개선 / 성장주(NAVER) 부담(-)
 MACRO_SENS = {
-    "000660": {"sox": 0.5, "tsmc": 0.3, "nasdaq": 0.2},    # SK하이닉스: 반도체 직결
-    "005930": {"sox": 0.4, "tsmc": 0.25, "nasdaq": 0.2},   # 삼성전자: 반도체 + 지수 대표
-    "009150": {"sox": 0.3, "nasdaq": 0.2},                 # 삼성전기: 반도체 부품
+    "000660": {"sox": 0.4, "mu": 0.25, "nvda": 0.15, "tsmc": 0.15, "nasdaq": 0.15},  # SK하이닉스: 마이크론=같은 D램, 엔비디아=HBM 수요
+    "005930": {"sox": 0.35, "mu": 0.2, "nvda": 0.1, "tsmc": 0.15, "nasdaq": 0.15},   # 삼성전자
+    "009150": {"sox": 0.25, "nvda": 0.1, "nasdaq": 0.15},                            # 삼성전기: 반도체 부품
     "066570": {"fx": 0.2, "nasdaq": 0.15},                 # LG전자: 수출가전 (원화약세 수혜)
     "005380": {"fx": 0.3},                                 # 현대차: 원화약세 수혜 대표
     "105560": {"tnx": 0.3, "vix": -0.1},                   # KB금융: 금리↑ 수혜, 공포↑ 부담
     "017670": {"vix": 0.05},                               # SK텔레콤: 방어주 (감응 미미)
     "035420": {"nasdaq": 0.4, "tnx": -0.3},                # NAVER: 성장주 (나스닥 동행·금리 역행)
 }
-MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC"}
+MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC", "nvda": "NVDA", "mu": "마이크론"}
 
 def calc_macro_adj(code, market):
     """종목별 매크로 조정치와 근거 설명. 반환: (adj(-2~+2), parts[])"""
@@ -449,6 +449,8 @@ def fetch_market_signal():
         ("DX-Y.NYB", "달러인덱스",     "dxy"),
         ("CNY=X", "위안/달러",         "cny"),
         ("TSM",   "TSMC",             "tsmc"),
+        ("NVDA",  "엔비디아",          "nvda"),
+        ("MU",    "마이크론",          "mu"),
     ]
     out = {}
     for sym, name, key in targets:
@@ -526,6 +528,23 @@ def fetch_market_signal():
         advice = "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요."
 
     out["summary"] = {"mood": mood, "label": label, "score": round(score, 1), "advice": advice}
+    # ── FOMC 경고 (연준 공식 2026 일정 · 발표는 미국 14:00 ET = KST 다음날 새벽 3시경) ──
+    # 발표 전후는 통계적으로 변동성 급증 구간 — 신규 진입·물량에 대한 경고만 (점수 미반영)
+    FOMC_DECISIONS = ["2026-01-28","2026-03-18","2026-04-29","2026-06-17",
+                      "2026-07-29","2026-09-16","2026-10-28","2026-12-09"]
+    try:
+        today_kst = datetime.now(KST).date()
+        for ds in FOMC_DECISIONS:
+            us_day = datetime.strptime(ds, "%Y-%m-%d").date()
+            kst_impact = us_day + timedelta(days=1)  # KST 새벽 발표 → 이 날 장에 반영
+            dd = (kst_impact - today_kst).days
+            if 0 <= dd <= 2:
+                when = {0: "오늘 새벽 발표됨", 1: "내일 새벽", 2: "모레 새벽"}[dd]
+                out["fomc"] = {"warn": True, "dday": dd,
+                    "text": f"🏛 FOMC 금리 발표 {when} (KST {kst_impact.strftime('%m/%d')} 03:00경) — 발표 전후 변동성 급증 구간. 신규 진입 신중, 발표 직전 물량 확대 자제."}
+                break
+    except Exception:
+        pass
     # ② 오늘의 매수 문턱 (레짐 가변): master_signal과 동일 컷오프(±1.5)
     _bt = 5 if score >= 1.5 else 7 if score <= -1.5 else 6
     out["summary"]["buyThreshold"] = _bt
