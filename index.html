@@ -591,7 +591,7 @@ body::after{
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-04-r23";
+const APP_VERSION = "v2026-07-04-r25";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1292,6 +1292,7 @@ function renderCard(s,idx){
         <div class="card-name-row">
           <span class="card-name">${st.name}</span>
           <button class="rec-mini" onclick="recordEntry('${s.code}')">📝</button>
+          <button class="rec-mini" onclick="_simState.code='${s.code}';openSim()" title="이 종목 진입 시뮬레이션">🎯</button>
         </div>
         <div class="card-hdr-prices">
           <span class="card-cur-price" style="color:${cc}">${W(s.price)}</span>
@@ -3456,7 +3457,8 @@ function renderBuyRange(s){
         <div style="font-size:11px;color:${mc};font-weight:700;text-align:center">현재가 ${s.price>r.B?"매수 범위 위 — 추격 구간":s.price<r.A?"지지선 아래 — 지지 확인 구간":"매수 범위 안 ✓"}</div>
       </div>`;
     })()}
-    ${s.atr?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(212,175,106,0.1)">🛡 <b style="color:#9ab">매수 보유 시 하방 손절 (2×ATR)</b>: <b style="color:#ff8090;font-family:'JetBrains Mono',monospace">${W(s.atr.stop2x)}</b> 아래로 빠지면 정상 출렁임이 아닌 이탈 <span style="opacity:.8">(일평균 변동 ±${s.atr.pct}%${s.atr.pct>=4?" — 고변동 장세, 손절폭이 넓으니 물량으로 리스크 조절":""})</span></div>`:""}
+    ${s.atr&&s.atrStopLoss?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(212,175,106,0.1)">🛡 <b style="color:#9ab">매수 보유 시 하방 손절 (2×ATR)</b>: <b style="color:#ff8090;font-family:'JetBrains Mono',monospace">${W(s.atrStopLoss)}</b> 아래로 빠지면 정상 출렁임이 아닌 이탈 <span style="opacity:.8">(일평균 변동 ±${s.atr.pct}%${s.atr.pct>=4?" — 고변동 장세, 손절폭이 넓으니 물량으로 리스크 조절":""})</span></div>`:""}
+    ${s.pivot&&s.pivot.s1&&r.A&&Math.abs(s.pivot.s1-r.A)/r.A>0.02?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:6px">※ 지지선 기준이 화면마다 다른 이유: 여기 <b>A</b>는 단기 지지(일목·이평 기반), 요약표의 <b>S1 ${W(s.pivot.s1)}</b>은 피봇 기반 — A가 깨지면 S1이 다음 방어선이에요.</div>`:""}
     <div style="font-size:11px;color:#9a958c;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px solid rgba(212,175,106,0.1)">
       <b style="color:${r.belowColor}">A 이하</b>: ${r.belowText}
     </div>
@@ -3745,6 +3747,15 @@ function renderSim(){
       if(fit.verdict==="noSupport") return `<div style="background:#2a2820;border-radius:12px;padding:13px;margin-bottom:12px;font-size:12px;color:#6b7a89;line-height:1.6">현재가 아래 지지선이 없어요(신고가 구간). 진입 기준 잡기 어려움 — <b style="color:#ff8888">신규 진입 신중</b>.</div>`;
       const vc={ok:"#2ecc71",caution:"#ffc940",hold:"#ff6b6b"}[fit.verdict];
       const vt={ok:"✅ 소량 신규 진입 가능",caution:"⚠️ 경계 — 아주 소량만/조금 더 대기",hold:"🚫 진입 보류 — 너무 높은 자리"}[fit.verdict];
+      // 종목 의견 게이트 — '자리'가 좋아도 시스템 의견이 매도면 그게 우선
+      let gate="";
+      if(s.opinion==="매도"){
+        gate=`<div style="background:#7a1f1f2e;border:1.5px solid #ff6b6b77;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#ff9aa8;line-height:1.65"><b>🚫 종목 의견 매도(${s.score>0?"+":""}${s.score}) — 시스템은 지금 신규 진입에 반대합니다.</b><br>아래 판정은 '가격 자리'만 본 것이에요. 자리가 좋아도 신호가 매도면 관망이 정석 — 그래도 진입한다면 선취 규칙(1/3 물량·손절 필수)보다 더 보수적으로.</div>`;
+      } else if(s.opinion==="중립"&&s.score<=-3){
+        gate=`<div style="background:#7a5c1a2e;border:1px solid #ffc94066;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#ffd27a;line-height:1.6">⚠️ 종목 의견 중립이지만 점수 ${s.score} — 매도 우위 기울기예요. 자리 판정과 별개로 신중하게.</div>`;
+      } else if(s.buyTrack&&s.buyTrack.type==="early"){
+        gate=`<div style="background:#00d4ff14;border:1px solid #00d4ff55;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#7adcff;line-height:1.6">★ 선취 매수 트랙 종목 — 1/3 물량 규칙과 함께 보세요.</div>`;
+      }
       const recPrice = Math.round(fit.firstSup*(1+fit.allow/100)); // 허용 이격 경계가 = 권장 진입 상한
       const recDropPct = ((entry-recPrice)/entry*100);
       const vmsg={
@@ -3759,8 +3770,8 @@ function renderSim(){
       const facHtml = fit.factors.map(f=>`<span style="display:inline-block;background:#1a1a1f;border-radius:6px;padding:2px 7px;margin:2px 3px 2px 0;font-size:11px;color:${f[1][0]==='+'?'#7ec99a':'#e89090'}">${f[0]} ${f[1]}</span>`).join("");
       const fund = s.fundamentals;
       const fundHtml = (fund&&fund.grade&&fund.grade!=="정보없음") ? `<div style="background:${fund.gradeColor}15;border:1px solid ${fund.gradeColor}40;border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:#d8d4cc;line-height:1.5"><b style="color:${fund.gradeColor}">${fund.grade}</b> — ${fund.comment}${fund.grade.includes("거품")?' <b style="color:#ff6b6b">진입 재고!</b>':''}</div>` : "";
-      return `<div style="background:${vc}18;border:1px solid ${vc}55;border-radius:12px;padding:13px;margin-bottom:12px">
-        <div style="font-size:14px;font-weight:800;color:${vc};margin-bottom:6px">${vt}</div>
+      return `${gate}<div style="background:${vc}18;border:1px solid ${vc}55;border-radius:12px;padding:13px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:800;color:${vc};margin-bottom:6px">${vt}${s.opinion==="매도"?' <span style="font-size:11px;color:#ff9aa8">(자리 기준 — 의견은 매도)</span>':''}</div>
         <div style="font-size:12px;color:#d8d4cc;line-height:1.6;margin-bottom:8px">${vmsg}</div>
         ${fundHtml}
         ${renderBuyRange(s)}
@@ -3780,6 +3791,11 @@ function renderSim(){
 
     <div style="font-size:12px;color:#8090b0;margin-bottom:8px;font-weight:700">📉 하락 시 대응 시나리오 (1주씩 추매 · 최대 3주)</div>
     ${simRender_levels(s, entry, shares)}
+
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="document.getElementById('simModal').style.display='none';recordEntry('${s.code}')" style="flex:1;background:#1f6b3a;border:none;border-radius:10px;padding:11px;color:#d8f5e4;font-size:12px;font-weight:800;cursor:pointer">📝 이 종목 진입 기록</button>
+      <button onclick="document.getElementById('simModal').style.display='none';openSwing()" style="flex:1;background:#2a2820;border:1px solid #d4af6a55;border-radius:10px;padding:11px;color:#d4af6a;font-size:12px;font-weight:700;cursor:pointer" title="물린 보유분의 평단 낮추기 계산">🔁 물림 해소는 스윙</button>
+    </div>
 
     <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #2a2820">
       ※ 지지선은 피봇·볼린저·이평·일목 기준 자동 산출. 추매는 "계획된 분할"일 때만 유효하며, 한도(3주) 도달 후엔 추매가 아니라 손절을 검토하세요. 본 시뮬레이션은 참고용입니다.
