@@ -18,11 +18,11 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#07060f;
-  --bg2:#0f1020;
-  --bg3:#16162a;
-  --border:rgba(0,240,255,0.16);
-  --border2:rgba(0,240,255,0.30);
+  --bg:#0a0e17;
+  --bg2:#101624;
+  --bg3:#161e30;
+  --border:rgba(120,150,200,0.14);
+  --border2:rgba(120,150,200,0.28);
   --green:#5cb88a;
   --red:#d9657a;
   --yellow:#d4af6a;
@@ -36,10 +36,10 @@
   --text2:#9a958c;
   --text3:#827c72;
   /* ── 프리미엄 다크 카드 토큰 ── */
-  --glass-bg:linear-gradient(160deg,#13152a,#0d0e1c);
-  --glass-bg2:#16162a;
-  --glass-border:rgba(0,240,255,0.16);
-  --glass-glow:rgba(212,175,106,0.12);
+  --glass-bg:linear-gradient(160deg,#121a2c,#0c111d);
+  --glass-bg2:#141c2e;
+  --glass-border:rgba(120,150,200,0.14);
+  --glass-glow:rgba(90,130,200,0.08);
   --glass-blur:12px;
   --shadow:0 6px 24px rgba(0,0,0,0.4);
   --shadow-lg:0 10px 36px rgba(0,0,0,0.55);
@@ -57,26 +57,12 @@ body::before{
   content:'';
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:
-    radial-gradient(ellipse at 50% 0%,#0d1228 0%,transparent 55%),
-    radial-gradient(ellipse at 50% 100%,#140d24 0%,transparent 50%),
-    #07060f;
+    radial-gradient(ellipse at 50% 0%,#0e1524 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 100%,#0c1220 0%,transparent 50%),
+    #0a0e17;
   pointer-events:none;z-index:-1;
 }
-/* 🌌 떠다니는 오로라 (홀로그램 분위기) */
-body::after{
-  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;z-index:-1;
-  background:
-    radial-gradient(340px circle at 12% 10%, rgba(0,240,255,0.22), transparent 62%),
-    radial-gradient(360px circle at 88% 90%, rgba(150,90,255,0.22), transparent 62%),
-    radial-gradient(300px circle at 90% 18%, rgba(0,150,255,0.14), transparent 60%),
-    radial-gradient(320px circle at 8% 80%, rgba(190,80,220,0.12), transparent 60%);
-  animation:auroraFloat 22s ease-in-out infinite alternate;
-}
-@keyframes auroraFloat{
-  0%{transform:translate(0,0) scale(1)}
-  100%{transform:translate(20px,30px) scale(1.1)}
-}
+/* 상황실 원칙: 배경은 조용히 — 오로라 제거, 신호만 빛난다 */
 @keyframes glassDrift{0%{opacity:1}100%{opacity:1}}
 
 /* ── ANIMATIONS ── */
@@ -89,25 +75,19 @@ body::after{
 
 /* ── HEADER ── */
 .hdr{
-  background:rgba(7,6,15,0.85);
+  background:rgba(10,14,23,0.88);
   backdrop-filter:blur(14px) saturate(140%);
   -webkit-backdrop-filter:blur(14px) saturate(140%);
-  border-bottom:1px solid rgba(0,240,255,0.22);
-  box-shadow:0 1px 14px rgba(0,240,255,0.10);
+  border-bottom:1px solid rgba(120,150,200,0.18);
+  box-shadow:0 1px 10px rgba(0,0,0,0.35);
   padding:14px 16px 11px;
   position:sticky;top:0;z-index:100;
 }
-.hdr::after{
-  content:'';position:absolute;left:8%;bottom:0;height:1px;width:30%;
-  background:linear-gradient(90deg,transparent,rgba(0,240,255,0.9),transparent);
-  animation:hdrBeam 4.5s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes hdrBeam{0%{left:5%;opacity:0}25%{opacity:1}75%{opacity:1}100%{left:65%;opacity:0}}
+/* 헤더 빔 제거 (상황실 절제) */25%{opacity:1}75%{opacity:1}100%{left:65%;opacity:0}}
 .hdr-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .hdr-brand{display:flex;flex-direction:column;gap:1px}
-.hdr-label{font-size:11.5px;letter-spacing:3px;color:var(--gold);font-family:'JetBrains Mono',monospace;opacity:.9;text-shadow:0 0 10px rgba(212,175,106,0.45)}
-.hdr-title{font-size:21px;font-weight:900;letter-spacing:-.5px;text-shadow:0 0 16px rgba(0,240,255,0.18)}
+.hdr-label{font-size:11.5px;letter-spacing:3px;color:var(--gold);font-family:'JetBrains Mono',monospace;opacity:.9;}
+.hdr-title{font-size:21px;font-weight:900;letter-spacing:-.5px;}
 
 .btn-main{
   display:flex;align-items:center;gap:6px;
@@ -490,6 +470,23 @@ body::after{
 
 /* ── RS BADGE ── */
 .rs-badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 9px}
+/* ── 하단 탭 바 (엄지 동선) ── */
+#bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;
+  background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid rgba(120,150,200,0.18);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#bottomNav button{flex:1;background:none;border:none;color:var(--text2);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;font-size:11px;font-weight:600}
+#bottomNav button span{font-size:19px;line-height:1}
+#bottomNav button:active{color:var(--text)}
+body{padding-bottom:74px}
+/* 헤더 버튼은 갱신(🔄)만 남기고 하단 탭으로 이전 */
+.hdr-btns .btn-icon:not(.btn-icon-main){display:none}
+/* ── 수집 지연 토스트 ── */
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);z-index:300;
+  background:#2a1518;border:1px solid rgba(255,80,100,.5);color:#ffb0b8;border-radius:12px;
+  padding:10px 16px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;max-width:86vw;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* 스크롤 시 헤더 축소 — 라벨·배지를 접어 콘텐츠 영역 확보 */
 .hdr{transition:padding .25s ease}
 .hdr-compact{padding-top:8px;padding-bottom:4px}
@@ -589,9 +586,18 @@ body::after{
   </div>
 </div>
 
+<nav id="bottomNav">
+  <button onclick="window.scrollTo({top:0,behavior:'smooth'});if(document.getElementById('results').style.display!=='none')loadData(true)"><span>🏠</span>홈</button>
+  <button onclick="openJournal()"><span>📝</span>기록</button>
+  <button onclick="openSim()"><span>🎯</span>시뮬</button>
+  <button onclick="openRecover()"><span>💵</span>현금</button>
+  <button onclick="openSwing()"><span>🔁</span>스윙</button>
+</nav>
+<div id="toast"></div>
+
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-04-r25";
+const APP_VERSION = "v2026-07-05-r26";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1909,6 +1915,16 @@ function renderCard(s,idx){
 
 let loading=false;
 
+// 수집 지연/실패 토스트 — 조용히 실패하지 않고 능동적으로 알림
+function showToast(msg){
+  var t=document.getElementById("toast");
+  if(!t) return;
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(t._tm);
+  t._tm=setTimeout(function(){t.classList.remove("show");},4000);
+}
+
 async function loadData(silent){
   if(loading) return;
   loading=true;
@@ -2005,8 +2021,9 @@ async function loadData(silent){
 
   }catch(e){
     if(silent){
-      // 자동 갱신 실패는 조용히 넘어감 — 보던 화면을 에러로 덮지 않음
+      // 자동 갱신 실패는 화면을 덮지 않되, 토스트로 능동 알림
       console.warn("자동 갱신 실패:", e.message);
+      showToast("⚠️ 데이터 갱신 실패 — 다음 주기에 재시도합니다");
       return;
     }
     hideAll();
