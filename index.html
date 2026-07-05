@@ -476,6 +476,27 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 
 /* ── RS BADGE ── */
 .rs-badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 9px}
+/* ── 상황실 본문 디테일 ── */
+/* 섹션 번호: 단말기풍 칩 */
+.sec-num{background:rgba(120,150,200,.08)!important;border:1px solid rgba(120,150,200,.25)!important;
+  border-radius:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.sec-title{letter-spacing:.8px}
+/* 카드 헤더 아래 미세 구분 그라데이션 */
+.card-hdr{border-bottom:1px solid transparent;
+  border-image:linear-gradient(90deg,transparent,rgba(120,150,200,.28),transparent) 1}
+/* 요약 테이블: 단말기풍 컬럼 헤더 + 옅은 행 구분 */
+.sum-table th{letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;
+  color:#7a8db0;border-bottom:1px solid rgba(120,150,200,.22)}
+.sum-table td{border-bottom:1px solid rgba(120,150,200,.08)}
+.sum-table tr:active{background:rgba(120,150,200,.06)}
+/* 정보행 값: 고정폭 숫자 정렬 강화 */
+.irow-v{font-family:'JetBrains Mono',monospace}
+/* 얇은 네이비 스크롤바 */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(120,150,200,.25);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+/* 텍스트 선택: 골드 액센트 */
+::selection{background:rgba(212,175,106,.3)}
 /* ── 하단 탭 바 (엄지 동선) ── */
 #bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;
   background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -608,7 +629,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-05-r27";
+const APP_VERSION = "v2026-07-05-r28";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
