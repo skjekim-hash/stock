@@ -62,7 +62,13 @@ body::before{
     #0a0e17;
   pointer-events:none;z-index:-1;
 }
-/* 상황실 원칙: 배경은 조용히 — 오로라 제거, 신호만 빛난다 */
+/* 상황실 원칙: 배경은 조용히 — 신호만 빛난다. 미세 그리드로 관제실 질감만 */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(rgba(120,150,200,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,150,200,.035) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 25%,black 30%,transparent 78%);
+  mask-image:radial-gradient(ellipse at 50% 25%,black 30%,transparent 78%);}
 @keyframes glassDrift{0%{opacity:1}100%{opacity:1}}
 
 /* ── ANIMATIONS ── */
@@ -474,13 +480,18 @@ body::before{
 #bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;
   background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-top:1px solid rgba(120,150,200,0.18);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#bottomNav::before{content:'';position:absolute;top:-1px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,175,106,.55),transparent)}
 #bottomNav button{flex:1;background:none;border:none;color:var(--text2);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;font-size:11px;font-weight:600}
-#bottomNav button span{font-size:19px;line-height:1}
+#bottomNav button span{font-size:19px;line-height:1;transition:transform .15s}
 #bottomNav button:active{color:var(--text)}
-body{padding-bottom:74px}
+#bottomNav button:active span{transform:scale(1.18)}
+body{padding-bottom:74px;font-variant-numeric:tabular-nums}
+/* 카드 유리면 상단 하이라이트 — 어두운 톤에서 입체감 */
+.card{box-shadow:0 6px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.045)}
 /* 헤더 버튼은 갱신(🔄)만 남기고 하단 탭으로 이전 */
-.hdr-btns .btn-icon:not(.btn-icon-main){display:none}
+.hdr-btns .btn-icon{display:none} /* 전 버튼 하단 탭으로 이전 (요소는 JS 참조용 유지) */
 /* ── 수집 지연 토스트 ── */
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);z-index:300;
   background:#2a1518;border:1px solid rgba(255,80,100,.5);color:#ffb0b8;border-radius:12px;
@@ -587,7 +598,7 @@ body{padding-bottom:74px}
 </div>
 
 <nav id="bottomNav">
-  <button onclick="window.scrollTo({top:0,behavior:'smooth'});if(document.getElementById('results').style.display!=='none')loadData(true)"><span>🏠</span>홈</button>
+  <button onclick="window.scrollTo({top:0,behavior:'smooth'});loadData()"><span>🏠</span>홈·갱신</button>
   <button onclick="openJournal()"><span>📝</span>기록</button>
   <button onclick="openSim()"><span>🎯</span>시뮬</button>
   <button onclick="openRecover()"><span>💵</span>현금</button>
@@ -597,7 +608,7 @@ body{padding-bottom:74px}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-05-r26";
+const APP_VERSION = "v2026-07-05-r27";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
