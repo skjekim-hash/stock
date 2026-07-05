@@ -521,7 +521,8 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* 스크롤 시 헤더 축소 — 라벨·배지를 접어 콘텐츠 영역 확보 */
 .hdr{transition:padding .25s ease}
-.hdr-compact{padding-top:8px;padding-bottom:4px}
+.hdr-compact{padding-top:8px;padding-bottom:9px}
+.hdr-compact .hdr-row1{margin-bottom:7px}
 .hdr-compact .hdr-label{display:none}
 .hdr-compact .hdr-badges{display:none}
 .hdr-compact .hdr-title{font-size:17px}
@@ -629,7 +630,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-05-r28";
+const APP_VERSION = "v2026-07-05-r29";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1186,7 +1187,7 @@ function renderSummaryTable(stocks){
       +  (s.spark&&s.spark.length?"<div style='margin-top:3px'>"+svgSpark(s.spark,58,14)+"</div>":"")
       +"</td>"
       +"<td style='padding:9px 4px;border-bottom:1px solid rgba(22,32,64,.4);text-align:center;white-space:nowrap'>"
-      +  "<span style='color:"+opColor+";font-weight:800;font-size:11px'>"+oi+" "+opLabel+"</span>"+(ohIcon?"<span style='color:"+ohColor+";margin-left:3px;font-size:11px'>"+ohIcon+"</span>":"")+(ceIcon?"<span style='color:#00d4ff;margin-left:3px;font-size:11px'>"+ceIcon+"</span>":"")
+      +  "<span style='display:inline-block;background:"+opColor+"1a;border:1px solid "+opColor+"55;color:"+opColor+";font-weight:800;font-size:11px;border-radius:14px;padding:3px 9px;white-space:nowrap'>"+oi+" "+opLabel+"</span>"+(ohIcon?"<span style='color:"+ohColor+";margin-left:3px;font-size:11px'>"+ohIcon+"</span>":"")+(ceIcon?"<span style='color:#00d4ff;margin-left:3px;font-size:11px'>"+ceIcon+"</span>":"")
       +"</td>"
       +"<td style='padding:9px 6px;border-bottom:1px solid rgba(22,32,64,.4);text-align:right;white-space:nowrap'>"
       +  "<div style='font-size:11px;font-weight:700;font-family:JetBrains Mono,monospace'>"+W(s.price)+"</div>"
