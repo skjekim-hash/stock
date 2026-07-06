@@ -35,9 +35,6 @@ jobs:
         run: |
           git config user.name "StockBot"
           git config user.email "bot@github.com"
-          git add data.json
-          git diff --staged --quiet || git commit -m "📊 주가 업데이트 $(date +'%Y-%m-%d %H:%M KST' -d '+9 hours')"
-          git push          git config user.email "bot@github.com"
           # 방금 생성된 data.json을 안전한 곳에 보관
           cp data.json /tmp/data.json
           # 푸시 경합(5분 주기 + 사용자 업로드) 대비 최대 3회 재시도
