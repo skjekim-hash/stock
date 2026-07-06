@@ -448,7 +448,9 @@ def fetch_short_selling(code):
                     continue
 
         if len(rows) < 2:
+            print(f"  공매도 파싱 실패 ({code}): bs4={HAS_BS4}, rows={len(rows)}, html_len={len(html)}", file=sys.stderr)
             return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
+        print(f"  ✅ 공매도 ({code}): 잔고비중 {rows[0]['balanceRatio']}% (bs4={HAS_BS4}, {len(rows)}행)", file=sys.stderr)
         recent = rows[0]["balanceRatio"]
         n = min(5, len(rows))
         avg = sum(r["balanceRatio"] for r in rows[:n]) / n
@@ -1822,15 +1824,18 @@ def _load_prev_shorts():
 _PREV_SHORTS = _load_prev_shorts()
 
 def get_short_cached(code):
-    """오늘 이미 크롤링한 공매도가 있으면 재사용, 없으면 새로 크롤링.
-    판단 기준: 캐시에 오늘(KST) 날짜로 찍힌 값이 있으면 재사용."""
+    """오늘 이미 '성공적으로' 크롤링한 공매도가 있으면 재사용, 없으면 새로 크롤링.
+    실패("데이터 없음")는 캐시하지 않아, 다음 실행에서 다시 시도한다."""
     today = datetime.now(KST).strftime("%Y-%m-%d")
     cached = _PREV_SHORTS.get(code)
-    if cached and cached.get("fetchedDate") == today:
-        return cached  # 오늘 이미 받음 → 재사용 (크롤링 스킵)
+    # 오늘 날짜 + 성공 데이터(days>0)일 때만 재사용
+    if cached and cached.get("fetchedDate") == today and cached.get("days", 0) > 0:
+        return cached
     # 새로 크롤링
     fresh = fetch_short_selling(code)
-    fresh["fetchedDate"] = today
+    # 성공했을 때만 오늘 날짜 찍기 (실패면 날짜 안 찍어 다음 실행에서 재시도)
+    if fresh.get("days", 0) > 0:
+        fresh["fetchedDate"] = today
     return fresh
 
 def analyze_stock(stock, kospi, market=None):
