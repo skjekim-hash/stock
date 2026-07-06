@@ -602,7 +602,8 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
       </div>
       <div style="font-size:11px;color:#94a3b8;line-height:1.7;margin-bottom:10px">
         <b style="color:#5cb88a">✅ 확정:</b> 매수 제안가 채점 정의 — 도달(±1%) 후 10거래일 안에 +5% 반등하면 '맞음'. 안 맞음은 미달(너무 보수적)/지지실패(칼날)로 구분.<br>
-        <b style="color:#8090b0">⏳ 다음:</b> 매수 제안가부터 구현(템플릿) → 매도 제안가·진입가·소량진입·시장지표(SOX 조건부) 순서로 확장.
+        <b style="color:#8090b0">⏳ 다음:</b> 매수 제안가부터 구현(템플릿) → 매도 제안가·진입가·소량진입·시장지표(SOX 조건부) 순서로 확장.<br>
+        <b style="color:#8090b0">⏳ 공매도:</b> 잔고 추세 검증 — "잔고 감소/증가가 실제 3일 뒤 주가와 연동되나" 채점. 검증되면 점수 반영(부호·가중치는 데이터로 결정). 지금은 표시만.
       </div>
       <div style="background:rgba(255,64,96,0.06);border:1px solid rgba(255,64,96,0.2);border-radius:8px;padding:9px 11px">
         <div style="font-size:11px;color:#ff8fa3;line-height:1.6">
@@ -630,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-06-r33";
+const APP_VERSION = "v2026-07-06-r35";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1765,11 +1766,11 @@ function renderCard(s,idx){
         <div class="irow-n">${rs?.comment||""}</div>
       </div>
     </div>
-    ${s.short&&s.short.ratio>0?`<div class="irow">
-      <span class="irow-l">공매도 비율</span>
+    ${s.short&&s.short.days>0?`<div class="irow">
+      <span class="irow-l">공매도 잔고추세<br><span style="font-size:10px;color:#667">최근 ${s.short.days}일 · D-2 공표</span></span>
       <div class="irow-r">
-        <div class="irow-v" style="color:${s.short.ratio>5?"#ff4060":s.short.ratio>2?"#f5b942":"#8090b0"}">${s.short.ratio}%</div>
-        <div class="irow-n">${s.short.comment||""}${s.short.ratio>5?" · 하락압력 주의":s.short.ratio<1?" · 부담 낮음":""}</div>
+        <div class="irow-v" style="color:${s.short.trend==="up"?"#ff4060":s.short.trend==="down"?"#00e5a0":"#8090b0"}">${s.short.pctChg>0?"+":""}${s.short.pctChg}%</div>
+        <div class="irow-n">${s.short.trend==="up"?"📈 하락베팅 누적":s.short.trend==="down"?"📉 숏커버 우세":"보합"}</div>
       </div>
     </div>`:""}
   </div>
