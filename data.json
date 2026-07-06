@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-06 16:10:26 KST",
-  "updatedTime": "16:10",
+  "updatedAt": "2026-07-06 16:15:16 KST",
+  "updatedTime": "16:15",
   "kospi": {
     "price": 8051.33,
     "change": -37.01,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29847.0,
-      "pct": 0.98
+      "price": 29854.75,
+      "pct": 1.01
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1532.97,
-      "pct": 0.18
+      "price": 1532.8,
+      "pct": 0.17
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -36,12 +36,12 @@
     "dxy": {
       "name": "달러인덱스",
       "price": 101.07,
-      "pct": 0.21
+      "pct": 0.22
     },
     "cny": {
       "name": "위안/달러",
       "price": 6.79,
-      "pct": 0.32
+      "pct": 0.33
     },
     "tsmc": {
       "name": "TSMC",
@@ -61,7 +61,7 @@
     "summary": {
       "mood": "adverse",
       "label": "비우호적",
-      "score": -8.4,
+      "score": -8.3,
       "advice": "반도체 약세. 하이닉스·삼성전자 갭하락 가능. 추격 진입 자제, 지지선 확인 후 분할매수.",
       "buyThreshold": 7,
       "thresholdNote": "시장 비우호 — 문턱 7로 강화 (더 보수적)",
@@ -157,7 +157,8 @@
           "SOX -5.44% → -2.2",
           "마이크론 -5.49% → -1.4",
           "NVDA -1.39% → -0.2",
-          "TSMC -2.27% → -0.3"
+          "TSMC -2.27% → -0.3",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -475,9 +476,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 2358000,
+        "nxtPrice": 2359000,
         "closePrice": 2343000,
-        "nxtChgPct": 0.64,
+        "nxtChgPct": 0.68,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -535,7 +536,8 @@
         "parts": [
           "SOX -5.44% → -1.9",
           "마이크론 -5.49% → -1.1",
-          "TSMC -2.27% → -0.3"
+          "TSMC -2.27% → -0.3",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -859,9 +861,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 319500,
+        "nxtPrice": 319000,
         "closePrice": 318000,
-        "nxtChgPct": 0.47,
+        "nxtChgPct": 0.31,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -915,8 +917,10 @@
         "label": "시장 비우호 → 강화"
       },
       "macro": {
-        "adj": 0.0,
-        "parts": []
+        "adj": 0.2,
+        "parts": [
+          "나스닥선물 +1.01% → +0.2"
+        ]
       },
       "contrarian": "",
       "profitTaking": "",
@@ -1228,9 +1232,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 184900,
+        "nxtPrice": 185000,
         "closePrice": 185700,
-        "nxtChgPct": -0.43,
+        "nxtChgPct": -0.38,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -1284,9 +1288,10 @@
         "label": "시장 비우호 → 강화"
       },
       "macro": {
-        "adj": -1.4,
+        "adj": -1.2,
         "parts": [
-          "SOX -5.44% → -1.4"
+          "SOX -5.44% → -1.4",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -1569,14 +1574,21 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 1831000,
+        "nxtPrice": 1830000,
         "closePrice": 1828000,
-        "nxtChgPct": 0.16,
+        "nxtChgPct": 0.11,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
       "nxtSignal": {
-        "review": false
+        "review": true,
+        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.11%) + 나스닥 선물 +1.0%. 다음 날 상승 이어갈 여지.",
+        "checks": [
+          "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
+          "지지선 아래로 빠질 때 추매할 여력이 있는지",
+          "신고가권 추격은 아닌지"
+        ],
+        "note": "소량 분할로만. NXT는 수급이 적어 다음 날 빗나갈 수 있어요."
       }
     },
     {
@@ -2323,9 +2335,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 170900,
+        "nxtPrice": 171000,
         "closePrice": 170900,
-        "nxtChgPct": 0.0,
+        "nxtChgPct": 0.06,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -2750,7 +2762,7 @@
       "macro": {
         "adj": 0.4,
         "parts": [
-          "나스닥선물 +0.98% → +0.4"
+          "나스닥선물 +1.01% → +0.4"
         ]
       },
       "contrarian": "",
