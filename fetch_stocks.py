@@ -412,28 +412,28 @@ def fetch_short_selling(code):
             dm = re.search(r'<td class="date">(\d{4}\.\d{2}\.\d{2})</td>', tr)
             if not dm:
                 continue
-            nums = re.findall(r'<td class="num"><span[^>]*>([^<]+)</span></td>', tr)
+            nums = re.findall(r'<td class="num">\s*<span[^>]*>\s*([^<]+?)\s*</span>\s*</td>', tr)
             if len(nums) < 6:
                 continue
             def _c(x): return x.replace(',', '').replace('%', '').strip()
             try:
-                rows.append({"date": dm.group(1),
-                             "shortRatio": float(_c(nums[2])),    # 공매도 비중 %
-                             "balanceRatio": float(_c(nums[5]))})  # 잔고 비중 %
+                # 표 구조가 종목마다 다를 수 있어 위치 고정 대신 '마지막 값 = 잔고비중%'을 사용.
+                # (네이버 공매도표는 항상 맨 끝 컬럼이 잔고비중. 예: ...·261,332,042,500·17.04)
+                bal_ratio = float(_c(nums[-1]))
+                rows.append({"date": dm.group(1), "balanceRatio": bal_ratio})
             except ValueError:
                 continue
         if len(rows) < 2:
             return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
-        # 최근값 + 5일 평균 대비 추세 (rows[0]=최신)
-        recent = rows[0]["shortRatio"]
+        # 잔고비중(%) 추세: 최근값 vs 5일 평균 (rows[0]=최신)
+        recent = rows[0]["balanceRatio"]
         n = min(5, len(rows))
-        avg = sum(r["shortRatio"] for r in rows[:n]) / n
-        bal = rows[0]["balanceRatio"]
+        avg = sum(r["balanceRatio"] for r in rows[:n]) / n
         diff = round(recent - avg, 2)
-        if diff >= 0.5:    trend, comment = "up",   f"공매도 비중 {recent}% (5일평균 {avg:.1f}%↑ 늘어남)"
-        elif diff <= -0.5: trend, comment = "down", f"공매도 비중 {recent}% (5일평균 {avg:.1f}%↓ 줄어듦)"
-        else:              trend, comment = "flat", f"공매도 비중 {recent}% (평균 수준)"
-        return {"ratio": recent, "balanceRatio": bal, "avg": round(avg, 2),
+        if diff >= 0.3:    trend, comment = "up",   f"공매도 잔고비중 {recent}% (5일평균 {avg:.1f}%↑ 늘어남)"
+        elif diff <= -0.3: trend, comment = "down", f"공매도 잔고비중 {recent}% (5일평균 {avg:.1f}%↓ 줄어듦)"
+        else:              trend, comment = "flat", f"공매도 잔고비중 {recent}% (평균 수준)"
+        return {"ratio": recent, "balanceRatio": recent, "avg": round(avg, 2),
                 "trend": trend, "diff": diff, "days": n, "comment": comment}
     except Exception as e:
         print(f"  공매도 실패 ({code}): {e}", file=sys.stderr)
