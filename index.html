@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-06-r35";
+const APP_VERSION = "v2026-07-06-r36";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1767,10 +1767,10 @@ function renderCard(s,idx){
       </div>
     </div>
     ${s.short&&s.short.days>0?`<div class="irow">
-      <span class="irow-l">공매도 잔고추세<br><span style="font-size:10px;color:#667">최근 ${s.short.days}일 · D-2 공표</span></span>
+      <span class="irow-l">공매도 비중<br><span style="font-size:10px;color:#667">잔고 ${s.short.balanceRatio||0}% · D-2 공표</span></span>
       <div class="irow-r">
-        <div class="irow-v" style="color:${s.short.trend==="up"?"#ff4060":s.short.trend==="down"?"#00e5a0":"#8090b0"}">${s.short.pctChg>0?"+":""}${s.short.pctChg}%</div>
-        <div class="irow-n">${s.short.trend==="up"?"📈 하락베팅 누적":s.short.trend==="down"?"📉 숏커버 우세":"보합"}</div>
+        <div class="irow-v" style="color:${s.short.trend==="up"?"#ff4060":s.short.trend==="down"?"#00e5a0":"#8090b0"}">${s.short.ratio}%</div>
+        <div class="irow-n">${s.short.trend==="up"?"📈 공매도 늘어남":s.short.trend==="down"?"📉 공매도 줄어듦":"평균 수준"}</div>
       </div>
     </div>`:""}
   </div>
