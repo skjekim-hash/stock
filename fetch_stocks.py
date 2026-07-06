@@ -448,7 +448,17 @@ def fetch_short_selling(code):
                     continue
 
         if len(rows) < 2:
-            print(f"  공매도 파싱 실패 ({code}): bs4={HAS_BS4}, rows={len(rows)}, html_len={len(html)}", file=sys.stderr)
+            # 진단: GitHub가 받는 HTML 구조 파악
+            diag = ""
+            if HAS_BS4:
+                soup2 = BeautifulSoup(html, "html.parser")
+                tables = soup2.find_all("table")
+                classes = [t.get("class") for t in tables]
+                diag = f"table수={len(tables)}, class들={classes[:5]}"
+                # 로그인/차단 페이지인지
+                if "로그인" in html or "login" in html.lower(): diag += " [로그인페이지?]"
+                if "type2" not in html: diag += " [type2없음]"
+            print(f"  공매도 파싱 실패 ({code}): bs4={HAS_BS4}, rows={len(rows)}, html_len={len(html)}, {diag}", file=sys.stderr)
             return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
         print(f"  ✅ 공매도 ({code}): 잔고비중 {rows[0]['balanceRatio']}% (bs4={HAS_BS4}, {len(rows)}행)", file=sys.stderr)
         recent = rows[0]["balanceRatio"]
