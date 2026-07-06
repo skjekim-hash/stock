@@ -630,7 +630,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-05-r31";
+const APP_VERSION = "v2026-07-06-r32";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1455,6 +1455,16 @@ function renderCard(s,idx){
       <span class="op-ico" style="color:${oc}">${oi}</span>
       <span class="op-txt" style="color:${oc}">${opLabel}</span>
     </div>
+    ${(function(){
+      var r=s.sigReasons; if(!r||(!r.buy?.length&&!r.sell?.length))return"";
+      var bg=r.buy&&r.buy.length?`<div style="flex:1;min-width:0"><div style="font-size:10px;color:#00e5a0;font-weight:700;margin-bottom:3px">▲ 매수 근거</div>${r.buy.map(function(x){return '<div style="font-size:11px;color:#c8e8d8;line-height:1.6">· '+x+'</div>';}).join("")}</div>`:"";
+      var sl=r.sell&&r.sell.length?`<div style="flex:1;min-width:0"><div style="font-size:10px;color:#ff6680;font-weight:700;margin-bottom:3px">▼ 매도 근거</div>${r.sell.map(function(x){return '<div style="font-size:11px;color:#f0cdd5;line-height:1.6">· '+x+'</div>';}).join("")}</div>`:"";
+      var conflict=(r.buy?.length&&r.sell?.length)?`<div style="font-size:10px;color:#f5b942;margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);line-height:1.5">⚖️ 매수·매도 신호가 공존해요. 갈린 신호일수록 예상과 다르게 움직일 수 있으니 신중히.</div>`:"";
+      return `<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:rgba(128,144,176,.05);border:1px solid rgba(128,144,176,.16)">
+        <div style="font-size:10px;color:#8090b0;font-weight:700;margin-bottom:6px">🧠 이 신호의 핵심 근거</div>
+        <div style="display:flex;gap:14px">${bg}${sl}</div>${conflict}
+      </div>`;
+    })()}
     ${s.chaseWarning?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ff406018;border:1.5px solid #ff406055;font-size:12px;color:#ff6680;font-weight:700;line-height:1.5">${s.chaseWarning}<div style="font-size:11px;color:#a8b4c8;font-weight:400;margin-top:4px">높은 금액에서 물리지 않는 게 우선. 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요.</div></div>`:""}
     ${(function(){
       // 🧠 종합 해석 — 개별 지표가 아닌 '조합'을 읽는다 (상충 신호의 의미)
