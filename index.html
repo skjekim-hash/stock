@@ -630,7 +630,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-06-r32";
+const APP_VERSION = "v2026-07-06-r33";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1765,6 +1765,13 @@ function renderCard(s,idx){
         <div class="irow-n">${rs?.comment||""}</div>
       </div>
     </div>
+    ${s.short&&s.short.ratio>0?`<div class="irow">
+      <span class="irow-l">공매도 비율</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.short.ratio>5?"#ff4060":s.short.ratio>2?"#f5b942":"#8090b0"}">${s.short.ratio}%</div>
+        <div class="irow-n">${s.short.comment||""}${s.short.ratio>5?" · 하락압력 주의":s.short.ratio<1?" · 부담 낮음":""}</div>
+      </div>
+    </div>`:""}
   </div>
 
   <!-- ⑥ 기술 지표 -->
