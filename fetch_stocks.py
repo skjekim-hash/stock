@@ -398,49 +398,46 @@ def fetch_naver_price(code):
     return None
 
 def fetch_short_selling(code):
-    """네이버 공매도 추이 페이지에서 '공매도 잔고 추세'를 뽑는다.
-    비중(%)이 아니라 잔고수량 추세 — 늦어도(D-2 공표) 방향성이 명확해 추세 확인용으로 적합.
-    잔고 증가=하락 베팅 누적 / 감소=숏커버(청산). 순수 파이썬, euc-kr."""
+    """네이버 공매도 추이 페이지 파싱. 공매도 비중(%) + 잔고 비중(%) + 추세.
+    실제 구조: <td class="date">날짜 / <td class="num"><span>값 6개.
+    순서: [종가, 전일비, 공매도비중%, 공매도거래량, 거래대금, 잔고비중%]. euc-kr, pandas 미사용."""
     try:
         req = Request(f"https://finance.naver.com/item/short_trade.naver?code={code}",
                       headers={"User-Agent": "Mozilla/5.0",
                                "Referer": "https://finance.naver.com/"})
         with urlopen(req, timeout=8) as r:
             html = r.read().decode("euc-kr", errors="replace")
-        # 각 <tr> 단위로, <td class="num"> 셀을 정확히 짚어 뽑는다.
-        # (전일비 컬럼의 <span>·<img> 노이즈를 피하려 위치가 아닌 td 단위로 파싱)
         rows = []
         for tr in re.findall(r'<tr>(.*?)</tr>', html, re.S):
-            if '<td class="num"' not in tr:
+            dm = re.search(r'<td class="date">(\d{4}\.\d{2}\.\d{2})</td>', tr)
+            if not dm:
                 continue
-            date_m = re.search(r'(\d{4}\.\d{2}\.\d{2})', tr)
-            if not date_m:
+            nums = re.findall(r'<td class="num"><span[^>]*>([^<]+)</span></td>', tr)
+            if len(nums) < 6:
                 continue
-            tds = re.findall(r'<td class="num">(.*?)</td>', tr, re.S)
-            vals = []
-            for td in tds:
-                txt = re.sub(r'<[^>]+>', '', td)
-                num = re.findall(r'[\d,]+', txt)
-                vals.append(int(num[-1].replace(',', '')) if num else 0)
-            # vals = [종가, 전일비, 공매도거래량, 거래대금, 잔고수량, 잔고금액]
-            if len(vals) >= 6:
-                rows.append({"date": date_m.group(1), "shortVol": vals[2], "balance": vals[4]})
+            def _c(x): return x.replace(',', '').replace('%', '').strip()
+            try:
+                rows.append({"date": dm.group(1),
+                             "shortRatio": float(_c(nums[2])),    # 공매도 비중 %
+                             "balanceRatio": float(_c(nums[5]))})  # 잔고 비중 %
+            except ValueError:
+                continue
         if len(rows) < 2:
-            return {"ratio": 0, "balance": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
-        # 최근이 위(내림차순). 잔고 추세: 최근값 vs 5일 전(있으면)
-        recent = rows[0]["balance"]
-        older = rows[min(4, len(rows)-1)]["balance"]
+            return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
+        # 최근값 + 5일 평균 대비 추세 (rows[0]=최신)
+        recent = rows[0]["shortRatio"]
         n = min(5, len(rows))
-        pct_chg = round((recent - older) / older * 100, 1) if older else 0
-        if pct_chg >= 5:    trend, comment = "up",   f"공매도 잔고 {n}일간 +{pct_chg}% (하락 베팅 누적)"
-        elif pct_chg <= -5: trend, comment = "down", f"공매도 잔고 {n}일간 {pct_chg}% (숏커버·청산 우세)"
-        else:               trend, comment = "flat", f"공매도 잔고 보합 ({pct_chg:+}%)"
-        return {"balance": recent, "balancePrev": older, "trend": trend,
-                "pctChg": pct_chg, "days": n, "comment": comment,
-                "ratio": 0}  # ratio는 하위호환용 (점수엔 안 씀)
+        avg = sum(r["shortRatio"] for r in rows[:n]) / n
+        bal = rows[0]["balanceRatio"]
+        diff = round(recent - avg, 2)
+        if diff >= 0.5:    trend, comment = "up",   f"공매도 비중 {recent}% (5일평균 {avg:.1f}%↑ 늘어남)"
+        elif diff <= -0.5: trend, comment = "down", f"공매도 비중 {recent}% (5일평균 {avg:.1f}%↓ 줄어듦)"
+        else:              trend, comment = "flat", f"공매도 비중 {recent}% (평균 수준)"
+        return {"ratio": recent, "balanceRatio": bal, "avg": round(avg, 2),
+                "trend": trend, "diff": diff, "days": n, "comment": comment}
     except Exception as e:
-        print(f"  공매도 잔고 실패 ({code}): {e}", file=sys.stderr)
-        return {"ratio": 0, "balance": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
+        print(f"  공매도 실패 ({code}): {e}", file=sys.stderr)
+        return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
 
 def fetch_kospi():
     pct5 = 0
