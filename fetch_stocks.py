@@ -448,19 +448,9 @@ def fetch_short_selling(code):
                     continue
 
         if len(rows) < 2:
-            # 진단: GitHub가 받는 HTML 구조 파악
-            diag = ""
-            if HAS_BS4:
-                soup2 = BeautifulSoup(html, "html.parser")
-                tables = soup2.find_all("table")
-                classes = [t.get("class") for t in tables]
-                diag = f"table수={len(tables)}, class들={classes[:5]}"
-                # 로그인/차단 페이지인지
-                if "로그인" in html or "login" in html.lower(): diag += " [로그인페이지?]"
-                if "type2" not in html: diag += " [type2없음]"
-            print(f"  공매도 파싱 실패 ({code}): bs4={HAS_BS4}, rows={len(rows)}, html_len={len(html)}, {diag}", file=sys.stderr)
-            return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
-        print(f"  ✅ 공매도 ({code}): 잔고비중 {rows[0]['balanceRatio']}% (bs4={HAS_BS4}, {len(rows)}행)", file=sys.stderr)
+            # 네이버가 서버(GitHub Actions) IP에는 공매도 표를 주지 않음 (type2 표 없음).
+            # 로컬 IP에선 되지만 서버에선 구조적으로 차단 — 통합수급과 동일. 조용히 넘어감.
+            return {"ratio": 0, "trend": "flat", "comment": "공매도 미제공", "days": 0}
         recent = rows[0]["balanceRatio"]
         n = min(5, len(rows))
         avg = sum(r["balanceRatio"] for r in rows[:n]) / n
@@ -1804,7 +1794,7 @@ def gen_text(code, op, rsi, wr, mfi, ft, obv, weekly, investor, short, vol_surge
         f"RSI {rsi or '-'} · Williams%R {wr or '-'} · MFI {mfi or '-'} — "
         f"{'다중 과매도' if (rsi and rsi < 30) or (wr and wr < -80) else '다중 과매수 주의' if (rsi and rsi > 70) or (wr and wr > -20) else '지표 중립권'}",
         f"외국인 {'+' if f > 0 else ''}{f:,}주 · 기관 {'+' if inst > 0 else ''}{inst:,}주 · OBV {obv['trend'] if obv else '-'}",
-        f"주봉 {weekly['opinion']} · {short.get('comment', '공매도 -') if short else '공매도 -'} · "
+        f"주봉 {weekly['opinion']} · "
         f"{'52주 신고가 근접' if breakout.get('nearHigh') else '52주 신저가 근접' if breakout.get('nearLow') else str(breakout.get('position', 50)) + '%'}",
     ]
     notes = (
