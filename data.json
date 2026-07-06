@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-06 15:50:27 KST",
-  "updatedTime": "15:50",
+  "updatedAt": "2026-07-06 15:55:11 KST",
+  "updatedTime": "15:55",
   "kospi": {
     "price": 8051.33,
     "change": -37.01,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29848.25,
-      "pct": 0.99
+      "price": 29853.75,
+      "pct": 1.01
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1532.82,
-      "pct": 0.17
+      "price": 1533.04,
+      "pct": 0.19
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -156,7 +156,8 @@
           "SOX -5.44% → -2.2",
           "마이크론 -5.49% → -1.4",
           "NVDA -1.39% → -0.2",
-          "TSMC -2.27% → -0.3"
+          "TSMC -2.27% → -0.3",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -474,9 +475,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 2348000,
+        "nxtPrice": 2347000,
         "closePrice": 2343000,
-        "nxtChgPct": 0.21,
+        "nxtChgPct": 0.17,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -534,7 +535,8 @@
         "parts": [
           "SOX -5.44% → -1.9",
           "마이크론 -5.49% → -1.1",
-          "TSMC -2.27% → -0.3"
+          "TSMC -2.27% → -0.3",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -858,9 +860,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 317000,
+        "nxtPrice": 317500,
         "closePrice": 318000,
-        "nxtChgPct": -0.31,
+        "nxtChgPct": -0.16,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -914,8 +916,10 @@
         "label": "시장 비우호 → 강화"
       },
       "macro": {
-        "adj": 0.0,
-        "parts": []
+        "adj": 0.2,
+        "parts": [
+          "나스닥선물 +1.01% → +0.2"
+        ]
       },
       "contrarian": "",
       "profitTaking": "",
@@ -1283,9 +1287,10 @@
         "label": "시장 비우호 → 강화"
       },
       "macro": {
-        "adj": -1.4,
+        "adj": -1.2,
         "parts": [
-          "SOX -5.44% → -1.4"
+          "SOX -5.44% → -1.4",
+          "나스닥선물 +1.01% → +0.2"
         ]
       },
       "contrarian": "",
@@ -1575,7 +1580,14 @@
         "session": "AFTER_MARKET"
       },
       "nxtSignal": {
-        "review": false
+        "review": true,
+        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(-0.11%) + 나스닥 선물 +1.0%. 다음 날 상승 이어갈 여지.",
+        "checks": [
+          "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
+          "지지선 아래로 빠질 때 추매할 여력이 있는지",
+          "신고가권 추격은 아닌지"
+        ],
+        "note": "소량 분할로만. NXT는 수급이 적어 다음 날 빗나갈 수 있어요."
       }
     },
     {
@@ -2751,7 +2763,7 @@
       "macro": {
         "adj": 0.4,
         "parts": [
-          "나스닥선물 +0.99% → +0.4"
+          "나스닥선물 +1.01% → +0.4"
         ]
       },
       "contrarian": "",
