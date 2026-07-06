@@ -409,7 +409,7 @@ def fetch_short_selling(code):
         req = Request(f"https://finance.naver.com/item/short_trade.naver?code={code}",
                       headers={"User-Agent": "Mozilla/5.0",
                                "Referer": "https://finance.naver.com/"})
-        with urlopen(req, timeout=8) as r:
+        with urlopen(req, timeout=3) as r:
             html = r.read().decode("euc-kr", errors="replace")
 
         rows = []
@@ -1804,6 +1804,35 @@ def gen_text(code, op, rsi, wr, mfi, ft, obv, weekly, investor, short, vol_surge
 
 
 # ─── 종목 분석 메인 ─────────────────────────────────────────────────────────
+def _load_prev_shorts():
+    """기존 data.json에서 종목별 공매도 데이터를 읽어 캐시로 재사용.
+    공매도는 D-2 공표라 하루종일 안 바뀜 → 하루 1회만 크롤링하려는 목적."""
+    try:
+        with open("data.json", encoding="utf-8") as f:
+            prev = json.load(f)
+        cache = {}
+        for s in prev.get("stocks", []):
+            if s.get("code") and s.get("short"):
+                cache[s["code"]] = s["short"]
+        return cache
+    except Exception:
+        return {}
+
+# 프로그램 시작 시 1회 로드 (종목 루프에서 참조)
+_PREV_SHORTS = _load_prev_shorts()
+
+def get_short_cached(code):
+    """오늘 이미 크롤링한 공매도가 있으면 재사용, 없으면 새로 크롤링.
+    판단 기준: 캐시에 오늘(KST) 날짜로 찍힌 값이 있으면 재사용."""
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    cached = _PREV_SHORTS.get(code)
+    if cached and cached.get("fetchedDate") == today:
+        return cached  # 오늘 이미 받음 → 재사용 (크롤링 스킵)
+    # 새로 크롤링
+    fresh = fetch_short_selling(code)
+    fresh["fetchedDate"] = today
+    return fresh
+
 def analyze_stock(stock, kospi, market=None):
     code, name = stock["code"], stock["name"]
     print(f"\n▶ {name} ({code}) 분석 중...", file=sys.stderr)
@@ -1827,7 +1856,7 @@ def analyze_stock(stock, kospi, market=None):
     micro   = fetch_kis_micro(code) if is_real_kis else None      # ① 체결강도·호가잔량
     program = fetch_kis_program(code) if is_real_kis else None    # ② 프로그램 매매
     kis_short = fetch_kis_short(code) if KIS_AVAILABLE else None
-    short     = kis_short or fetch_short_selling(code) or {"ratio": 0, "volume": 0, "comment": "없음"}
+    short     = kis_short or get_short_cached(code) or {"ratio": 0, "trend": "flat", "comment": "없음", "days": 0}
     news = []
     dart = fetch_dart(code)
     time.sleep(0.1)
