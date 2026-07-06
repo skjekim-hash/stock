@@ -412,13 +412,15 @@ def fetch_short_selling(code):
             dm = re.search(r'<td class="date">(\d{4}\.\d{2}\.\d{2})</td>', tr)
             if not dm:
                 continue
-            nums = re.findall(r'<td class="num">\s*<span[^>]*>\s*([^<]+?)\s*</span>\s*</td>', tr)
+            # td class="num" 내용을 통째로 가져와 태그를 제거하고 텍스트만 추출.
+            # (전일비 컬럼만 <span>이고 나머지는 span 없이 텍스트라, span 요구 정규식은 실패함)
+            raw = re.findall(r'<td class="num">(.*?)</td>', tr, re.S)
+            nums = [re.sub(r'<[^>]+>', '', v).strip() for v in raw]
             if len(nums) < 6:
                 continue
             def _c(x): return x.replace(',', '').replace('%', '').strip()
             try:
-                # 표 구조가 종목마다 다를 수 있어 위치 고정 대신 '마지막 값 = 잔고비중%'을 사용.
-                # (네이버 공매도표는 항상 맨 끝 컬럼이 잔고비중. 예: ...·261,332,042,500·17.04)
+                # 마지막 컬럼 = 잔고비중%. (종목마다 컬럼 수 달라도 맨 끝은 잔고비중)
                 bal_ratio = float(_c(nums[-1]))
                 rows.append({"date": dm.group(1), "balanceRatio": bal_ratio})
             except ValueError:
