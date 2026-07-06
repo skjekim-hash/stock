@@ -9,6 +9,11 @@ from datetime import datetime, timezone, timedelta
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 from urllib.parse import urlencode, quote
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
 
 PYKRX_AVAILABLE = False
 
@@ -398,36 +403,52 @@ def fetch_naver_price(code):
     return None
 
 def fetch_short_selling(code):
-    """네이버 공매도 추이 페이지 파싱. 공매도 비중(%) + 잔고 비중(%) + 추세.
-    실제 구조: <td class="date">날짜 / <td class="num"><span>값 6개.
-    순서: [종가, 전일비, 공매도비중%, 공매도거래량, 거래대금, 잔고비중%]. euc-kr, pandas 미사용."""
+    """네이버 공매도 매매현황 파싱 → 잔고비중(%) 추세.
+    bs4로 표를 구조적으로 파싱(안전). bs4 없으면 정규식 폴백."""
     try:
         req = Request(f"https://finance.naver.com/item/short_trade.naver?code={code}",
                       headers={"User-Agent": "Mozilla/5.0",
                                "Referer": "https://finance.naver.com/"})
         with urlopen(req, timeout=8) as r:
             html = r.read().decode("euc-kr", errors="replace")
+
         rows = []
-        for tr in re.findall(r'<tr>(.*?)</tr>', html, re.S):
-            dm = re.search(r'<td class="date">(\d{4}\.\d{2}\.\d{2})</td>', tr)
-            if not dm:
-                continue
-            # td class="num" 내용을 통째로 가져와 태그를 제거하고 텍스트만 추출.
-            # (전일비 컬럼만 <span>이고 나머지는 span 없이 텍스트라, span 요구 정규식은 실패함)
-            raw = re.findall(r'<td class="num">(.*?)</td>', tr, re.S)
-            nums = [re.sub(r'<[^>]+>', '', v).strip() for v in raw]
-            if len(nums) < 6:
-                continue
-            def _c(x): return x.replace(',', '').replace('%', '').strip()
-            try:
-                # 마지막 컬럼 = 잔고비중%. (종목마다 컬럼 수 달라도 맨 끝은 잔고비중)
-                bal_ratio = float(_c(nums[-1]))
-                rows.append({"date": dm.group(1), "balanceRatio": bal_ratio})
-            except ValueError:
-                continue
+        if HAS_BS4:
+            soup = BeautifulSoup(html, "html.parser")
+            # 공매도 표는 class="type2". 그 안의 각 tr에서 셀 텍스트를 순서대로.
+            for table in soup.select("table.type2"):
+                for tr in table.select("tr"):
+                    cells = [td.get_text(strip=True) for td in tr.find_all("td")]
+                    # 날짜(YYYY.MM.DD)로 시작하고 셀이 6개 이상인 데이터 행만
+                    if not cells or not re.match(r'\d{4}\.\d{2}\.\d{2}', cells[0]):
+                        continue
+                    if len(cells) < 6:
+                        continue
+                    try:
+                        # 맨 끝 셀 = 잔고비중%
+                        bal = float(cells[-1].replace(',', '').replace('%', '').strip())
+                        rows.append({"date": cells[0], "balanceRatio": bal})
+                    except ValueError:
+                        continue
+        else:
+            # 폴백: 정규식 (bs4 미설치 환경)
+            for tr in re.findall(r'<tr>(.*?)</tr>', html, re.S):
+                dm = re.search(r'(\d{4}\.\d{2}\.\d{2})', tr)
+                if not dm:
+                    continue
+                raw = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.S)
+                cells = [re.sub(r'<[^>]+>', '', v).strip() for v in raw]
+                cells = [c for c in cells if c]
+                if len(cells) < 6 or not re.match(r'\d{4}\.\d{2}\.\d{2}', cells[0]):
+                    continue
+                try:
+                    bal = float(cells[-1].replace(',', '').replace('%', '').strip())
+                    rows.append({"date": cells[0], "balanceRatio": bal})
+                except ValueError:
+                    continue
+
         if len(rows) < 2:
             return {"ratio": 0, "trend": "flat", "comment": "공매도 데이터 없음", "days": 0}
-        # 잔고비중(%) 추세: 최근값 vs 5일 평균 (rows[0]=최신)
         recent = rows[0]["balanceRatio"]
         n = min(5, len(rows))
         avg = sum(r["balanceRatio"] for r in rows[:n]) / n
