@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: 의존성 설치
+        run: pip install beautifulsoup4
+
       - name: 주식 데이터 수집
         env:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
@@ -29,12 +32,12 @@ jobs:
         run: python fetch_stocks.py
 
       - name: data.json 커밋 & 푸시
-        # ⚠️ 이전 방식(reset --soft)은 체크아웃 시점의 전체 파일을 커밋해서,
-        #    실행 도중 사용자가 올린 index.html 등을 옛 버전으로 되돌리는 버그가 있었음.
-        #    새 방식: 항상 '지금 이 순간의 최신 main' 위에 data.json 한 파일만 얹어 커밋.
         run: |
           git config user.name "StockBot"
           git config user.email "bot@github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "📊 주가 업데이트 $(date +'%Y-%m-%d %H:%M KST' -d '+9 hours')"
+          git push          git config user.email "bot@github.com"
           # 방금 생성된 data.json을 안전한 곳에 보관
           cp data.json /tmp/data.json
           # 푸시 경합(5분 주기 + 사용자 업로드) 대비 최대 3회 재시도
