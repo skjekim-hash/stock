@@ -1611,6 +1611,55 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if market_score is not None:
         if market_score >= 1.5:   buy_th, th_label = 5, "시장 우호 → 완화"
         elif market_score <= -1.5: buy_th, th_label = 7, "시장 비우호 → 강화"
+    # ── 신호 근거 수집 (점수는 위에서 이미 확정됨. 여기선 '왜'를 설명만 한다) ──
+    # 각 지표의 실제 판정을 (라벨, 기여점수)로 모아 → 기여 큰 순 상위 N개를 근거로.
+    # 주의: 점수를 재계산하지 않는다. 위 로직과 같은 조건을 읽어 문구만 만든다.
+    _reasons = []
+    def _add(label, pts):
+        if pts: _reasons.append((label, pts))
+    if rsi:
+        if rsi < 30: _add(f"RSI {rsi:.0f} 과매도", 2)
+        elif rsi < 45: _add(f"RSI {rsi:.0f} 낮음", 1)
+        elif rsi > 70: _add(f"RSI {rsi:.0f} 과매수", -2)
+        elif rsi > 60: _add(f"RSI {rsi:.0f} 높음", -1)
+    if macd and macd_sig:
+        _add("MACD 상승(골든)" if macd > macd_sig else "MACD 하락(데드)", 2 if macd > macd_sig else -2)
+    if mfi:
+        if mfi < 20: _add(f"MFI {mfi:.0f} 매수유입 바닥", 2)
+        elif mfi < 40: _add(f"MFI {mfi:.0f} 낮음", 1)
+        elif mfi > 80: _add(f"MFI {mfi:.0f} 과열", -2)
+        elif mfi > 60: _add(f"MFI {mfi:.0f} 높음", -1)
+    if obv:
+        if obv["slope"] > 2: _add("OBV 상승(매집)", 2)
+        elif obv["slope"] < -2: _add("OBV 하락(분산)", -2)
+    if stoch_rsi and isinstance(stoch_rsi, dict) and stoch_rsi.get("signal") == "매수":
+        _add("스토캐스틱RSI 과매도 반등", 3 if stoch_rsi.get("k", 50) < 10 else 2)
+    elif stoch_rsi and isinstance(stoch_rsi, dict) and stoch_rsi.get("signal") == "매도":
+        _add("스토캐스틱RSI 과매수", -2)
+    if divergence:
+        if divergence.get("bullish"): _add("상승 다이버전스", 4)
+        if divergence.get("bearish"): _add("하락 다이버전스", -4)
+    if ichimoku and ichimoku.get("signal") == "매수":
+        _add("일목 " + ("강한 매수" if "강한" in ichimoku.get("comment","") else "매수"), 2 if "강한" in ichimoku.get("comment","") else 1)
+    elif ichimoku and ichimoku.get("signal") == "매도":
+        _add("일목 매도", -2 if "강한" in ichimoku.get("comment","") else -1)
+    if h52 and l52 and price:
+        pos = (price - l52) / (h52 - l52) * 100 if h52 > l52 else 50
+        if pos < 20: _add(f"52주 저점권({pos:.0f}%)", 2)
+        elif pos < 35: _add(f"52주 하단({pos:.0f}%)", 1)
+        elif pos > 90: _add(f"52주 고점권({pos:.0f}%)", -2)
+        elif pos > 85: _add(f"52주 상단({pos:.0f}%)", -1)
+    if weekly_opinion == "매수": _add("주봉 매수", 2)
+    elif weekly_opinion == "매도": _add("주봉 매도", -2)
+    if patterns:
+        if any(p.get("bullish") for p in patterns if isinstance(p, dict)): _add("상승 캔들패턴", 2)
+        if any(p.get("bearish") for p in patterns if isinstance(p, dict)): _add("하락 캔들패턴", -2)
+    if macro_adj:
+        _add(f"매크로 {'+' if macro_adj>0 else ''}{macro_adj}", round(macro_adj))
+    # 기여 큰 순(절댓값) 정렬, 매수근거/매도근거 분리
+    _reasons.sort(key=lambda x: -abs(x[1]))
+    buy_reasons = [r[0] for r in _reasons if r[1] > 0][:3]
+    sell_reasons = [r[0] for r in _reasons if r[1] < 0][:3]
     opinion = "매수" if score >= buy_th else "매도" if score <= SELL_TH else "중립"
     # 중립의 결: 점수가 어느 쪽으로 기울었는지 (문턱은 레짐에 따라 가변)
     nuance = ""
@@ -1621,7 +1670,8 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         elif score >= -2: nuance = "약한 매도 우위"
         else:             nuance = "매도 우위 (문턱 근접)"
     th_info = {"buy": buy_th, "sell": SELL_TH, "label": th_label}
-    return opinion, score, nuance, th_info
+    reasons = {"buy": buy_reasons, "sell": sell_reasons}
+    return opinion, score, nuance, th_info, reasons
 
 def assess_cautious_entry(opinion, score, ichimoku, stoch_rsi, divergence,
                           psar, investor, cci, price, pivot, buy_th=6):
@@ -1816,7 +1866,7 @@ def analyze_stock(stock, kospi, market=None):
     macro_adj, macro_parts = calc_macro_adj(code, market)
     _mkt_score = (market.get("summary", {}) or {}).get("score") if market else None
 
-    opinion, score, nuance, th_info = master_signal(
+    opinion, score, nuance, th_info, sig_reasons = master_signal(
         rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         closes_d, price, high52w, low52w, vwap,
         weekly["opinion"], investor, short.get("ratio", 0), news,
@@ -2029,6 +2079,7 @@ def analyze_stock(stock, kospi, market=None):
         "buyTrack": buy_track,
         "buyThreshold": th_info,
         "macro": {"adj": macro_adj, "parts": macro_parts},
+        "sigReasons": sig_reasons,
         "contrarian": contrarian,
         "profitTaking": profit_taking,
         "marginCallRisk": margin_call_risk,
