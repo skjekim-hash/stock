@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r41";
+const APP_VERSION = "v2026-07-07-r42";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1452,6 +1452,11 @@ function renderCard(s,idx){
       <span class="sec-num">02</span>
       <span class="sec-title" style="color:${oc}">분석 결과</span>
     </div>
+    ${(function(){
+      // 이 종목 보유 단계를 한 번 계산해 아래 메시지들이 공유 (신규진입 vs 추매 구분용)
+      window._bc = loadJournal().filter(function(e){return e.status==="보유"&&e.code===s.code;}).length;
+      return "";
+    })()}
     <div class="op-box" style="background:${oc}10;border:1px solid ${oc}25">
       <span class="op-ico" style="color:${oc}">${oi}</span>
       <span class="op-txt" style="color:${oc}">${opLabel}</span>
@@ -1466,7 +1471,7 @@ function renderCard(s,idx){
         <div style="display:flex;gap:14px">${bg}${sl}</div>${conflict}
       </div>`;
     })()}
-    ${s.chaseWarning?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ff406018;border:1.5px solid #ff406055;font-size:12px;color:#ff6680;font-weight:700;line-height:1.5">${s.chaseWarning}<div style="font-size:11px;color:#a8b4c8;font-weight:400;margin-top:4px">높은 금액에서 물리지 않는 게 우선. 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요.</div></div>`:""}
+    ${s.chaseWarning?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:#ff406018;border:1.5px solid #ff406055;font-size:12px;color:#ff6680;font-weight:700;line-height:1.5">${s.chaseWarning}<div style="font-size:11px;color:#a8b4c8;font-weight:400;margin-top:4px">${window._bc>=3?"🚫 이미 "+window._bc+"차 보유 중 — 분할 진입이 아니라 물타기 위험 구간이에요. 더 담지 말고 기다리거나 손절을 검토하세요.":window._bc>=1?"⚠️ 이미 "+window._bc+"차 보유 중이라 추매는 신중히. 신규 진입이라면 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요.":"높은 금액에서 물리지 않는 게 우선. 조정 시 지지구간(S1·S2)에서 분할 진입을 권장해요."}</div></div>`:""}
     ${(function(){
       // 🧠 종합 해석 — 개별 지표가 아닌 '조합'을 읽는다 (상충 신호의 의미)
       var obs=[], concl="";
@@ -1481,9 +1486,12 @@ function renderCard(s,idx){
       if(bigUp&&div){ obs.push("가격은 오르는데 RSI는 하락(다이버전스)"); if(!concl)concl="상승의 힘이 빠지는 중 — 고점 신호."; }
       if(bigUp&&noTrend){ obs.push("급등에도 ADX "+s.adx.adx+" (추세 없음)"); if(!concl)concl="아직 추세가 아닌 출렁임 — 하루 이틀 더 확인."; }
       if(!obs.length) return "";
+      var holdNote="";
+      if(window._bc>=3) holdNote=`<div style="font-size:11px;color:#ff6680;margin-top:6px;line-height:1.5">🚫 단, 이미 ${window._bc}차 보유 중이에요. 위 해석과 별개로 추매는 물타기 위험 — 신규 진입 관점의 참고로만 보세요.</div>`;
+      else if(window._bc>=1) holdNote=`<div style="font-size:11px;color:#f5b942;margin-top:6px;line-height:1.5">⚠️ 이미 ${window._bc}차 보유 중 — 추매라면 위 해석보다 보수적으로. 신규 진입 기준의 판단이에요.</div>`;
       return `<div style="margin-top:10px;padding:11px 13px;border-radius:10px;background:rgba(212,175,106,.06);border:1px solid rgba(212,175,106,.28)">
         <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:4px">🧠 종합 해석 — 신호의 조합이 말하는 것</div>
-        <div style="font-size:12px;color:var(--text);line-height:1.7">${obs.join(" · ")}<br><b style="color:var(--gold)">→ ${concl}</b></div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7">${obs.join(" · ")}<br><b style="color:var(--gold)">→ ${concl}</b></div>${holdNote}
       </div>`;
     })()}
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
@@ -1501,7 +1509,7 @@ function renderCard(s,idx){
       var st2=(s.buyThreshold&&s.buyThreshold.sell)||-5;
       // ── 추매 단계별 문턱 상향 (물타기 방지) ──
       // 이 종목을 이미 몇 번 샀는지 = 보유 중 매매기록 수. 살수록 문턱을 올린다.
-      var buyCount=loadJournal().filter(function(e){return e.status==="보유"&&e.code===s.code;}).length;
+      var buyCount=window._bc||0;
       var addPerBuy=2;  // 추매 1회당 문턱 +2
       var bt=btBase + buyCount*addPerBuy;  // 첫 진입(0회)은 그대로, 추매마다 +2
       var overBuy=buyCount>=3;  // 3회 이상 보유 = 물타기 위험 구간
