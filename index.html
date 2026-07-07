@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r42";
+const APP_VERSION = "v2026-07-07-r43";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -2767,7 +2767,16 @@ function renderHabitCard(arr){
 function calcTrueRecord(arr){
   const WIN = 1.0;
   const cur = {};
-  (window.__stocks||[]).forEach(s=>{ cur[s.code]=s.price; });
+  const nameToCode={"SK하이닉스":"000660","삼성전자":"005930","LG전자":"066570","삼성전기":"009150","현대차":"005380","현대자동차":"005380","KB금융":"105560","SK텔레콤":"017670","NAVER":"035420"};
+  const priceByCode = {};
+  (window.__stocks||[]).forEach(s=>{ priceByCode[s.code]=s.price; });
+  // 현재가를 code로도 name으로도 찾을 수 있게 매핑
+  const getPrice = (e)=>{
+    if(e.code && priceByCode[e.code]!=null) return priceByCode[e.code];
+    const c = nameToCode[e.name];
+    if(c && priceByCode[c]!=null) return priceByCode[c];
+    return null;
+  };
   const closed = arr.filter(e=>e.status==="청산" && e.returnPct!==null && e.entryPrice);
   const held = arr.filter(e=>e.status==="보유" && e.entryPrice);
   const rows = [];
@@ -2776,7 +2785,7 @@ function calcTrueRecord(arr){
   });
   let skippedHeld = 0;
   held.forEach(e=>{
-    const p = cur[e.code];
+    const p = getPrice(e);
     if(!p){ skippedHeld++; return; }  // 현재가 없으면 평가 불가 (분석 미로드 등)
     rows.push({ ret:(p-e.entryPrice)/e.entryPrice*100, pnl:(p-e.entryPrice)*(e.shares||1), realized:false, name:e.name });
   });
