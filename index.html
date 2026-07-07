@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r40";
+const APP_VERSION = "v2026-07-07-r41";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1497,14 +1497,29 @@ function renderCard(s,idx){
       ${s.overheat.level==="경고"?`<div style="font-size:11.5px;color:#8090b0;margin-top:8px;line-height:1.5">여러 위험 신호가 겹친 구간입니다. 신규 진입보다 조정 후 지지선 매수를 권장합니다.</div>`:""}
     </div>`:""}
     ${(function(){
-      var bt=(s.buyThreshold&&s.buyThreshold.buy)||6;
+      var btBase=(s.buyThreshold&&s.buyThreshold.buy)||6;
       var st2=(s.buyThreshold&&s.buyThreshold.sell)||-5;
+      // ── 추매 단계별 문턱 상향 (물타기 방지) ──
+      // 이 종목을 이미 몇 번 샀는지 = 보유 중 매매기록 수. 살수록 문턱을 올린다.
+      var buyCount=loadJournal().filter(function(e){return e.status==="보유"&&e.code===s.code;}).length;
+      var addPerBuy=2;  // 추매 1회당 문턱 +2
+      var bt=btBase + buyCount*addPerBuy;  // 첫 진입(0회)은 그대로, 추매마다 +2
+      var overBuy=buyCount>=3;  // 3회 이상 보유 = 물타기 위험 구간
+      var escalMsg="";
+      if(buyCount>=1){
+        escalMsg=`<div style="font-size:10.5px;margin-top:5px;padding:6px 8px;border-radius:6px;background:${overBuy?"rgba(255,64,96,0.1)":"rgba(245,185,66,0.08)"};border:1px solid ${overBuy?"rgba(255,64,96,0.3)":"rgba(245,185,66,0.25)"};line-height:1.5">`
+          +(overBuy
+            ?`🚫 <b style="color:#ff6680">${buyCount}차 보유 — 물타기 위험 구간.</b> 여기서 더 담기보다 기다리거나 손절을 검토하세요. 매수 문턱을 크게 올렸습니다(${btBase}→${bt}).`
+            :`⚠️ <b style="color:#f5b942">${buyCount}차 보유 중.</b> 추매는 신중히 — 매수 문턱을 ${btBase}→${bt}로 올렸습니다. 더 확실한 신호가 아니면 담지 마세요.`)
+          +`</div>`;
+      }
       return `<div class="score-wrap" style="display:flex;align-items:center;gap:14px;margin-top:4px">
       <div style="flex-shrink:0">${svgGauge(s.score,-8,8,bt,st2,124)}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;color:var(--text2);margin-bottom:3px">신호 강도</div>
         <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=st2?"강한 매도":s.score<=-3?"매도":"관망"}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">🎯 매수 문턱 <b style="color:#00e5a0">${bt}</b>${s.buyThreshold&&s.buyThreshold.label!=="기본"?" ("+s.buyThreshold.label+")":""} · 매도 <b style="color:#ff4060">${st2}</b><br>문턱까지 <b style="color:${sc}">${s.score>=bt?"도달":(bt-s.score)+"점"}</b> 남음</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">🎯 매수 문턱 <b style="color:#00e5a0">${bt}</b>${buyCount>=1?`<span style="color:#f5b942"> (${buyCount}차 추매 상향)</span>`:(s.buyThreshold&&s.buyThreshold.label!=="기본"?" ("+s.buyThreshold.label+")":"")} · 매도 <b style="color:#ff4060">${st2}</b><br>문턱까지 <b style="color:${sc}">${s.score>=bt?"도달":(bt-s.score)+"점"}</b> 남음</div>
+        ${escalMsg}
         ${(function(){
           var t=svgScoreTrend(s.code,88,20);
           if(!t) return "";
