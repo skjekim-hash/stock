@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-09 01:45:20 KST",
-  "updatedTime": "01:45",
+  "updatedAt": "2026-07-09 01:50:42 KST",
+  "updatedTime": "01:50",
   "kospi": {
     "price": 7246.79,
     "change": -409.52,
@@ -10,33 +10,33 @@
   "market": {
     "sox": {
       "name": "필라델피아 반도체",
-      "price": 12474.27,
-      "pct": 1.41
+      "price": 12522.05,
+      "pct": 1.8
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29290.5,
-      "pct": -0.34
+      "price": 29330.75,
+      "pct": -0.21
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1508.15,
-      "pct": -0.31
+      "price": 1507.84,
+      "pct": -0.34
     },
     "vix": {
       "name": "공포지수(VIX)",
-      "price": 17.51,
-      "pct": 8.56
+      "price": 17.45,
+      "pct": 8.18
     },
     "tnx": {
       "name": "미국 10년물 금리",
-      "price": 4.59,
-      "pct": 1.32
+      "price": 4.58,
+      "pct": 1.24
     },
     "dxy": {
       "name": "달러인덱스",
-      "price": 101.14,
-      "pct": 0.12
+      "price": 101.12,
+      "pct": 0.1
     },
     "cny": {
       "name": "위안/달러",
@@ -45,45 +45,45 @@
     },
     "tsmc": {
       "name": "TSMC",
-      "price": 436.54,
-      "pct": 0.92
+      "price": 438.14,
+      "pct": 1.29
     },
     "nvda": {
       "name": "엔비디아",
-      "price": 199.44,
-      "pct": 1.27
+      "price": 200.32,
+      "pct": 1.72
     },
     "mu": {
       "name": "마이크론",
-      "price": 942.0,
-      "pct": 0.39
+      "price": 943.52,
+      "pct": 0.55
     },
     "summary": {
       "mood": "neutral",
       "label": "중립",
-      "score": -1.4,
+      "score": -0.6,
       "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
       "buyThreshold": 6,
       "thresholdNote": "기본 문턱 6"
     },
     "forecast": {
       "kospi": {
-        "dir": "하락",
+        "dir": "보합",
         "strength": "약",
-        "color": "#ff5c7a",
-        "bias": -0.4,
-        "low": -0.9,
-        "high": 0.1,
-        "text": "하락 경향 약 (대략 -0.4% 안팎)"
+        "color": "#9ab",
+        "bias": -0.2,
+        "low": -0.7,
+        "high": 0.3,
+        "text": "보합 경향 약 (대략 -0.2% 안팎)"
       },
       "semi": {
         "dir": "상승",
-        "strength": "중",
+        "strength": "강",
         "color": "#00c896",
-        "bias": 1.2,
-        "low": 0.6,
-        "high": 1.8,
-        "text": "상승 경향 중 (SOX +1.41% · TSMC +0.92%)"
+        "bias": 1.6,
+        "low": 1.0,
+        "high": 2.2,
+        "text": "상승 경향 강 (SOX +1.8% · TSMC +1.29%)"
       },
       "disclaimer": "야간 해외지표 기반 경향일 뿐, 갭은 자주 빗나가요. 진입은 시장 방향이 아니라 종목 자리(지지·수급)로 판단하세요."
     },
@@ -148,16 +148,17 @@
         "label": "기본"
       },
       "macro": {
-        "adj": 0.8,
+        "adj": 1.2,
         "parts": [
-          "SOX +1.41% → +0.6",
-          "NVDA +1.27% → +0.2"
+          "SOX +1.8% → +0.7",
+          "NVDA +1.72% → +0.3",
+          "TSMC +1.29% → +0.2"
         ]
       },
       "sigReasons": {
         "buy": [
           "스토캐스틱RSI 과매도 반등",
-          "매크로 +0.8"
+          "매크로 +1.2"
         ],
         "sell": [
           "하락 다이버전스",
@@ -527,14 +528,17 @@
         "label": "기본"
       },
       "macro": {
-        "adj": 0.5,
+        "adj": 1.0,
         "parts": [
-          "SOX +1.41% → +0.5"
+          "SOX +1.8% → +0.6",
+          "NVDA +1.72% → +0.2",
+          "TSMC +1.29% → +0.2"
         ]
       },
       "sigReasons": {
         "buy": [
-          "스토캐스틱RSI 과매도 반등"
+          "스토캐스틱RSI 과매도 반등",
+          "매크로 +1.0"
         ],
         "sell": [
           "하락 다이버전스",
@@ -1237,8 +1241,8 @@
       "changePct": -10.25,
       "high52w": 2417000,
       "low52w": 132500,
-      "opinion": "중립",
-      "score": 5,
+      "opinion": "매수",
+      "score": 6,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -1266,13 +1270,12 @@
         1828000,
         1479000
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "",
       "buyTrack": {
-        "type": "early",
-        "label": "선취 매수",
-        "size": "1/3 물량",
-        "desc": "선행 신호 2개 결집 — 손절가 2,353,997원 필수",
-        "stopLoss": 2353997
+        "type": "confirm",
+        "label": "확인 매수",
+        "size": "계획 물량",
+        "desc": "합산 +6점 ≥ 문턱 6 (기본)"
       },
       "buyThreshold": {
         "buy": 6,
@@ -1280,15 +1283,17 @@
         "label": "기본"
       },
       "macro": {
-        "adj": 0.4,
+        "adj": 0.6,
         "parts": [
-          "SOX +1.41% → +0.4"
+          "SOX +1.8% → +0.5",
+          "NVDA +1.72% → +0.2"
         ]
       },
       "sigReasons": {
         "buy": [
           "스토캐스틱RSI 과매도 반등",
-          "RSI 43 낮음"
+          "RSI 43 낮음",
+          "매크로 +0.6"
         ],
         "sell": [
           "MACD 하락(데드)",
@@ -1301,7 +1306,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
+      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-07-08",
       "fairValue": 2293600,
       "fairValueGap": 55.1,
@@ -1328,11 +1333,11 @@
         "pct": 12.98
       },
       "atrStopLoss": 1051142,
-      "suggestedPrice": 0,
-      "suggestedLabel": "해당없음",
-      "targetPrice": 0,
-      "targetPrice2": 0,
-      "stopLoss": 0,
+      "suggestedPrice": 1479000,
+      "suggestedLabel": "매수 추천가",
+      "targetPrice": 1597320,
+      "targetPrice2": 2086667,
+      "stopLoss": 1738333,
       "rsi": 43.1,
       "rsiComment": "저점권",
       "macd": 5.231,
@@ -1376,13 +1381,10 @@
         "comment": "거래대금 평이 (0.8배)"
       },
       "cautiousEntry": {
-        "entry": true,
-        "signals": [
-          "스토캐스틱 RSI 매수",
-          "CCI 과매도"
-        ],
-        "reason": "중립이지만 선행 매수 신호 2개 확인 — 1/3 물량 선취 검토 (손절가 필수)",
-        "stopLoss": 2353997
+        "entry": false,
+        "signals": [],
+        "reason": "",
+        "stopLoss": 0
       },
       "overheat": {
         "level": "none",
@@ -1567,9 +1569,9 @@
       ],
       "risk": [],
       "notes": [
-        "주봉·일봉 동시 매수 신호 확인 후 진입",
-        "외국인 순매수 전환 시 진입 검토",
-        "공매도 감소 + 거래량 증가 조합 주시"
+        "피봇 S1 지지 확인 후 분할 매수",
+        "OBV 수급 지속 확인",
+        "주봉 신호 일치 시 비중 확대"
       ],
       "noChart": false
     },
@@ -1958,7 +1960,7 @@
       "high52w": 182700,
       "low52w": 105800,
       "opinion": "중립",
-      "score": -4,
+      "score": -3,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -1996,10 +1998,10 @@
         "label": "기본"
       },
       "macro": {
-        "adj": -0.5,
+        "adj": -0.4,
         "parts": [
-          "美금리 +1.32% → +0.4",
-          "VIX +8.56% → -0.9"
+          "美금리 +1.24% → +0.4",
+          "VIX +8.18% → -0.8"
         ]
       },
       "sigReasons": {
@@ -2378,7 +2380,7 @@
       "macro": {
         "adj": 0.4,
         "parts": [
-          "VIX +8.56% → +0.4"
+          "VIX +8.18% → +0.4"
         ]
       },
       "sigReasons": {
@@ -2755,7 +2757,7 @@
       "macro": {
         "adj": -0.4,
         "parts": [
-          "美금리 +1.32% → -0.4"
+          "美금리 +1.24% → -0.4"
         ]
       },
       "sigReasons": {
