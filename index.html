@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r45";
+const APP_VERSION = "v2026-07-07-r46";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -800,7 +800,7 @@ function svgSpark(data,w,h,color,entryPrice){
   return svg;
 }
 // 반원 게이지 — 점수와 매수/매도 문턱을 아크 위에 표시
-function svgGauge(score,min,max,buyTh,sellTh,w){
+function svgGauge(score,min,max,buyTh,sellTh,w,showLabel){
   var h=Math.round(w*0.62), cx=w/2, cy=h-10, r=w/2-12;
   var clamp=function(v){return Math.max(min,Math.min(max,v));};
   var ang=function(v){return 180-((clamp(v)-min)/(max-min))*180;};  // 값→각도 (180°=min, 0°=max)
@@ -825,6 +825,11 @@ function svgGauge(score,min,max,buyTh,sellTh,w){
   g+="<line x1='"+cx+"' y1='"+cy+"' x2='"+np[0]+"' y2='"+np[1]+"' stroke='"+sc+"' stroke-width='2.4' stroke-linecap='round' style='filter:drop-shadow(0 0 4px "+sc+")'/>"
     +"<circle cx='"+cx+"' cy='"+cy+"' r='3.4' fill='"+sc+"'/>"
     +"<text x='"+cx+"' y='"+(cy-r*0.34)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.14)+"' font-weight='800' font-family='JetBrains Mono,monospace'>"+(score>0?"+":"")+score+"</text>";
+  // 상태 라벨 — 종목 신호 게이지에만(showLabel). 문턱 상향 자동 반영(buyTh가 이미 상향값)
+  if(showLabel){
+    var lbl=score>=buyTh?"강한 매수":score>=buyTh-2?"매수 근접":score<=sellTh?"강한 매도":score<=-3?"매도":"관망";
+    g+="<text x='"+cx+"' y='"+(cy-r*0.04)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.085)+"' font-weight='700' opacity='0.9'>"+lbl+"</text>";
+  }
   return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible'>"+g+"</svg>";
 }
 // 육각 레이더 — 6개 지표의 '체형'을 한 도형으로
@@ -1559,7 +1564,7 @@ function renderCard(s,idx){
           +`</div>`;
       }
       return `<div class="score-wrap" style="display:flex;align-items:center;gap:14px;margin-top:4px">
-      <div style="flex-shrink:0">${svgGauge(s.score,-8,8,bt,st2,124)}</div>
+      <div style="flex-shrink:0">${svgGauge(s.score,-8,8,bt,st2,124,true)}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;color:var(--text2);margin-bottom:3px">신호 강도</div>
         <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=st2?"강한 매도":s.score<=-3?"매도":"관망"}</div>
