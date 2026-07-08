@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r44";
+const APP_VERSION = "v2026-07-07-r45";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -771,9 +771,13 @@ function B(items,color){
 
 /* ── SVG 시각화 (스파크라인 · 게이지 · 레이더) ── */
 // 네온 스파크라인 — 최근 가격 흐름을 한 줄 곡선으로
-function svgSpark(data,w,h,color){
+function svgSpark(data,w,h,color,entryPrice){
   if(!data||data.length<2) return "";
   var min=Math.min.apply(null,data), max=Math.max.apply(null,data);
+  // 진입가가 데이터 범위 밖이면 범위를 넓혀 선이 보이게
+  if(entryPrice!=null && entryPrice>0){
+    min=Math.min(min,entryPrice); max=Math.max(max,entryPrice);
+  }
   var span=(max-min)||1;
   var pts=data.map(function(v,i){
     var x=(i/(data.length-1))*(w-6)+3;
@@ -782,10 +786,18 @@ function svgSpark(data,w,h,color){
   });
   var last=pts[pts.length-1].split(",");
   var c=color||((data[data.length-1]>=data[0])?"#00e5a0":"#ff4060");
-  return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>"
-    +"<polyline points='"+pts.join(" ")+"' fill='none' stroke='"+c+"' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round' style='filter:drop-shadow(0 0 3px "+c+"88)'/>"
+  var svg="<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>";
+  // 매수가 기준선 (있을 때만) — 현재가가 이 선 위면 이익, 아래면 손실
+  if(entryPrice!=null && entryPrice>0){
+    var ey=h-3-((entryPrice-min)/span)*(h-6);
+    var above=data[data.length-1]>=entryPrice;  // 현재가가 매수가 위인가
+    var lineC=above?"#00e5a0":"#ff4060";
+    svg+="<line x1='0' y1='"+ey.toFixed(1)+"' x2='"+w+"' y2='"+ey.toFixed(1)+"' stroke='"+lineC+"' stroke-width='0.9' stroke-dasharray='3,2' opacity='0.55'/>";
+  }
+  svg+="<polyline points='"+pts.join(" ")+"' fill='none' stroke='"+c+"' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round' style='filter:drop-shadow(0 0 3px "+c+"88)'/>"
     +"<circle cx='"+last[0]+"' cy='"+last[1]+"' r='2.2' fill='"+c+"' style='filter:drop-shadow(0 0 4px "+c+");animation:pulse 2.4s infinite'/>"
     +"</svg>";
+  return svg;
 }
 // 반원 게이지 — 점수와 매수/매도 문턱을 아크 위에 표시
 function svgGauge(score,min,max,buyTh,sellTh,w){
@@ -1353,7 +1365,23 @@ function renderCard(s,idx){
           <span class="card-cur-price" style="color:${cc}">${W(s.price)}</span>
           <span class="card-change-pct" style="color:${cc}">${cp}</span>
         </div>
-        ${s.spark&&s.spark.length?`<div style="margin-top:7px">${svgSpark(s.spark,150,30)}</div>`:""}
+        ${s.spark&&s.spark.length?`<div style="margin-top:7px">${svgSpark(s.spark,150,30,null,(function(){
+          // 이 종목 보유 중이면 평균 매수가를 기준선으로 (물려있을 때 현재가 대비 위치 파악)
+          var hs=loadJournal().filter(function(e){return e.status==="보유"&&e.code===s.code&&e.entryPrice;});
+          if(!hs.length) return null;
+          var tsh=hs.reduce(function(a,e){return a+(e.shares||1);},0);
+          var tc=hs.reduce(function(a,e){return a+e.entryPrice*(e.shares||1);},0);
+          return tsh?tc/tsh:null;
+        })())}</div>
+        ${(function(){
+          var hs=loadJournal().filter(function(e){return e.status==="보유"&&e.code===s.code&&e.entryPrice;});
+          if(!hs.length) return "";
+          var tsh=hs.reduce(function(a,e){return a+(e.shares||1);},0);
+          var avg=hs.reduce(function(a,e){return a+e.entryPrice*(e.shares||1);},0)/tsh;
+          var ret=((s.price-avg)/avg*100);
+          var rc=ret>=0?"#00e5a0":"#ff4060";
+          return `<div style="margin-top:4px;font-size:10.5px;color:var(--text3)">내 평단 <b style="color:#c8d4e8">${W(Math.round(avg))}</b> · 현재 <b style="color:${rc}">${ret>=0?"+":""}${ret.toFixed(1)}%</b> <span style="color:${rc}">${ret>=0?"▲":"▼"}</span></div>`;
+        })()}`:""}
       </div>
       <div class="card-hdr-right">
         <div class="card-opinion-pill" style="background:${oc}18;color:${oc};border:1px solid ${oc}35">${oi} ${opLabel}</div>
