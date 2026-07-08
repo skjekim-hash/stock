@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r46";
+const APP_VERSION = "v2026-07-07-r47";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -824,11 +824,11 @@ function svgGauge(score,min,max,buyTh,sellTh,w,showLabel){
   var na=ang(score), np=pt(na,r-9);
   g+="<line x1='"+cx+"' y1='"+cy+"' x2='"+np[0]+"' y2='"+np[1]+"' stroke='"+sc+"' stroke-width='2.4' stroke-linecap='round' style='filter:drop-shadow(0 0 4px "+sc+")'/>"
     +"<circle cx='"+cx+"' cy='"+cy+"' r='3.4' fill='"+sc+"'/>"
-    +"<text x='"+cx+"' y='"+(cy-r*0.34)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.14)+"' font-weight='800' font-family='JetBrains Mono,monospace'>"+(score>0?"+":"")+score+"</text>";
-  // 상태 라벨 — 종목 신호 게이지에만(showLabel). 문턱 상향 자동 반영(buyTh가 이미 상향값)
+    +"<text x='"+cx+"' y='"+(cy-r*0.46)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.14)+"' font-weight='800' font-family='JetBrains Mono,monospace'>"+(score>0?"+":"")+score+"</text>";
+  // 상태 라벨 — 종목 신호 게이지에만(showLabel). 점수 바로 아래, 아크와 안 겹치는 위쪽 영역
   if(showLabel){
     var lbl=score>=buyTh?"강한 매수":score>=buyTh-2?"매수 근접":score<=sellTh?"강한 매도":score<=-3?"매도":"관망";
-    g+="<text x='"+cx+"' y='"+(cy-r*0.04)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.085)+"' font-weight='700' opacity='0.9'>"+lbl+"</text>";
+    g+="<text x='"+cx+"' y='"+(cy-r*0.08)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.075)+"' font-weight='700' opacity='0.85'>"+lbl+"</text>";
   }
   return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible'>"+g+"</svg>";
 }
