@@ -631,7 +631,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r43";
+const APP_VERSION = "v2026-07-07-r44";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -919,9 +919,18 @@ function renderActionBriefing(stocks){
     var held={};
     loadJournal().forEach(function(e){ if(e.status==="보유"&&e.code) held[e.code]=true; });
     var buy=[], early=[], turn=[], check=[], watch=0;
+    // 종목별 보유 횟수 (추매 문턱 상향 반영용 — 카드 안 로직과 일치시킴)
+    var buyCnt={};
+    loadJournal().forEach(function(e){ if(e.status==="보유"&&e.code){ buyCnt[e.code]=(buyCnt[e.code]||0)+1; } });
     (stocks||[]).forEach(function(s){
       var acted=false;
-      if(s.buyTrack&&s.buyTrack.type==="confirm"){ buy.push(s); acted=true; }
+      if(s.buyTrack&&s.buyTrack.type==="confirm"){
+        // 이미 보유 중이면 추매 문턱(기본+보유수×2)을 넘는 강한 신호일 때만 매수로 인정.
+        // 아니면 물타기 위험이므로 매수 목록에서 제외 (카드 안 "관망" 판정과 일치).
+        var bc=buyCnt[s.code]||0;
+        var escalTh=((s.buyThreshold&&s.buyThreshold.buy)||6)+bc*2;
+        if(bc===0 || s.score>=escalTh){ buy.push(s); acted=true; }
+      }
       else if(s.buyTrack&&s.buyTrack.type==="early"){ early.push(s); acted=true; }
       if(s.flowTurnaround){ turn.push(s); acted=true; }
       if(held[s.code]&&(s.opinion==="매도"||s.score<=-5)){ check.push(s); acted=true; }
