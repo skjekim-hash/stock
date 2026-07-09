@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-09 21:25:14 KST",
-  "updatedTime": "21:25",
+  "updatedAt": "2026-07-09 21:46:01 KST",
+  "updatedTime": "21:46",
   "kospi": {
     "price": 7291.91,
     "change": 45.12,
@@ -15,23 +15,23 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29714.5,
-      "pct": 0.83
+      "price": 29775.25,
+      "pct": 1.04
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1512.69,
+      "price": 1512.59,
       "pct": 0.47
     },
     "vix": {
       "name": "공포지수(VIX)",
-      "price": 16.78,
-      "pct": -0.71
+      "price": 16.72,
+      "pct": -1.07
     },
     "tnx": {
       "name": "미국 10년물 금리",
-      "price": 4.57,
-      "pct": 0.88
+      "price": 4.58,
+      "pct": 0.26
     },
     "dxy": {
       "name": "달러인덱스",
@@ -59,23 +59,23 @@
       "pct": 1.11
     },
     "summary": {
-      "mood": "neutral",
-      "label": "중립",
-      "score": 1.3,
-      "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
-      "buyThreshold": 6,
-      "thresholdNote": "기본 문턱 6",
+      "mood": "favorable",
+      "label": "우호적",
+      "score": 1.9,
+      "advice": "미국 기술주 강세. 갭상승 가능성. 추격매수는 신중히, 눌림목 기다리는 것도 방법이에요.",
+      "buyThreshold": 5,
+      "thresholdNote": "시장 우호 — 문턱 5로 완화 (반 박자 빠른 진입)",
       "cnyNote": "위안은 안정인데 원화만 약세 — 한국 고유 악재 가능성. 외국인 이탈 신호일 수 있어 더 주의."
     },
     "forecast": {
       "kospi": {
         "dir": "상승",
-        "strength": "약",
+        "strength": "중",
         "color": "#00c896",
-        "bias": 0.4,
-        "low": -0.1,
-        "high": 0.9,
-        "text": "상승 경향 약 (대략 +0.4% 안팎)"
+        "bias": 0.6,
+        "low": 0.1,
+        "high": 1.1,
+        "text": "상승 경향 중 (대략 +0.6% 안팎)"
       },
       "semi": {
         "dir": "상승",
@@ -144,23 +144,24 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 1.9,
+        "adj": 2.0,
         "parts": [
           "SOX +2.23% → +0.9",
           "마이크론 +1.11% → +0.3",
           "NVDA +3.65% → +0.5",
-          "TSMC +1.02% → +0.2"
+          "TSMC +1.02% → +0.2",
+          "나스닥선물 +1.04% → +0.2"
         ]
       },
       "sigReasons": {
         "buy": [
           "스토캐스틱RSI 과매도 반등",
-          "매크로 +1.9"
+          "매크로 +2.0"
         ],
         "sell": [
           "하락 다이버전스",
@@ -492,7 +493,7 @@
       "high52w": 374500,
       "low52w": 60400,
       "opinion": "중립",
-      "score": 0,
+      "score": 1,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -520,28 +521,29 @@
         277500,
         278000
       ],
-      "nuance": "완전 중립 (관망)",
+      "nuance": "관찰 — 신호 부족",
       "buyTrack": {
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 1.5,
+        "adj": 1.7,
         "parts": [
           "SOX +2.23% → +0.8",
           "마이크론 +1.11% → +0.2",
           "NVDA +3.65% → +0.4",
-          "TSMC +1.02% → +0.2"
+          "TSMC +1.02% → +0.2",
+          "나스닥선물 +1.04% → +0.2"
         ]
       },
       "sigReasons": {
         "buy": [
           "스토캐스틱RSI 과매도 반등",
-          "매크로 +1.5",
+          "매크로 +1.7",
           "RSI 42 낮음"
         ],
         "sell": [
@@ -907,13 +909,15 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 0.0,
-        "parts": []
+        "adj": 0.2,
+        "parts": [
+          "나스닥선물 +1.04% → +0.2"
+        ]
       },
       "sigReasons": {
         "buy": [
@@ -1284,18 +1288,19 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +9점 ≥ 문턱 6 (기본)"
+        "desc": "합산 +9점 ≥ 문턱 5 (시장 우호 → 완화)"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 0.9,
+        "adj": 1.1,
         "parts": [
           "SOX +2.23% → +0.6",
-          "NVDA +3.65% → +0.4"
+          "NVDA +3.65% → +0.4",
+          "나스닥선물 +1.04% → +0.2"
         ]
       },
       "sigReasons": {
@@ -1631,9 +1636,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
         "adj": 0.0,
@@ -2004,15 +2009,13 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 0.3,
-        "parts": [
-          "美금리 +0.88% → +0.3"
-        ]
+        "adj": 0.0,
+        "parts": []
       },
       "sigReasons": {
         "buy": [
@@ -2387,9 +2390,9 @@
         "stopLoss": 82200
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
         "adj": 0.0,
@@ -2768,15 +2771,14 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 5,
         "sell": -5,
-        "label": "기본"
+        "label": "시장 우호 → 완화"
       },
       "macro": {
-        "adj": 0.1,
+        "adj": 0.4,
         "parts": [
-          "나스닥선물 +0.83% → +0.3",
-          "美금리 +0.88% → -0.3"
+          "나스닥선물 +1.04% → +0.4"
         ]
       },
       "sigReasons": {
