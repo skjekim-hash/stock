@@ -320,7 +320,11 @@ def fetch_kis_short(code):
             "FHPST04830000")
         rows = (d or {}).get("output2") or (d or {}).get("output") or []
         if isinstance(rows, dict): rows = [rows]
+        if not d:
+            print(f"  KIS 공매도 무응답 ({code}) — TR/권한 확인 필요", file=sys.stderr)
+            return None
         if not rows:
+            print(f"  KIS 공매도 빈 응답 ({code}) — 응답 최상위 키: {list(d.keys())[:8]}", file=sys.stderr)
             return None
         row = rows[0]  # 최신 거래일
         # 필드 후보를 순서대로 시도 (공매도 거래량 비중 % / 공매도 수량)
@@ -330,6 +334,7 @@ def fetch_kis_short(code):
         if ratio <= 0 and vol <= 0:
             print(f"  KIS 공매도 필드 미매칭 ({code}) — 응답 키: {list(row.keys())[:12]}", file=sys.stderr)
             return None
+        print(f"  ✅ KIS 공매도 ({code}): 비중 {ratio}% · 수량 {vol:,}", file=sys.stderr)
         comment = ("공매도 비율 높음" if ratio > 5 else
                    "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
         return {"ratio": round(ratio, 2), "volume": vol, "comment": comment}
