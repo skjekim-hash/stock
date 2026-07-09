@@ -647,7 +647,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r54";
+const APP_VERSION = "v2026-07-07-r55";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -2411,7 +2411,13 @@ function recordEntry(code){
   // 3. 종목 의견
   let opinionOk = true;
   if(s.opinion==="매도" || (s.score!==undefined && s.score<=-3)){ checks.push(["🚫",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score}) — 매도 우위인데 진입?`]); opinionOk=false; }
-  else if(s.opinion==="매수" || (s.score!==undefined && s.score>=2)) checks.push(["✅",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score})`]);
+  else if(s.opinion==="매수" || (s.score!==undefined && s.score>=2)){
+    // 추매 상향 문턱 반영 (게이지·브리핑과 동일 공식: 기본 + 보유수×2)
+    var _ebc=loadJournal().filter(function(e){return e.status==="보유"&&e.code===code;}).length;
+    var _eth=((s.buyThreshold&&s.buyThreshold.buy)||6)+_ebc*2;
+    if(_ebc>=1 && s.score<_eth){ checks.push(["🚫",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score}) — 이미 ${_ebc}차 보유, 추매 문턱 ${_eth} 미달. 물타기 위험`]); opinionOk=false; }
+    else checks.push(["✅",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score})${_ebc>=1?` — ${_ebc}차 보유 중, 추매 문턱(${_eth}) 충족`:""}`]);
+  }
   else if(s.buyTrack&&s.buyTrack.type==="early") checks.push(["✅",`종목 의견: 선취 매수 트랙(${s.score>0?"+":""}${s.score}) — 1/3 물량으로 제한하세요`]);
   else checks.push(["⚠️",`종목 의견: 중립(${s.score>0?"+":""}${s.score})`]);
   // 4. 시장 상황
