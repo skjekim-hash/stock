@@ -305,24 +305,34 @@ def fetch_kis_program(code):
     return None
 
 def fetch_kis_short(code):
+    """KIS 공식 '국내주식 공매도 일별추이' API.
+    ※ 기존 코드는 일봉 차트 API를 호출해 공매도 필드가 없어 항상 실패했음.
+    TR·필드명은 실전 첫 호출에서 확인 필요 — 실패 시 응답 키를 로그로 남김."""
     if not KIS_AVAILABLE: return None
     if "openapivts" in KIS_BASE_URL: return None
     try:
+        end = datetime.now(KST).strftime("%Y%m%d")
+        start = (datetime.now(KST) - timedelta(days=7)).strftime("%Y%m%d")
         d = kis_request(
-            "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice",
+            "/uapi/domestic-stock/v1/quotations/daily-short-sale",
             {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
-             "FID_INPUT_DATE_1": datetime.now(KST).strftime("%Y%m%d"),
-             "FID_INPUT_DATE_2": datetime.now(KST).strftime("%Y%m%d"),
-             "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0"},
-            "FHKST03010100")
-        if d:
-            out = d.get("output2", [{}])
-            if out:
-                ratio = to_n(out[0].get("short_sell_rate") or 0)
-                if ratio > 0:
-                    comment = ("공매도 비율 높음" if ratio > 5 else
-                               "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
-                    return {"ratio": round(ratio, 2), "volume": 0, "comment": comment}
+             "FID_INPUT_DATE_1": start, "FID_INPUT_DATE_2": end},
+            "FHPST04830000")
+        rows = (d or {}).get("output2") or (d or {}).get("output") or []
+        if isinstance(rows, dict): rows = [rows]
+        if not rows:
+            return None
+        row = rows[0]  # 최신 거래일
+        # 필드 후보를 순서대로 시도 (공매도 거래량 비중 % / 공매도 수량)
+        ratio = to_n(row.get("ssts_vol_rlim") or row.get("ssts_tr_pbmn_rlim")
+                     or row.get("short_sell_rate") or 0)
+        vol = round(to_n(row.get("ssts_cntg_qty") or row.get("ssts_vol") or 0))
+        if ratio <= 0 and vol <= 0:
+            print(f"  KIS 공매도 필드 미매칭 ({code}) — 응답 키: {list(row.keys())[:12]}", file=sys.stderr)
+            return None
+        comment = ("공매도 비율 높음" if ratio > 5 else
+                   "공매도 비율 보통" if ratio > 2 else "공매도 비율 낮음")
+        return {"ratio": round(ratio, 2), "volume": vol, "comment": comment}
     except Exception as e:
         print(f"  KIS 공매도 실패 ({code}): {e}", file=sys.stderr)
     return None
