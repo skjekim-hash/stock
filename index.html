@@ -60,7 +60,7 @@ body::before{
     radial-gradient(ellipse at 50% 0%,#0e1524 0%,transparent 55%),
     radial-gradient(ellipse at 50% 100%,#0c1220 0%,transparent 50%),
     #0a0e17;
-  pointer-events:none;z-index:-1;
+  pointer-events:none;z-index:-3;
 }
 /* 상황실 원칙: 배경은 조용히 — 신호만 빛난다. 미세 그리드로 관제실 질감만 */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
@@ -647,7 +647,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r52";
+const APP_VERSION = "v2026-07-07-r53";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
