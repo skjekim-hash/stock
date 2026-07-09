@@ -1985,7 +1985,8 @@ def analyze_stock(stock, kospi, market=None):
         if len(oversold_signals) >= 3:
             score += 2
             contrarian = "⚡ 역발상 반등 주목 — " + " · ".join(oversold_signals[:3])
-            if score >= 6:   opinion = "매수"
+            # 재판정도 오늘의 가변 문턱을 따라야 함 (고정 6이면 비우호 날 문턱 7과 모순)
+            if score >= th_info["buy"]: opinion = "매수"
             elif score >= 0: opinion = "중립"
             # nuance 재계산
             if opinion == "중립":
@@ -2050,7 +2051,7 @@ def analyze_stock(stock, kospi, market=None):
     if market and opinion == "매수":
         if market.get("summary", {}).get("mood") == "adverse":
             score -= 2
-            if score < 6:
+            if score < th_info["buy"]:  # 브레이크 후 재판정도 오늘의 문턱 기준
                 opinion = "중립"
                 market_brake = "시장 비우호적 — 매수 신호 보류"
                 nuance = "관찰 구간 (소량만)" if score >= 4 else "관찰 — 신호 부족"
