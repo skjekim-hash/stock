@@ -63,6 +63,17 @@ body::before{
   pointer-events:none;z-index:-3;
 }
 /* 상황실 원칙: 배경은 조용히 — 신호만 빛난다. 미세 그리드로 관제실 질감만 */
+/* + 조용한 오로라: 저채도 색이 아주 느리게 흐르는 숨결 (판독 방해 없는 12% 이하) */
+body::before{content:'';position:fixed;inset:-20%;pointer-events:none;z-index:-2;
+  background:
+    radial-gradient(ellipse 60% 45% at 18% 12%, rgba(0,140,160,.13), transparent 60%),
+    radial-gradient(ellipse 55% 40% at 85% 20%, rgba(110,80,200,.11), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 95%, rgba(212,175,106,.07), transparent 65%);
+  animation:calmAurora 46s ease-in-out infinite alternate;}
+@keyframes calmAurora{
+  0%{transform:translate(0,0) scale(1);opacity:.85}
+  50%{transform:translate(2.5%,1.5%) scale(1.06);opacity:1}
+  100%{transform:translate(-2%,2.5%) scale(1.02);opacity:.9}}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
   background-image:linear-gradient(rgba(120,150,200,.035) 1px,transparent 1px),
     linear-gradient(90deg,rgba(120,150,200,.035) 1px,transparent 1px);
@@ -647,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-10-r60";
+const APP_VERSION = "v2026-07-10-r61";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
