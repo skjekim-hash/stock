@@ -2176,8 +2176,15 @@ def analyze_stock(stock, kospi, market=None):
         "intradayFlow": intraday_flow,
         "micro": micro,          # ① 체결강도·호가잔량 (방아쇠)
         "program": program,      # ② 프로그램 당일 순매수
-        "flowTurnaround": bool(intraday_flow and intraday_flow.get("foreign", 0) > 0
-                               and investor.get("streak", 0) <= -3),
+        "flowTurnaround": bool(
+            # 1순위: 장중 잠정 전환 (실전 KIS키 필요 — 현재 보류)
+            (intraday_flow and intraday_flow.get("foreign", 0) > 0
+             and investor.get("streak", 0) <= -3)
+            # 2순위(T+1 대체): 확정 수급에서 '연속 순매도 사슬이 어제 깨짐' 감지
+            # daily[-1]=최신일. 어제 순매수 전환 + 직전 3일 이상 연속 순매도
+            or (len(investor.get("daily", [])) >= 4
+                and investor["daily"][-1] > 0
+                and all(d < 0 for d in investor["daily"][-4:-1]))),
         # 프런트 스파크라인용 최근 20일 종가 (마지막 값은 현재가로 갱신)
         "spark": ([round(c) for c in closes_d[-20:-1]] + [round(price)]) if len(closes_d) >= 5 else [],
         "nuance": nuance,
