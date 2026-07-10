@@ -647,7 +647,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-07-r55";
+const APP_VERSION = "v2026-07-10-r56";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -2417,6 +2417,17 @@ function recordEntry(code){
     var _eth=((s.buyThreshold&&s.buyThreshold.buy)||6)+_ebc*2;
     if(_ebc>=1 && s.score<_eth){ checks.push(["🚫",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score}) — 이미 ${_ebc}차 보유, 추매 문턱 ${_eth} 미달. 물타기 위험`]); opinionOk=false; }
     else checks.push(["✅",`종목 의견: ${s.opinion}(${s.score>0?"+":""}${s.score})${_ebc>=1?` — ${_ebc}차 보유 중, 추매 문턱(${_eth}) 충족`:""}`]);
+    // 물타기 금지선: 점수와 무관하게, 기존 진입가에서 2×ATR 이상 빠진 자리는 추매가 아니라 손절 검토 구간
+    if(_ebc>=1){
+      var _held=loadJournal().filter(function(e){return e.status==="보유"&&e.code===code&&e.entryPrice;});
+      var _worst=Math.min.apply(null,_held.map(function(e){return e.entryPrice;}));
+      var _atrP=(s.atr&&s.atr.pct)?s.atr.pct:5;
+      var _limit=Math.round(_worst*(1-2*_atrP/100));
+      if(_worst>0&&s.price<_limit){
+        checks.push(["🚫",`물타기 금지선: 기존 진입가 ₩${_worst.toLocaleString()} 대비 2×ATR(${_atrP}%×2) 아래 — 이 자리는 추매가 아니라 손절 검토 구간입니다`]);
+        opinionOk=false;
+      }
+    }
   }
   else if(s.buyTrack&&s.buyTrack.type==="early") checks.push(["✅",`종목 의견: 선취 매수 트랙(${s.score>0?"+":""}${s.score}) — 1/3 물량으로 제한하세요`]);
   else checks.push(["⚠️",`종목 의견: 중립(${s.score>0?"+":""}${s.score})`]);
