@@ -647,7 +647,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-10-r59";
+const APP_VERSION = "v2026-07-10-r60";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -2447,8 +2447,9 @@ function recordEntry(code){
     var _w=Math.min.apply(null,_hd.map(function(e){return e.entryPrice;}));
     var _ap=(s.atr&&s.atr.pct)?s.atr.pct:5;
     var _lim=Math.round(_w*(1-2*_ap/100));
-    if(_w>0&&s.price<_lim){
-      checks.push(["🚫",`물타기 금지선: 기존 진입가 ₩${_w.toLocaleString()} 대비 2×ATR(${_ap}%×2) 아래 — 이 자리는 추매가 아니라 손절 검토 구간입니다`]);
+    var _px=(s.nxt&&s.nxt.price)?s.nxt.price:s.price;  // NXT 거래중엔 실시간가로 자리 판정
+    if(_w>0&&_px<_lim){
+      checks.push(["🚫",`물타기 금지선: 기존 진입가 ₩${_w.toLocaleString()} 대비 2×ATR(${_ap}%×2) 아래${(s.nxt&&s.nxt.price)?" (NXT가 기준)":""} — 이 자리는 추매가 아니라 손절 검토 구간입니다`]);
       opinionOk=false;
     }
   })();
