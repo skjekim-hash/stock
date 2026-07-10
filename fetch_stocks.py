@@ -26,6 +26,12 @@ KIS_BASE_URL   = ("https://openapi.koreainvestment.com:9443"
                   if os.environ.get("KIS_REAL", "").lower() in ("1", "true", "yes")
                   else "https://openapivts.koreainvestment.com:29443")
 KIS_TOKEN      = {"access_token": "", "expires": 0}
+# 시작 로그에 KIS 모드 명시 (모의 서버면 공매도·잠정·체결강도·프로그램이 전부 비활성)
+import sys as _sys
+_kis_mode = ("미설정 (키 없음)" if not KIS_AVAILABLE
+             else "실전" if "openapivts" not in KIS_BASE_URL
+             else "⚠️ 모의투자 — 시세분석 API(공매도·잠정·체결강도·프로그램) 비활성. KIS_REAL=1 시크릿 필요")
+print(f"  🔑 KIS 모드: {_kis_mode}", file=_sys.stderr)
 
 STOCKS = [
     {"code": "000660", "yf": "000660.KS", "name": "SK하이닉스", "emoji": "🔵"},
@@ -2206,6 +2212,14 @@ def analyze_stock(stock, kospi, market=None):
                  "position": boll_pos} if boll_result else None,
         "atr": atr,
         "atrStopLoss": round(price - atr["atr"] * 2) if atr else 0,
+        # CMF(20) — 매집/분산: 종가가 봉 안 어디서 끝났는지를 거래량 가중 평균 (간접 수급)
+        "cmf": (lambda: (lambda mfv, vol: {
+                "value": round(sum(mfv[-20:]) / max(sum(vol[-20:]), 1), 3),
+                "comment": ("매집 우세 (조용한 유입)" if sum(mfv[-20:])/max(sum(vol[-20:]),1) > 0.05
+                            else "분산 우세 (조용한 이탈)" if sum(mfv[-20:])/max(sum(vol[-20:]),1) < -0.05
+                            else "중립")})(
+                [((c-l)-(h-c))/max(h-l,1)*v for h,l,c,v in zip(highs_d, lows_d, closes_d, volumes_d)],
+                volumes_d))() if has_data and len(closes_d) >= 20 else None,
         "suggestedPrice": pt["sp"], "suggestedLabel": pt["sl"],
         "targetPrice": pt["tp"], "targetPrice2": pt["tp2"], "stopLoss": pt["stop"],
         "rsi": rsi, "rsiComment": cmt_rsi(rsi),
