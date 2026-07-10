@@ -647,7 +647,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-10-r57";
+const APP_VERSION = "v2026-07-10-r59";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -1463,6 +1463,11 @@ function renderCard(s,idx){
           <span style="font-size:15px;font-weight:800;color:${nc};font-family:'JetBrains Mono',monospace">${W(np)} <span style="font-size:11px">(${chg>0?"+":""}${chg}%)</span></span>
         </div>
         <div style="font-size:11px;color:#8090b0;margin-top:4px">정규장 종가 ${W(s.nxt.closePrice)} 대비 · NXT 거래중${reach?" · "+reach:""}</div>
+        ${(function(){
+          if(typeof chg!=="number"||Math.abs(chg)<0.5) return "";
+          var up=chg>0;
+          return `<div style="font-size:11px;font-weight:700;margin-top:5px;color:${up?"#00e5a0":"#ff6680"}">${up?"📈 시간외 프리미엄 — 장외 매수 우위, 내일 갭업 압력":"📉 시간외 디스카운트 — 장외 매도 우위, 내일 갭하락 압력"} <span style="color:#8090b0;font-weight:400">(괴리 ${chg>0?"+":""}${chg}%)</span></div>`;
+        })()}
         ${reviewBox}
       </div>`;
     })():""}
@@ -1760,6 +1765,21 @@ function renderCard(s,idx){
     })():""}
     ${s.program&&!s.intradayFlow?`<div style="margin-bottom:10px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
       <span style="font-size:11px;color:var(--text2)">🤖 프로그램 당일 <b style="color:${s.program.netQty>0?"#00e5a0":"#ff6680"};font-family:'JetBrains Mono',monospace">${s.program.netQty>0?"+":""}${s.program.netQty.toLocaleString()}주</b> — ${s.program.netQty>0?"기계 자금 유입":"기계 자금 이탈"} 중 <span style="color:var(--text3)">(${s.program.asOf} 집계)</span></span>
+    </div>`:""}
+    ${s.cmf?`<div class="irow">
+      <span class="irow-l">매집/분산 (CMF·20일)</span>
+      <div class="irow-r">
+        <div class="irow-v" style="color:${s.cmf.value>0.05?"#00e5a0":s.cmf.value<-0.05?"#ff4060":"#8090b0"}">${s.cmf.value>0?"+":""}${s.cmf.value}</div>
+        <div class="irow-n">${s.cmf.comment} — 종가가 봉 위/아래 어디서 끝나는지의 20일 누적</div>
+        ${s.cmfBars&&s.cmfBars.length?`<div style="margin-top:5px">${(function(){
+          var w=150,h=26,bw=w/s.cmfBars.length,mid=h/2,g="";
+          s.cmfBars.forEach(function(v,i){
+            var bh=Math.abs(v)*(h/2-1), c=v>=0?"#00e5a0":"#ff4060";
+            g+="<rect x='"+(i*bw+0.5).toFixed(1)+"' y='"+(v>=0?mid-bh:mid).toFixed(1)+"' width='"+(bw-1.2).toFixed(1)+"' height='"+Math.max(bh,0.8).toFixed(1)+"' fill='"+c+"' opacity='.8'/>";
+          });
+          return "<svg width='"+w+"' height='"+h+"'><line x1='0' y1='"+mid+"' x2='"+w+"' y2='"+mid+"' stroke='rgba(255,255,255,.15)'/>"+g+"</svg>";
+        })()}<div style="font-size:10.5px;color:var(--text3)">일별: 위 막대=매수가 이긴 날 · 아래=매도가 이긴 날</div></div>`:""}
+      </div>
     </div>`:""}
     ${s.investor&&(s.investor.foreign||s.investor.institution)?`<div class="sec-sub">수급 (전일 마감)</div>
     <div class="irow">
