@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-10-r61";
+const APP_VERSION = "v2026-07-11-r63";
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -982,7 +982,7 @@ function renderActionBriefing(stocks){
     var lines=[];
     if(buy.length)   lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>✅ 매수 문턱 도달 "+buy.length+"</span> — "+buy.map(jump).join(", ")+" <span style='color:var(--text3)'>(계획 물량)</span></div>");
     if(early.length) lines.push("<div style='margin-bottom:5px'><span style='color:#00d4ff;font-weight:800'>★ 선취 후보 "+early.length+"</span> — "+early.map(jump).join(", ")+" <span style='color:var(--text3)'>(1/3 물량 · 손절가 필수)</span></div>");
-    if(turn.length)  lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>🌊 외인 당일 전환 "+turn.length+"</span> — "+turn.map(jump).join(", ")+" <span style='color:var(--text3)'>(수급 반전 첫 신호)</span></div>");
+    if(turn.length)  lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>🌊 외인 전환 "+turn.length+"</span> — "+turn.map(jump).join(", ")+" <span style='color:var(--text3)'>(수급 반전 첫 신호)</span></div>");
     if(check.length) lines.push("<div style='margin-bottom:5px'><span style='color:#ff6680;font-weight:800'>⚠️ 보유 점검 "+check.length+"</span> — "+check.map(jump).join(", ")+" <span style='color:var(--text3)'>(보유 중인데 매도 신호)</span></div>");
     var summary = lines.length
       ? lines.join("") + "<div style='color:var(--text3);font-size:11px'>나머지 "+watch+"종목 관망</div>"
@@ -1413,7 +1413,7 @@ function renderCard(s,idx){
       <div class="card-hdr-right">
         <div class="card-opinion-pill" style="background:${oc}18;color:${oc};border:1px solid ${oc}35">${oi} ${opLabel}</div>
         ${op==="중립"&&s.nuance?`<div style="font-size:11px;color:${s.nuance.indexOf("관찰")>=0?"#f5b942":s.score<=-1?"#ff6680":"#9ab"};text-align:right;margin-top:2px;font-weight:600">${s.nuance}</div>`:""}
-        ${s.flowTurnaround?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00e5a020;border:1px solid #00e5a060;border-radius:20px;padding:2px 8px;font-size:11px;color:#00e5a0;font-weight:700">🌊 외인 당일 순매수 전환</span></div>`:""}
+        ${s.flowTurnaround?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00e5a020;border:1px solid #00e5a060;border-radius:20px;padding:2px 8px;font-size:11px;color:#00e5a0;font-weight:700">🌊 외인 순매수 전환</span></div>`:""}
         ${s.contrarian?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ffc94020;border:1px solid #ffc94050;border-radius:20px;padding:2px 8px;font-size:11px;color:#ffc940;font-weight:700">⚡ 역발상 반등 주목</span></div>`:""}
         ${s.marginCallRisk?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#ff406020;border:1px solid #ff406050;border-radius:20px;padding:2px 8px;font-size:11px;color:#ff4060;font-weight:700">⚠️ 반대매매 주의</span></div>`:""}
         ${s.turnover?`<div style="margin-top:4px;text-align:right"><span style="display:inline-block;background:#00d4ff20;border:1px solid #00d4ff50;border-radius:20px;padding:2px 8px;font-size:11px;color:#00d4ff;font-weight:700">🔄 물갈이 진행</span></div>`:""}
@@ -1641,10 +1641,10 @@ function renderCard(s,idx){
     </div>`:""}
   </div>
 
-  ${(s.opinion==="매수"||(s.score!==undefined&&s.score>=2)||(s.contrarian))?`<div class="sec" style="border-left-color:#d4af6a">
+  ${(s.opinion==="매수"||(s.score!==undefined&&s.score>=2)||(s.contrarian))?`<div class="sec" style="border-left-color:#7a9cc8">
     <div class="sec-head">
       <span class="sec-num">⑩</span>
-      <span class="sec-title" style="color:#d4af6a">매수 가격대</span>
+      <span class="sec-title" style="color:#7a9cc8">매수 가격대</span>
     </div>
     ${renderBuyRange(s)}
   </div>`:""}
@@ -2050,7 +2050,7 @@ function renderCard(s,idx){
       <div class="guide-item"><b>RS(상대강도)</b> — KOSPI 대비 강도. +면 시장보다 강함(아웃퍼폼), −면 약함.</div>
       <div class="guide-item"><b>🔫 방아쇠 (체결강도·호가)</b> — 다른 지표가 '자리'를 말한다면 이건 <b>지금 이 순간 힘이 실렸는지</b>를 봅니다. 체결강도 100% 이상 = 매수 체결 우위, 120% 이상 = 강한 매수세. 매수/매도 호가 배율은 대기 주문의 벽 방향이에요. <b>살 자리에 도달했어도 방아쇠 '대기'면 서두를 이유가 없고, '충족'이면 반등에 힘이 실린 것</b> — 자리+방아쇠가 겹치는 순간이 진입 타이밍입니다. 🤖 프로그램 순매수는 지수 연계 기계 자금의 방향(대형주 당일 등락의 숨은 주체)이에요.</div>
       <div class="guide-item"><b>🛡 변동성 손절 (2×ATR)</b> — 고정 % 손절은 변동성이 큰 장에서 노이즈에 걸려 털립니다. ATR은 그 종목의 일평균 진폭이라, <b>2×ATR 아래 = 정상 출렁임이 아닌 진짜 이탈</b>로 볼 수 있는 선이에요. 지지선 손절과 비교해 더 넉넉한 쪽을 쓰면 데일 확률이 줄어듭니다.</div>
-      <div class="guide-item"><b>⚡ 오늘 장중 잠정 수급</b> — 확정 수급은 하루 늦은(T-1) 정보인데, 잠정치는 <b>오늘 장중 외국인·기관이 사고 있는지</b>를 실시간 집계로 보여주는 선행 정보예요. 특히 <b style="color:#00e5a0">🌊 외인 당일 순매수 전환</b>(연속 순매도 중이던 외국인이 오늘 매수로 돌아섬)은 수급 반전의 첫 신호라 타이밍 판단에 가장 값진 순간입니다. 단, 장중 집계라 마감 확정치와 다를 수 있고 점수에는 반영하지 않아요 — 진입 방아쇠 판단의 참고로만 쓰세요.</div>
+      <div class="guide-item"><b>⚡ 오늘 장중 잠정 수급</b> — 확정 수급은 하루 늦은(T-1) 정보인데, 잠정치는 <b>오늘 장중 외국인·기관이 사고 있는지</b>를 실시간 집계로 보여주는 선행 정보예요. 특히 <b style="color:#00e5a0">🌊 외인 순매수 전환</b>(연속 순매도 중이던 외국인이 오늘 매수로 돌아섬)은 수급 반전의 첫 신호라 타이밍 판단에 가장 값진 순간입니다. 단, 장중 집계라 마감 확정치와 다를 수 있고 점수에는 반영하지 않아요 — 진입 방아쇠 판단의 참고로만 쓰세요.</div>
       <div class="guide-item" style="border-top:1px solid #2a2820;margin-top:8px;padding-top:8px;color:#00d4ff">
         <b>📐 시각화 읽는 법 (게이지 · 추세선 · 레이더)</b>
       </div>
@@ -2347,7 +2347,7 @@ function recordDailySignals(stocks){
   stocks.forEach(function(s){
     snapshot.signals[s.code] = {
       score: s.score, opinion: s.opinion, price: s.price,
-      turn: !!s.flowTurnaround,                       // 🌊 외인 당일 전환 여부 (적중률 검증용)
+      turn: !!s.flowTurnaround,                       // 🌊 외인 전환 여부 (적중률 검증용)
       th: (s.buyThreshold&&s.buyThreshold.buy)||6,    // 당일 매수 문턱 (레짐별 성적 분석용)
       name: (typeof STOCKS!=="undefined" && STOCKS.find(function(x){return x.code===s.code;})||{}).name || s.code
     };
@@ -3047,7 +3047,7 @@ function renderJournal(){
         <span style="color:#8090b0;font-size:11px">일부 팔고 보유 중인 거래의 실현분 — 전량청산 승률과 별도 집계</span>
       </div>`:""}
       ${(violatedTrades.length>0||followedTrades.length>0)?`<div style="margin-bottom:12px;padding:11px 12px;background:rgba(212,175,106,0.06);border-radius:10px;border:1px solid rgba(212,175,106,0.2)">
-        <div style="font-size:11.5px;color:#d4af6a;font-weight:700;margin-bottom:8px">🪞 신호를 따랐을 때 vs 어겼을 때</div>
+        <div style="font-size:11.5px;color:#8fa8cc;font-weight:700;margin-bottom:8px">🪞 신호를 따랐을 때 vs 어겼을 때</div>
         <div style="display:flex;gap:8px">
           <div style="flex:1;text-align:center;background:rgba(92,184,138,0.1);border-radius:8px;padding:8px 4px">
             <div style="font-size:11px;color:#9a958c">신호 따름</div>
@@ -3654,7 +3654,7 @@ function renderBuyRange(s){
   else if(r.zone==="below"){ curColor=r.belowColor; curMsg="현재가가 지지선(A) 아래 — "+(r.belowMode==="buy"?"적극 매수 구간":r.belowMode==="hold"?"보류 구간":"신중 구간"); }
   else { curColor="#d9657a"; curMsg="⚠️ 현재가가 권장 상단(B) 초과 — 추격 매수 주의, 다음 기회 기다리기"; }
   return `<div style="background:rgba(212,175,106,0.06);border:1px solid rgba(212,175,106,0.2);border-radius:10px;padding:12px 13px;margin-bottom:10px">
-    <div style="font-size:11px;color:#d4af6a;font-weight:700;letter-spacing:.5px;margin-bottom:8px">💰 매수 가격대</div>
+    <div style="font-size:11px;color:#7a9cc8;font-weight:700;letter-spacing:.5px;margin-bottom:8px">💰 매수 가격대</div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
       <div style="flex:1;text-align:center;background:rgba(92,184,138,0.1);border-radius:8px;padding:7px 4px">
         <div style="font-size:11px;color:#9a958c">A · 지지선</div>
@@ -4023,7 +4023,7 @@ function renderSim(){
 
     <div style="display:flex;gap:8px;margin-top:12px">
       <button onclick="document.getElementById('simModal').style.display='none';recordEntry('${s.code}')" style="flex:1;background:#1f6b3a;border:none;border-radius:10px;padding:11px;color:#d8f5e4;font-size:12px;font-weight:800;cursor:pointer">📝 이 종목 진입 기록</button>
-      <button onclick="document.getElementById('simModal').style.display='none';openSwing()" style="flex:1;background:#2a2820;border:1px solid #d4af6a55;border-radius:10px;padding:11px;color:#d4af6a;font-size:12px;font-weight:700;cursor:pointer" title="물린 보유분의 평단 낮추기 계산">🔁 물림 해소는 스윙</button>
+      <button onclick="document.getElementById('simModal').style.display='none';openSwing()" style="flex:1;background:#2a2820;border:1px solid #7a9cc855;border-radius:10px;padding:11px;color:#8fa8cc;font-size:12px;font-weight:700;cursor:pointer" title="물린 보유분의 평단 낮추기 계산">🔁 물림 해소는 스윙</button>
     </div>
 
     <div style="font-size:11px;color:#5a6a88;line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid #2a2820">
