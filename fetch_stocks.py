@@ -2220,6 +2220,9 @@ def analyze_stock(stock, kospi, market=None):
                             else "중립")})(
                 [((c-l)-(h-c))/max(h-l,1)*v for h,l,c,v in zip(highs_d, lows_d, closes_d, volumes_d)],
                 volumes_d))() if has_data and len(closes_d) >= 20 else None,
+        # CMF 히스토그램용: 일별 종가 위치값 (-1~+1, +는 봉 상단 마감=매수 우위)
+        "cmfBars": ([round(((c-l)-(h-c))/max(h-l,1),2) for h,l,c in zip(highs_d[-20:], lows_d[-20:], closes_d[-20:])]
+                    if has_data and len(closes_d) >= 20 else []),
         "suggestedPrice": pt["sp"], "suggestedLabel": pt["sl"],
         "targetPrice": pt["tp"], "targetPrice2": pt["tp2"], "stopLoss": pt["stop"],
         "rsi": rsi, "rsiComment": cmt_rsi(rsi),
