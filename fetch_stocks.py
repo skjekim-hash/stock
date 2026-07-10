@@ -2004,11 +2004,11 @@ def analyze_stock(stock, kospi, market=None):
             if s20 and (price - s20) / s20 * 100 < -8:
                 oversold_signals.append("이격도 과대")
         if len(oversold_signals) >= 3:
-            score += 2
+            score += 1  # 튜닝(7/10): +2→+1 축소 — 매수 신호 적중 29%(7건 중 2)의 주범이 역발상 승격으로 확인됨
             contrarian = "⚡ 역발상 반등 주목 — " + " · ".join(oversold_signals[:3])
-            # 재판정도 오늘의 가변 문턱을 따라야 함 (고정 6이면 비우호 날 문턱 7과 모순)
-            if score >= th_info["buy"]: opinion = "매수"
-            elif score >= 0: opinion = "중립"
+            # 역발상은 '매수 승격' 금지 — 과매도 베팅은 선취 트랙(1/3 물량+손절가)의 역할.
+            # 근거: 매수 빗나감 사례(현대차 -11.3%/-6.0%, LG전자 -4.1%)가 전부 이 경로였음
+            if score >= 0 and opinion == "매도": opinion = "중립"
             # nuance 재계산
             if opinion == "중립":
                 if   score >= 4:  nuance = "관찰 구간 (소량만)"
