@@ -1544,6 +1544,12 @@ def contra_signal(rsi, macd, macd_sig, obv, patterns, fg_score, investor):
               "역발상 매도 기회" if strength <= -2 else "현 신호 유효")
     return {"signals": signals[:4], "action": action, "strength": strength}
 
+def judge_opinion(score, th_info):
+    """의견 판정의 유일한 진실 공급원 — 모든 (재)판정은 반드시 이 함수를 경유.
+    (7월 버그 3건의 공통 원인이 '흩어진 고정 문턱'이었음: 역발상·브레이크가 6 하드코딩)"""
+    return ("매수" if score >= th_info["buy"]
+            else "매도" if score <= th_info["sell"] else "중립")
+
 def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap, weekly_opinion,
                   investor, short_ratio, news_list,
@@ -1551,85 +1557,89 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
                   boll_data=None, weekly_rsi=None, patterns=None, fx_price=0,
                   market_score=None, macro_adj=0.0):
+    contrib = {}
+    def _t(lbl, v):
+        if v: contrib[lbl] = contrib.get(lbl, 0) + v
+        return v
     score = 0
     # RSI
-    if rsi: score += 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0
+    if rsi: score += _t("RSI", 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0)
     # MACD
-    if macd and macd_sig: score += 2 if macd > macd_sig else -2
+    if macd and macd_sig: score += _t("MACD", 2 if macd > macd_sig else -2)
     # Williams %R: -70 이하로 문턱 낮춤 (기존 -80)
-    if wr: score += 1 if wr < -70 else -1 if wr > -20 else 0
+    if wr: score += _t("윌리엄스R", 1 if wr < -70 else -1 if wr > -20 else 0)
     # 스토캐스틱
-    if stoch: score += 1 if stoch < 20 else -1 if stoch > 80 else 0
+    if stoch: score += _t("스토캐스틱", 1 if stoch < 20 else -1 if stoch > 80 else 0)
     # MFI: 범위 확장 (기존 극단만 → 40/60으로 확장)
-    if mfi: score += 2 if mfi < 20 else 1 if mfi < 40 else -2 if mfi > 80 else -1 if mfi > 60 else 0
+    if mfi: score += _t("MFI", 2 if mfi < 20 else 1 if mfi < 40 else -2 if mfi > 80 else -1 if mfi > 60 else 0)
     # OBV: +1 → +2로 강화 (수급 대체)
-    if obv: score += 2 if obv["slope"] > 2 else -2 if obv["slope"] < -2 else 0
+    if obv: score += _t("OBV", 2 if obv["slope"] > 2 else -2 if obv["slope"] < -2 else 0)
     # ADX: 횡보 구간 반등 가능성 반영
     if adx:
-        if adx["adx"] < 15: score += 1    # 추세 없음 → 반등 여지
-        elif adx["adx"] > 30 and adx["pdi"] < adx["ndi"]: score -= 1  # 강한 하락 추세
+        if adx["adx"] < 15: score += _t("ADX", 1)    # 추세 없음 → 반등 여지
+        elif adx["adx"] > 30 and adx["pdi"] < adx["ndi"]: score += _t("ADX", -1)  # 강한 하락 추세
     # 스토캐스틱 RSI: 과매도 구간 차등 (기존 일괄 +2 → K<10이면 +3)
     if stoch_rsi:
         if stoch_rsi["signal"] == "매수":
-            score += 3 if stoch_rsi.get("k", 50) < 10 else 2
+            score += _t("스토캐RSI", 3 if stoch_rsi.get("k", 50) < 10 else 2)
         elif stoch_rsi["signal"] == "매도":
-            score -= 2
+            score += _t("스토캐RSI", -2)
     # 다이버전스: +3 → +4로 강화
     if divergence:
-        if divergence.get("bullish"): score += 4
-        if divergence.get("bearish"): score -= 4
+        if divergence.get("bullish"): score += _t("강세 다이버전스", 4)
+        if divergence.get("bearish"): score += _t("약세 다이버전스", -4)
     # 일목
     if ichimoku:
-        if ichimoku["signal"] == "매수": score += 2 if "강한" in ichimoku["comment"] else 1
-        elif ichimoku["signal"] == "매도": score -= 2 if "강한" in ichimoku["comment"] else 1
+        if ichimoku["signal"] == "매수": score += _t("일목", 2 if "강한" in ichimoku["comment"] else 1)
+        elif ichimoku["signal"] == "매도": score += _t("일목", -(2 if "강한" in ichimoku["comment"] else 1))
     # CCI
     if cci:
-        if cci["signal"] == "매수": score += 2 if "극단" in cci["comment"] else 1
-        elif cci["signal"] == "매도": score -= 2 if "극단" in cci["comment"] else 1
+        if cci["signal"] == "매수": score += _t("CCI", 2 if "극단" in cci["comment"] else 1)
+        elif cci["signal"] == "매도": score += _t("CCI", -(2 if "극단" in cci["comment"] else 1))
     # PSAR
     if psar:
-        if psar["signal"] == "매수": score += 1
-        elif psar["signal"] == "매도": score -= 1
+        if psar["signal"] == "매수": score += _t("SAR", 1)
+        elif psar["signal"] == "매도": score += _t("SAR", -1)
     # 거래대금 급등
     if value_surge and value_surge["surge"]:
-        score += 1 if rsi and rsi > 50 else -1 if rsi and rsi < 50 else 0
+        score += _t("구름대", 1 if rsi and rsi > 50 else -1 if rsi and rsi < 50 else 0)
     # 52주 위치: +1 → +2로 강화, 볼린저 밴드 위치 추가
     if h52 > 0 and l52 > 0:
         pos = (price - l52) / (h52 - l52) * 100
-        score += 2 if pos < 20 else 1 if pos < 35 else -2 if pos > 90 else -1 if pos > 85 else 0
+        score += _t("52주 위치", 2 if pos < 20 else 1 if pos < 35 else -2 if pos > 90 else -1 if pos > 85 else 0)
     # 볼린저 밴드 위치 (boll_pos가 있으면)
     if boll_data and boll_data.get("position") is not None:
         bp = boll_data["position"]
-        score += 2 if bp < 15 else 1 if bp < 25 else -2 if bp > 85 else -1 if bp > 75 else 0
+        score += _t("볼린저 위치", 2 if bp < 15 else 1 if bp < 25 else -2 if bp > 85 else -1 if bp > 75 else 0)
     # VWAP
-    if vwap: score += 1 if price > vwap else -1
+    if vwap: score += _t("VWAP", 1 if price > vwap else -1)
     # 이격도: SMA20 대비 -8% 이상 이격이면 평균회귀 가능성
     s5, s20 = calc_sma(closes, 5), calc_sma(closes, 20)
     if s5 and s20:
-        score += 1 if s5 > s20 else -1
+        score += _t("이평 배열", 1 if s5 > s20 else -1)
     if s20 and price > 0:
         gap = (price - s20) / s20 * 100
-        score += 2 if gap < -8 else 1 if gap < -4 else -1 if gap > 8 else 0
+        score += _t("이격도", 2 if gap < -8 else 1 if gap < -4 else -1 if gap > 8 else 0)
     # 주봉
-    if weekly_opinion == "매수": score += 2
-    elif weekly_opinion == "매도": score -= 2
+    if weekly_opinion == "매수": score += _t("주봉", 2)
+    elif weekly_opinion == "매도": score += _t("주봉", -2)
     # 주봉 RSI 과매도 추가 (+1)
-    if weekly_rsi and weekly_rsi < 40: score += 1
-    elif weekly_rsi and weekly_rsi > 70: score -= 1
+    if weekly_rsi and weekly_rsi < 40: score += _t("주봉 RSI", 1)
+    elif weekly_rsi and weekly_rsi > 70: score += _t("주봉 RSI", -1)
     # 공매도: 잔고 추세로 전환(비중% 폐기). 검증 전까지 점수 미반영 — 화면 표시 전용.
     # (기존 short_ratio 가점은 데이터가 항상 0이라 무의미했음. 예측검증 후 잔고추세 반영 검토)
     # 뉴스
     if news_list:
         pos_count = len([n for n in news_list if n["sentiment"] == "긍정"])
         neg_count = len([n for n in news_list if n["sentiment"] == "부정"])
-        if pos_count > neg_count: score += 1
-        elif neg_count > pos_count: score -= 1
+        if pos_count > neg_count: score += _t("뉴스", 1)
+        elif neg_count > pos_count: score += _t("뉴스", -1)
     # 캔들 패턴: +1 → +2로 강화
     if patterns:
         pos_pat = [p for p in patterns if p.get("type") in ["상승반전","강세"]]
         neg_pat = [p for p in patterns if p.get("type") in ["하락반전","약세"]]
-        if pos_pat: score += 2
-        if neg_pat: score -= 2
+        if pos_pat: score += _t("캔들 패턴", 2)
+        if neg_pat: score += _t("캔들 패턴", -2)
     # 수급은 화면에서 직접 확인 후 판단 (점수에서 제외)
     # ── 레짐 구분 + 외국인 수급 강화 (학술 근거: 추세장에선 과매수=매도가 해롭다) ──
     # 과매수 페널티를 재계산해서, 추세장(ADX>20 & 일목매수)이면 절반을 되돌려줌
@@ -1652,15 +1662,15 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if _uptrend and ob_penalty < 0:
         # 추세장: 과매수 페널티 절반 되돌림 (예: -8 → +4 보정)
         relief = ob_penalty - round(ob_penalty / 2)  # 음수 페널티의 절반만큼 +
-        score -= relief  # relief가 음수이므로 score 상승
+        score += _t("과매도 완화", -relief)  # relief가 음수이므로 score 상승
     # 외국인 수급 강화 (한국시장: 외국인=숙련 차익거래자, 모멘텀 주도)
     if investor:
         _f5 = investor.get("foreign5", 0) or 0
         _streak = investor.get("streak", 0) or 0
         if _f5 > 0 or _streak >= 2:
-            score += 1   # 외국인 순매수 흐름 → 매수 가산
+            score += _t("수급(외인)", 1)
         elif _f5 < -1000000:
-            score -= 1   # 외국인 대량 순매도 → 매도 경계 유지
+            score += _t("수급(외인)", -1)
     # ── 환율 위기 + 외국인 보유율 차별 경계 ──
     # 환율이 위험 수준이면, 외국인 보유율 높은 종목일수록 자금이탈에 취약
     # (모든 종목 일괄 차감이 아니라 외국인 비중으로 차별화 → 종목 우열 유지)
@@ -1669,11 +1679,11 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
             _hold = float(str(investor.get("holdRatio", "0")).replace("%", ""))
         except (ValueError, TypeError):
             _hold = 0
-        if _hold >= 50:   score -= 2   # 외국인 절반 이상 보유 → 환율위기에 크게 취약
-        elif _hold >= 30: score -= 1   # 외국인 상당 보유 → 일부 취약
+        if _hold >= 50:   score += _t("외인 보유·환율", -2)   # 외국인 절반 이상 보유 → 환율위기에 크게 취약
+        elif _hold >= 30: score += _t("외인 보유·환율", -1)   # 외국인 상당 보유 → 일부 취약
         # 30% 미만은 환율 영향 적어 차감 없음 (내수·개인 비중 높은 종목)
     # ── ③ 종목별 매크로 조정 (SOX·나스닥·환율·금리 감응 차등, ±2 캡) ──
-    score += macro_adj
+    score += _t("매크로", macro_adj)
     score = round(score)
     # ── ② 레짐 가변 매수 문턱 ──────────────────────────
     # 확인형 지표들이 모두 동의해야 +6이라 타이밍이 늦음 → 시장이 우호적일 때만
@@ -1732,7 +1742,9 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     _reasons.sort(key=lambda x: -abs(x[1]))
     buy_reasons = [r[0] for r in _reasons if r[1] > 0][:3]
     sell_reasons = [r[0] for r in _reasons if r[1] < 0][:3]
-    opinion = "매수" if score >= buy_th else "매도" if score <= SELL_TH else "중립"
+    th_info = {"buy": buy_th, "sell": SELL_TH, "label": th_label,
+               "drivers": [{"k": k, "v": round(v, 1)} for k, v in sorted(contrib.items(), key=lambda x: -abs(x[1]))[:4]]}
+    opinion = judge_opinion(score, th_info)
     # 중립의 결: 점수가 어느 쪽으로 기울었는지 (문턱은 레짐에 따라 가변)
     nuance = ""
     if opinion == "중립":
@@ -1741,7 +1753,6 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         elif score == 0:  nuance = "완전 중립 (관망)"
         elif score >= -2: nuance = "약한 매도 우위"
         else:             nuance = "매도 우위 (문턱 근접)"
-    th_info = {"buy": buy_th, "sell": SELL_TH, "label": th_label}
     reasons = {"buy": buy_reasons, "sell": sell_reasons}
     return opinion, score, nuance, th_info, reasons
 
@@ -2072,8 +2083,8 @@ def analyze_stock(stock, kospi, market=None):
     if market and opinion == "매수":
         if market.get("summary", {}).get("mood") == "adverse":
             score -= 2
-            if score < th_info["buy"]:  # 브레이크 후 재판정도 오늘의 문턱 기준
-                opinion = "중립"
+            opinion = judge_opinion(score, th_info)  # 재판정 단일화 (③ 리팩토링)
+            if opinion != "매수":
                 market_brake = "시장 비우호적 — 매수 신호 보류"
                 nuance = "관찰 구간 (소량만)" if score >= 4 else "관찰 — 신호 부족"
             else:
@@ -2190,6 +2201,7 @@ def analyze_stock(stock, kospi, market=None):
         "nuance": nuance,
         "buyTrack": buy_track,
         "buyThreshold": th_info,
+        "scoreDrivers": th_info.get("drivers", []),
         "macro": {"adj": macro_adj, "parts": macro_parts},
         "sigReasons": sig_reasons,
         "contrarian": contrarian,
