@@ -658,7 +658,9 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-11-r65";
+const APP_VERSION = "v2026-07-11-r66";
+// 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
+const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
   var v=document.getElementById("appVer");
   if(v) v.textContent="빌드 "+APP_VERSION;
@@ -966,7 +968,7 @@ function renderActionBriefing(stocks){
         // 이미 보유 중이면 추매 문턱(기본+보유수×2)을 넘는 강한 신호일 때만 매수로 인정.
         // 아니면 물타기 위험이므로 매수 목록에서 제외 (카드 안 "관망" 판정과 일치).
         var bc=buyCnt[s.code]||0;
-        var escalTh=((s.buyThreshold&&s.buyThreshold.buy)||6)+bc*2;
+        var escalTh=((s.buyThreshold&&s.buyThreshold.buy)||6)+bc*ADD_PER_BUY;
         if(bc===0 || s.score>=escalTh){ buy.push(s); acted=true; }
       }
       else if(s.buyTrack&&s.buyTrack.type==="early"){ early.push(s); acted=true; }
@@ -1579,7 +1581,7 @@ function renderCard(s,idx){
       // ── 추매 단계별 문턱 상향 (물타기 방지) ──
       // 이 종목을 이미 몇 번 샀는지 = 보유 중 매매기록 수. 살수록 문턱을 올린다.
       var buyCount=window._bc||0;
-      var addPerBuy=2;  // 추매 1회당 문턱 +2
+      var addPerBuy=ADD_PER_BUY;  // 전역 상수 공유 (브리핑과 어긋나지 않게)
       var bt=btBase + buyCount*addPerBuy;  // 첫 진입(0회)은 그대로, 추매마다 +2
       var overBuy=buyCount>=3;  // 3회 이상 보유 = 물타기 위험 구간
       var escalMsg="";
