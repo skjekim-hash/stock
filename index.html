@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-11-r66";
+const APP_VERSION = "v2026-07-11-r67";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -2360,21 +2360,41 @@ function recordDailySignals(stocks){
   if(track.length>60) track = track.slice(-60);
   saveSignalTrack(track);
 }
-// 과거 신호 vs 현재가 채점 (시차 LAG일 후 평가)
+// 과거 신호 vs 현재가 채점
+// 단기(3일)와 중기(30일)를 둘 다 잰다.
+//  - 단기: 신호 직후 바로 움직였나 (기존 방식)
+//  - 중기: 실제 매매 스타일(최대 30일 보유, 목표 +5%)에 맞춘 채점.
+//          30일 '기간 중 최고가'가 목표에 닿았는지를 본다 — 실제로 익절할 기회가 있었나.
 function scoreSignalAccuracy(currentStocks){
   var track = loadSignalTrack();
   if(track.length<2) return null;
-  var LAG = 3;          // 3거래일(달력일) 후 평가
+  var LAG = 3;          // 단기: 3거래일(달력일) 후 평가
   var EVAL_WINDOW = 7;  // 후속 기록이 없을 때 현재가로 대신 평가 가능한 최대 경과일
   var HIT = 1.0;        // 맞음 판정 기준 ±1%
+  var MID_DAYS = 30;    // 중기: 실제 보유 한도와 동일
   var curPrice = {};
   (currentStocks||[]).forEach(function(s){ curPrice[s.code]=s.price; });
   var today = new Date(kstDateStr());
   var result = {
     sell:{hit:0,miss:0,total:0}, buy:{hit:0,miss:0,total:0},
     turn:{hit:0,miss:0,total:0},   // 🌊 외인 전환 신호: 3일 후 +1% 이상이면 적중
+    // 중기(30일) 채점 — 실제 매매 스타일 기준
+    buyMid:{hit:0,miss:0,total:0, pending:0},
+    sellMid:{hit:0,miss:0,total:0, pending:0},
     examples:[]
   };
+  // 특정 종목의 [신호일 ~ 신호일+MID_DAYS] 구간 가격들을 모은다
+  function pricesWithin(code, snapDate, maxDays){
+    var out=[];
+    for(var i=0;i<track.length;i++){
+      var t=track[i];
+      var gap=Math.floor((new Date(t.date)-snapDate)/86400000);
+      if(gap>0 && gap<=maxDays && t.signals[code] && t.signals[code].price){
+        out.push({gap:gap, price:t.signals[code].price});
+      }
+    }
+    return out;
+  }
   track.forEach(function(snap){
     var snapDate = new Date(snap.date);
     var daysSince = Math.floor((today - snapDate)/86400000);
@@ -2393,19 +2413,47 @@ function scoreSignalAccuracy(currentStocks){
               : (daysSince<=LAG+EVAL_WINDOW ? curPrice[code] : null);
       if(!now || !sig.price) return;
       var chg = (now - sig.price)/sig.price*100;
+      var isBuy  = (sig.opinion==="매수" || sig.score>=6);
+      var isSell = (sig.opinion==="매도" || sig.score<=-5);
+
+      // ── 중기(30일) 채점 ── 기간 중 최고/최저를 봐서 '기회가 있었나'를 판정
+      if(isBuy || isSell){
+        var mid = result[isBuy?"buyMid":"sellMid"];
+        if(daysSince < MID_DAYS){
+          mid.pending++;   // 아직 30일이 안 지나 판정 보류
+        } else {
+          var pts = pricesWithin(code, snapDate, MID_DAYS);
+          if(pts.length){
+            var hi=-Infinity, lo=Infinity;
+            pts.forEach(function(p){ if(p.price>hi)hi=p.price; if(p.price<lo)lo=p.price; });
+            mid.total++;
+            if(isBuy){
+              // 매수: 30일 안에 최고가가 +1% 이상 → 익절 기회가 있었다
+              var upMax=(hi-sig.price)/sig.price*100;
+              if(upMax>=HIT) mid.hit++; else mid.miss++;
+            } else {
+              // 매도: 30일 안에 최저가가 -1% 이하 → 팔길 잘했다
+              var dnMax=(lo-sig.price)/sig.price*100;
+              if(dnMax<=-HIT) mid.hit++; else mid.miss++;
+            }
+          }
+        }
+      }
+
       // 🌊 외인 전환 신호: 진짜 반등(+1%↑)으로 이어졌는지 (의견과 독립 집계)
       if(sig.turn){
         result.turn.total++;
         if(chg >= HIT) result.turn.hit++; else result.turn.miss++;
       }
+      // ── 단기(3일) 채점 ── 신호 직후 바로 움직였나
       // 매도 신호: 이후 떨어지면 적중 / 오르면 빗나감
-      if(sig.opinion==="매도" || sig.score<=-5){
+      if(isSell){
         result.sell.total++;
         if(chg <= HIT) result.sell.hit++; else result.sell.miss++;
         if(chg > 3) result.examples.push({type:"매도빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
       }
       // 매수 신호: 이후 오르면 적중 / 떨어지면 빗나감
-      else if(sig.opinion==="매수" || sig.score>=6){
+      else if(isBuy){
         result.buy.total++;
         if(chg >= -HIT) result.buy.hit++; else result.buy.miss++;
         if(chg < -3) result.examples.push({type:"매수빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
@@ -2677,10 +2725,15 @@ function renderSignalAccuracy(){
   }
   var sellRate = r.sell.total ? Math.round(r.sell.hit/r.sell.total*100) : null;
   var buyRate = r.buy.total ? Math.round(r.buy.hit/r.buy.total*100) : null;
+  var bmRate = r.buyMid.total ? Math.round(r.buyMid.hit/r.buyMid.total*100) : null;
+  var smRate = r.sellMid.total ? Math.round(r.sellMid.hit/r.sellMid.total*100) : null;
+  var smallSample = (r.buy.total + r.sell.total) < 30;  // 표본 부족 경고 기준
   var html = `<div class="card-body" style="padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--blue)">
     <div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px">🎯 신호 정확도 추적</div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:10px">3일 후 종가로 자동 채점 · ${days}일치 기록</div>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px">단기 3일 · 중기 30일(실제 보유 한도) 두 기준으로 채점 · ${days}일치 기록</div>
+    ${smallSample?`<div style="font-size:10.5px;color:#f5b942;background:rgba(245,185,66,.08);border:1px solid rgba(245,185,66,.25);border-radius:8px;padding:7px 10px;margin-bottom:9px;line-height:1.5">⚠️ <b>표본 ${r.buy.total+r.sell.total}건 — 아직 판단하기 이른 수치예요.</b> 30건 미만에선 우연의 폭이 커요. 이 숫자를 보고 로직을 바꾸지 마세요.</div>`:""}
+    <div style="font-size:10.5px;color:var(--text3);margin-bottom:5px">단기 — 신호 3일 뒤 바로 움직였나</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
       <div style="flex:1;text-align:center;background:rgba(239,68,68,0.08);border-radius:8px;padding:8px 4px">
         <div style="font-size:11px;color:var(--text2)">매도 신호 적중</div>
         <div style="font-size:17px;font-weight:800;color:var(--red)">${sellRate!==null?sellRate+"%":"—"}</div>
@@ -2691,7 +2744,21 @@ function renderSignalAccuracy(){
         <div style="font-size:17px;font-weight:800;color:var(--green)">${buyRate!==null?buyRate+"%":"—"}</div>
         <div style="font-size:11px;color:var(--text2)">${r.buy.total}건 중 ${r.buy.hit}건</div>
       </div>
-    </div>`;
+    </div>
+    <div style="font-size:10.5px;color:var(--text3);margin-bottom:5px">중기 — 30일 안에 기회가 있었나 <span style="color:#8090b0">(실제 매매 기준)</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="flex:1;text-align:center;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:8px 4px">
+        <div style="font-size:11px;color:var(--text2)">매도 30일</div>
+        <div style="font-size:17px;font-weight:800;color:var(--red)">${smRate!==null?smRate+"%":"—"}</div>
+        <div style="font-size:10.5px;color:var(--text2)">${r.sellMid.total}건${r.sellMid.pending?` · ${r.sellMid.pending}건 진행중`:""}</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:8px 4px">
+        <div style="font-size:11px;color:var(--text2)">매수 30일</div>
+        <div style="font-size:17px;font-weight:800;color:var(--green)">${bmRate!==null?bmRate+"%":"—"}</div>
+        <div style="font-size:10.5px;color:var(--text2)">${r.buyMid.total}건${r.buyMid.pending?` · ${r.buyMid.pending}건 진행중`:""}</div>
+      </div>
+    </div>
+    ${(bmRate!==null&&buyRate!==null&&bmRate-buyRate>=15)?`<div style="font-size:10.5px;color:#7fdfff;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:7px 10px;margin-bottom:8px;line-height:1.5">💡 매수 신호가 <b>3일엔 ${buyRate}%지만 30일 보면 ${bmRate}%</b>. 신호가 틀린 게 아니라 <b>천천히 오르는 것</b>일 수 있어요 — 조급하게 손절하지 마세요.</div>`:""}`;
   // 🌊 외인 전환 신호 성적 (표본이 생기면 표시)
   if(r.turn && r.turn.total>0){
     var turnRate = Math.round(r.turn.hit/r.turn.total*100);
