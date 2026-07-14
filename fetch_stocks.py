@@ -525,6 +525,13 @@ def fetch_market_signal():
         ("TSM",   "TSMC",             "tsmc"),
         ("NVDA",  "엔비디아",          "nvda"),
         ("MU",    "마이크론",          "mu"),
+        # ── 아래는 관찰용(점수 미반영) — 종목별 가중치는 검증 후 결정 ──
+        ("CL=F",  "WTI 유가",          "oil"),    # 현대차: 연료비·수요 / 전반 인플레
+        ("HG=F",  "구리",              "copper"), # LG전자·제조업: 경기 선행 원자재
+        ("GC=F",  "금",                "gold"),   # 안전자산 선호도 (위험회피 강도)
+        ("^KS11", "코스피",            "kospi"),  # 국내 증시 자체 흐름
+        ("EWY",   "한국ETF(MSCI)",     "ewy"),    # 외국인이 보는 한국 (해외 자금 흐름)
+        ("XLF",   "미국 금융ETF",      "xlf"),    # KB금융: 글로벌 은행주 분위기
     ]
     out = {}
     for sym, name, key in targets:
