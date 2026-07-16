@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-11-r68";
+const APP_VERSION = "v2026-07-11-r69";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -1078,7 +1078,7 @@ function renderMarketBanner(m){
   });
   // ── 관찰용 지표 (점수 미반영) — 종목별 가중치는 검증 후 결정 ──
   var obsParts=[];
-  [["oil","WTI유가"],["copper","구리"],["gold","금"],["kospi","코스피"],["ewy","한국ETF"],["xlf","미국금융"]].forEach(function(p){
+  [["skhy","하이닉스ADR"],["oil","WTI유가"],["copper","구리"],["gold","금"],["kospi","코스피"],["ewy","한국ETF"],["xlf","미국금융"]].forEach(function(p){
     var k=p[0], lbl=p[1];
     if(m[k]&&typeof m[k].pct==="number"){
       var pct=m[k].pct;
@@ -1578,6 +1578,30 @@ function renderCard(s,idx){
     })()}
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
     ${s.macro&&s.macro.adj?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(128,144,176,.06);border:1px solid rgba(128,144,176,.18);font-size:11px;color:#8090b0;line-height:1.6">🌐 매크로 조정 <b style="color:${s.macro.adj>0?"#00e5a0":"#ff6680"}">${s.macro.adj>0?"+":""}${s.macro.adj}점</b> — ${(s.macro.parts||[]).join(" · ")}</div>`:""}
+    ${(function(){
+      // 종목별 '함께 볼 관찰 지표' (점수 미반영) — 검증되면 매크로 계수로 승격
+      var OBS_MAP={
+        "000660":[["skhy","하이닉스ADR"]],                           // 하이닉스: 밤사이 미국 ADR
+        "005930":[["skhy","하이닉스ADR"]],                            // 삼성전자: 메모리 동조
+        "009150":[["copper","구리"]],                                // 삼성전기: MLCC 원자재
+        "066570":[["copper","구리"],["oil","유가"]],                  // LG전자: 가전 원자재
+        "005380":[["oil","WTI유가"]],                                // 현대차: 연료비·수요
+        "105560":[["xlf","미국금융"],["ewy","한국ETF"]],              // KB금융: 글로벌 은행주
+        "017670":[["tnx","미국금리"]],                               // SKT: 배당주 금리 민감
+        "035420":[["nasdaq","나스닥"]]                               // NAVER: 성장주 동조
+      };
+      var list=OBS_MAP[s.code];
+      if(!list||!window.__market) return "";
+      var m=window.__market;
+      var shown=list.map(function(p){
+        var d=m[p[0]];
+        if(!d||typeof d.pct!=="number") return null;
+        var pct=d.pct, col=Math.abs(pct)<0.3?"#8090b0":pct<0?"#ff8fa3":"#7fdfc4";
+        return "<span style='color:"+col+"'>"+p[1]+" "+(pct>=0?"+":"")+pct+"%</span>";
+      }).filter(Boolean);
+      if(!shown.length) return "";
+      return `<div style="margin-top:6px;padding:6px 12px;border-radius:10px;background:rgba(0,180,216,.05);border:1px dashed rgba(0,180,216,.25);font-size:10.5px;color:#8090b0;line-height:1.6"><span style="color:#5aa8c0">👁 함께 볼 지표 (점수 미반영) — </span>${shown.join(" · ")}</div>`;
+    })()}
     ${s.flowRead?'<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">'+s.flowRead.split("│").map(function(t,i){return i===0?'<div style="color:#b8b4ac">📊 '+t.trim()+'</div>':'<div style="color:#00d4ff;margin-top:3px">→ '+t.trim()+'</div>';}).join("")+'</div>':""}
     ${s.overheat&&s.overheat.level!=="none"?`<div style="margin:10px 0;padding:12px 14px;border-radius:12px;background:${s.overheat.color}14;border:1.5px solid ${s.overheat.color}50">
       <div style="font-size:13px;font-weight:800;color:${s.overheat.color};margin-bottom:6px">${s.overheat.title}</div>
