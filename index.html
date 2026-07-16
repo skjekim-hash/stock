@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-11-r69";
+const APP_VERSION = "v2026-07-13-r70";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -958,7 +958,7 @@ function renderActionBriefing(stocks){
   try{
     var held={};
     loadJournal().forEach(function(e){ if(e.status==="보유"&&e.code) held[e.code]=true; });
-    var buy=[], early=[], turn=[], check=[], watch=0;
+    var buy=[], early=[], turn=[], check=[], warm=[], watch=0;
     // 종목별 보유 횟수 (추매 문턱 상향 반영용 — 카드 안 로직과 일치시킴)
     var buyCnt={};
     loadJournal().forEach(function(e){ if(e.status==="보유"&&e.code){ buyCnt[e.code]=(buyCnt[e.code]||0)+1; } });
@@ -974,6 +974,12 @@ function renderActionBriefing(stocks){
       else if(s.buyTrack&&s.buyTrack.type==="early"){ early.push(s); acted=true; }
       if(s.flowTurnaround){ turn.push(s); acted=true; }
       if(held[s.code]&&(s.opinion==="매도"||s.score<=-5)){ check.push(s); acted=true; }
+      // 🔥 예열: 문턱 2점 이내 + 점수 흐름 개선 중 — 매수 타이밍을 도달 '전'에 예고
+      if(!acted&&s.opinion!=="매도"){
+        var _bt2=(s.buyThreshold&&s.buyThreshold.buy)||6;
+        var _tr=(typeof svgScoreTrend==="function")?svgScoreTrend(s.code,10,10):null;
+        if(s.score>=_bt2-2&&_tr&&_tr.last>_tr.first){ warm.push({s:s,gap:_bt2-s.score}); acted=true; }
+      }
       if(!acted) watch++;
     });
     var jump=function(s){
@@ -984,6 +990,7 @@ function renderActionBriefing(stocks){
     var lines=[];
     if(buy.length)   lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>✅ 매수 문턱 도달 "+buy.length+"</span> — "+buy.map(jump).join(", ")+" <span style='color:var(--text3)'>(계획 물량)</span></div>");
     if(early.length) lines.push("<div style='margin-bottom:5px'><span style='color:#00d4ff;font-weight:800'>★ 선취 후보 "+early.length+"</span> — "+early.map(jump).join(", ")+" <span style='color:var(--text3)'>(1/3 물량 · 손절가 필수)</span></div>");
+    if(warm.length)  lines.push("<div style='margin-bottom:5px'><span style='color:#ffc340;font-weight:800'>🔥 예열 "+warm.length+"</span> — "+warm.map(function(w){return jump(w.s)+" <span style='color:var(--text3)'>(문턱까지 "+w.gap+"점·개선 중)</span>";}).join(", ")+" <span style='color:var(--text3)'>— 선취·방아쇠 주시</span></div>");
     if(turn.length)  lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>🌊 외인 전환 "+turn.length+"</span> — "+turn.map(jump).join(", ")+" <span style='color:var(--text3)'>(수급 반전 첫 신호)</span></div>");
     if(check.length) lines.push("<div style='margin-bottom:5px'><span style='color:#ff6680;font-weight:800'>⚠️ 보유 점검 "+check.length+"</span> — "+check.map(jump).join(", ")+" <span style='color:var(--text3)'>(보유 중인데 매도 신호)</span></div>");
     var summary = lines.length
