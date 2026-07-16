@@ -532,6 +532,7 @@ def fetch_market_signal():
         ("^KS11", "코스피",            "kospi"),  # 국내 증시 자체 흐름
         ("EWY",   "한국ETF(MSCI)",     "ewy"),    # 외국인이 보는 한국 (해외 자금 흐름)
         ("XLF",   "미국 금융ETF",      "xlf"),    # KB금융: 글로벌 은행주 분위기
+        ("SKHY",  "SK하이닉스 ADR",    "skhy"),   # 하이닉스 미국 상장분(7/13~ 정규티커) — 밤사이 흐름이 국내 선행
     ]
     out = {}
     for sym, name, key in targets:
