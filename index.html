@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-13-r72";
+const APP_VERSION = "v2026-07-17-r73";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -1249,6 +1249,13 @@ function renderSummaryTable(stocks){
     // 신호 배지 (요약에서 한눈에) — 경고(빨강) 우선, 기회(청록) 다음
     var sigBadges=[];
     if(s.flowTurnaround) sigBadges.push("<span style='color:#00e5a0'>🌊외인전환</span>");
+    (function(){
+      if(s.opinion==="매도") return;
+      var bt=(s.buyThreshold&&s.buyThreshold.buy)||6;
+      if(s.buyTrack&&s.buyTrack.type!=="none") return;  // 선취·확인은 자체 표시 있음
+      var tr=(typeof svgScoreTrend==="function")?svgScoreTrend(s.code,10,10):null;
+      if(s.score>=bt-2&&tr&&tr.last>tr.first) sigBadges.push("<span style='color:#ffc340'>🔥예열</span>");
+    })();
     if(s.micro&&((s.micro.strength>=120)||(s.micro.strength>=100&&s.micro.bidAskRatio>=1.3))) sigBadges.push("<span style='color:#00e5a0'>⚡방아쇠</span>");
     if(s.chaseWarning) sigBadges.push("<span style='color:#ff4060'>🚫추격</span>");
     if(s.marginCallRisk) sigBadges.push("<span style='color:#ff4060'>⚠️반대매매</span>");
@@ -1328,6 +1335,7 @@ function renderSummaryTable(stocks){
     +  "<span style='color:#ffc940'>◆ 관망</span>"
     +  "<span style='color:#ff4060'>▼ 매도</span>"
     +  "<span style='color:#00d4ff'>★ 소량 진입 검토</span>"
+    +  "<span style='color:#ffc340'>🔥 예열 (문턱 접근·개선 중)</span>"
     +  "<span style='color:#ff8c40'>⚠️ 과열 주의</span>"
     +  "<span style='color:#ff4060'>🚫 고위험</span>"
     +  "<span>| S1 = 1차 지지·분할매수 구간 (현재가 대비)</span>"
