@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-13-r71";
+const APP_VERSION = "v2026-07-13-r72";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -1011,7 +1011,9 @@ function renderActionBriefing(stocks){
       +   "<span style='font-size:14px;font-weight:800;color:var(--gold);letter-spacing:1px'>🧭 오늘의 액션</span>"
       +   "<span style='font-size:11px;color:var(--gold);opacity:.6;font-family:JetBrains Mono,monospace;letter-spacing:2.5px'>BRIEFING</span>"
       + "</div>"
-      + summary + "</div>";
+      + summary
+      + "<div style='margin-top:9px;padding-top:7px;border-top:1px dashed rgba(212,175,106,.25);font-size:10.5px;color:#8a94a8;line-height:1.7'>행동 사다리 — 매수: <b style='color:#00e5a0'>확인매수(계획물량)</b> › <b style='color:#00d4ff'>선취(1/3)</b> › <b style='color:#ffc340'>예열(주시)</b> › 관망 · 매도: <b style='color:#ff8090'>분할축소(-5~-6)</b> › <b style='color:#ff4060'>전량검토(-7↓)</b></div>"
+      + "</div>";
   }catch(e){ return ""; }
 }
 
@@ -1083,7 +1085,7 @@ function renderMarketBanner(m){
       parts.push("<span style='color:"+col+";font-weight:700'>"+txt+"</span>");
     }
   });
-  // ── 관찰용 지표 (점수 미반영) — 종목별 가중치는 검증 후 결정 ──
+  // ── 보조 시장지표 — 감응 계수 있는 지표는 종목 점수에 반영됨(MACRO_SENS) ──
   var obsParts=[];
   [["skhy","하이닉스ADR"],["oil","WTI유가"],["copper","구리"],["gold","금"],["kospi","코스피"],["ewy","한국ETF"],["xlf","미국금융"]].forEach(function(p){
     var k=p[0], lbl=p[1];
@@ -1160,7 +1162,7 @@ function renderMarketBanner(m){
     +"</span>"
     +"<span class='mb-parts'>"+parts.join(" <span style=\"color:#456\">·</span> ")+"</span>"
     +"</div>"
-    +(obsParts.length?"<div style='font-size:10.5px;color:#8090b0;line-height:1.6;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)'><span style='color:#667'>👁 관찰용 (점수 미반영) — </span>"+obsParts.join(" <span style=\"color:#456\">·</span> ")+"</div>":"")
+    +(obsParts.length?"<div style='font-size:10.5px;color:#8090b0;line-height:1.6;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)'><span style='color:#667'>👁 보조 지표 — </span>"+obsParts.join(" <span style=\"color:#456\">·</span> ")+"</div>":"")
     +(sm.advice?"<div class='mb-advice'"+(adverse?" style='color:#ffb0b0'":"")+">"+sm.advice+"</div>":"")
     +(sm.buyThreshold?"<div style='font-size:11px;font-weight:700;margin-top:6px;color:"+(sm.buyThreshold===5?"#00e5a0":sm.buyThreshold===7?"#ff6680":"#9ab")+"'>🎯 오늘 매수 문턱: "+sm.buyThreshold+"점 — "+(sm.thresholdNote||"")+"</div>":"")
     +(function(){
@@ -1584,9 +1586,25 @@ function renderCard(s,idx){
       </div>`;
     })()}
     ${s.marketBrake?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff406014;border:1px solid #ff406040;font-size:11px;color:#ff8c40;font-weight:700">🌐 ${s.marketBrake}</div>`:""}
-    ${s.macro&&s.macro.adj?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(128,144,176,.06);border:1px solid rgba(128,144,176,.18);font-size:11px;color:#8090b0;line-height:1.6">🌐 매크로 조정 <b style="color:${s.macro.adj>0?"#00e5a0":"#ff6680"}">${s.macro.adj>0?"+":""}${s.macro.adj}점</b> — ${(s.macro.parts||[]).join(" · ")}</div>`:""}
+    ${s.macro&&s.macro.adj?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(128,144,176,.06);border:1px solid rgba(128,144,176,.18);font-size:11px;color:#8090b0;line-height:1.6">🌐 매크로 조정 <b style="color:${s.macro.adj>0?"#00e5a0":"#ff6680"}">${s.macro.adj>0?"+":""}${s.macro.adj}점</b>
+      ${(function(){
+        var rows=(s.macro.parts||[]).map(function(p){
+          var m=/^(.+?) ([+\-][\d.]+)% → ([+\-][\d.]+)/.exec(p);
+          return m?{n:m[1],pct:m[2],v:parseFloat(m[3])}:null;
+        }).filter(Boolean);
+        if(!rows.length) return " — "+(s.macro.parts||[]).join(" · ");
+        var mx=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}))||1;
+        return "<div style='margin-top:6px'>"+rows.map(function(r){
+          var w=Math.max(4,Math.abs(r.v)/mx*46), c=r.v>=0?"#00e5a0":"#ff4060";
+          return "<div style='display:flex;align-items:center;gap:6px;margin-top:3px'>"
+            +"<span style='width:74px;color:#9ab;font-size:10.5px'>"+r.n+" <span style=\"color:#667\">"+r.pct+"%</span></span>"
+            +"<span style='position:relative;flex:1;height:7px'><span style='position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.18)'></span>"
+            +"<span style='position:absolute;top:0;bottom:0;"+(r.v>=0?"left:50%":"right:50%")+";width:"+w+"%;background:"+c+";border-radius:3px;opacity:.85'></span></span>"
+            +"<b style='width:36px;text-align:right;color:"+c+";font-family:JetBrains Mono,monospace;font-size:10.5px'>"+(r.v>0?"+":"")+r.v+"</b></div>";
+        }).join("")+"</div>";
+      })()}</div>`:""}
     ${(function(){
-      // 종목별 '함께 볼 관찰 지표' (점수 미반영) — 검증되면 매크로 계수로 승격
+      // 종목별 '함께 볼 지표' — 감응 반영분은 🌐 매크로 조정에 기여로 표시됨
       var OBS_MAP={
         "000660":[["skhy","하이닉스ADR"]],                           // 하이닉스: 밤사이 미국 ADR
         "005930":[["skhy","하이닉스ADR"]],                            // 삼성전자: 메모리 동조
@@ -1607,7 +1625,7 @@ function renderCard(s,idx){
         return "<span style='color:"+col+"'>"+p[1]+" "+(pct>=0?"+":"")+pct+"%</span>";
       }).filter(Boolean);
       if(!shown.length) return "";
-      return `<div style="margin-top:6px;padding:6px 12px;border-radius:10px;background:rgba(0,180,216,.05);border:1px dashed rgba(0,180,216,.25);font-size:10.5px;color:#8090b0;line-height:1.6"><span style="color:#5aa8c0">👁 함께 볼 지표 (점수 미반영) — </span>${shown.join(" · ")}</div>`;
+      return `<div style="margin-top:6px;padding:6px 12px;border-radius:10px;background:rgba(0,180,216,.05);border:1px dashed rgba(0,180,216,.25);font-size:10.5px;color:#8090b0;line-height:1.6"><span style="color:#5aa8c0">👁 함께 볼 지표 — </span>${shown.join(" · ")}</div>`;
     })()}
     ${s.flowRead?'<div style="margin-top:8px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:11.5px;line-height:1.6">'+s.flowRead.split("│").map(function(t,i){return i===0?'<div style="color:#b8b4ac">📊 '+t.trim()+'</div>':'<div style="color:#00d4ff;margin-top:3px">→ '+t.trim()+'</div>';}).join("")+'</div>':""}
     ${s.overheat&&s.overheat.level!=="none"?`<div style="margin:10px 0;padding:12px 14px;border-radius:12px;background:${s.overheat.color}14;border:1.5px solid ${s.overheat.color}50">
@@ -2116,7 +2134,7 @@ function renderCard(s,idx){
       <div class="guide-item"><b>미국 10년물 국채금리</b> — 글로벌 자금의 기준점. <b>오르면 성장주(반도체·플랫폼·2차전지)에 부담</b>이에요. 금리가 오르면 미래 이익의 현재가치가 깎여서, 성장 기대로 비싸게 거래되던 종목일수록 타격이 큽니다. 하이닉스·삼성전자·NAVER가 직접 영향권. <b>4.5% 위는 부담, 5.0% 위는 강한 부담</b> 구간으로 보고, 하루 변동률도 함께 봅니다. 반대로 금리가 내리면 성장주에 우호적이에요. <i>※ 은행주(KB금융)는 금리 상승이 오히려 호재일 수 있어 종목별로 영향이 갈립니다.</i></div>
       <div class="guide-item"><b>달러인덱스(DXY)</b> — 달러가 주요 6개 통화 대비 강한지 약한지를 보는 지표. <b>환율과 짝지어 읽는 게 핵심</b>이에요. ① DXY 오르고 원화도 약세 → <i>글로벌 달러 강세</i>라 어쩔 수 없는 흐름(우리만의 문제 아님). ② DXY 그대로인데 원화만 약세 → <i>한국 고유 악재</i>(더 위험, 외국인 이탈 신호일 수 있음). DXY가 오르면 보통 신흥국(한국 포함) 자금이 미국으로 빠져나가 부담이에요. <i>※ 점수에는 직접 반영하지 않고, 환율 움직임의 원인을 읽는 보조 지표로 씁니다.</i></div>
       <div class="guide-item"><b>위안/달러(CNY)</b> — 중국 위안화 환율. <b>한국 증시는 위안화와 같이 움직이는 경향</b>이 강해요(둘 다 신흥 아시아로 묶임). <b>원화와 짝지어 읽습니다.</b> ① 위안·원화 동반 약세 → <i>아시아 전반 자금 이탈</i>(한국만의 문제 아님). ② 위안은 안정인데 원화만 약세 → <i>한국 고유 악재</i>(외국인 이탈 신호일 수 있어 더 주의). ③ 위안 약세인데 원화는 견조 → <i>한국이 상대적으로 버티는 차별화</i>. 외국인이 아시아에서 빠지는 분위기인지 미리 가늠하는 선행 신호예요. <i>※ 점수 미반영, 환율 해석 보조용.</i></div>
-      <div class="guide-item"><b>TSMC ADR</b> — 미국 상장된 대만 TSMC(파운드리 1위) 주가. <b>SOX 지수보다 삼성전자·SK하이닉스에 더 직결된 선행지표</b>예요. SOX는 여러 종목 평균이라 둔하지만, TSMC는 글로벌 반도체 수급의 바로미터라 더 선명해요. 야간에 TSMC가 오르면 내일 삼성·하이닉스에 긍정적, 내리면 갭하락 주의. <b>SOX와 짝지어 읽으면</b> "SOX는 빠져도 TSMC는 견조 = 반도체 차별화" 같은 신호를 잡아요. <i>※ 점수 미반영, 반도체 선행 참고용.</i></div>
+      <div class="guide-item"><b>TSMC ADR</b> — 미국 상장된 대만 TSMC(파운드리 1위) 주가. <b>SOX 지수보다 삼성전자·SK하이닉스에 더 직결된 선행지표</b>예요. SOX는 여러 종목 평균이라 둔하지만, TSMC는 글로벌 반도체 수급의 바로미터라 더 선명해요. 야간에 TSMC가 오르면 내일 삼성·하이닉스에 긍정적, 내리면 갭하락 주의. <b>SOX와 짝지어 읽으면</b> "SOX는 빠져도 TSMC는 견조 = 반도체 차별화" 같은 신호를 잡아요. <i>※ 반도체 3종의 감응 계수로 점수에 반영됩니다.</i></div>
       <div class="guide-item" style="color:#8090b0;font-size:11.5px">
         이 지표들을 종합해 <b style="color:#00e5a0">🟢 우호적</b> / <b style="color:#ffc940">🟡 중립</b> / <b style="color:#ff4060">🔴 비우호적</b>으로 판정하고, 비우호적인 날은 매수 신호를 보수적으로 누릅니다(경계선 매수는 보류, 강한 매수는 '신중 진입').
       </div>
