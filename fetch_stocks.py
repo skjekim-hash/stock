@@ -2109,9 +2109,23 @@ def analyze_stock(stock, kospi, market=None):
     # confirm(확인 매수): 합산 점수가 문턱 도달 — 추세 확인형, 계획 물량
     # early(선취 매수): 중립이지만 선행 신호 결집 — 1/3 물량 소량 선취
     if opinion == "매수":
-        buy_track = {"type": "confirm", "label": "확인 매수",
-                     "size": "계획 물량",
-                     "desc": f"합산 {score:+d}점 ≥ 문턱 {th_info['buy']} ({th_info['label']})"}
+        _ma5 = sum(closes_d[-5:]) / 5 if has_data and len(closes_d) >= 5 else 0
+        _cmf_neg = False
+        try:
+            _mfv = [((c-l)-(hh-c))/max(hh-l,1)*v for hh,l,c,v in zip(highs_d[-20:], lows_d[-20:], closes_d[-20:], volumes_d[-20:])]
+            _cmf_neg = (sum(_mfv)/max(sum(volumes_d[-20:]),1)) < -0.05
+        except Exception:
+            pass
+        if _ma5 and price < _ma5 and _cmf_neg:
+            # 떨어지는 칼날 필터: 신호는 매수지만 추세·수급이 아직 하방 — 물량을 1/3로 제한
+            buy_track = {"type": "early", "label": "선취 매수 (추세 미확인)",
+                         "size": "1/3 물량",
+                         "desc": f"점수는 문턱 도달({score:+d}≥{th_info['buy']})이나 5일선 아래+분산 우세 — 추세 확인 전 소량만",
+                         "stopLoss": cautious.get("stopLoss", 0) or round(price * 0.97)}
+        else:
+            buy_track = {"type": "confirm", "label": "확인 매수",
+                         "size": "계획 물량",
+                         "desc": f"합산 {score:+d}점 ≥ 문턱 {th_info['buy']} ({th_info['label']})"}
     elif cautious.get("entry"):
         buy_track = {"type": "early", "label": "선취 매수",
                      "size": "1/3 물량",
