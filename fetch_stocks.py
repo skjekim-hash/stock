@@ -2035,7 +2035,7 @@ def analyze_stock(stock, kospi, market=None):
             if score >= 0 and opinion == "매도": opinion = "중립"
             # nuance 재계산
             if opinion == "중립":
-                if   score >= 4:  nuance = "관찰 구간 (소량만)"
+                if   score >= th_info["buy"] - 2:  nuance = "관찰 구간 (소량만)"
                 elif score >= 1:  nuance = "관찰 — 신호 부족"
                 elif score == 0:  nuance = "완전 중립 (관망)"
                 elif score >= -2: nuance = "약한 매도 우위"
@@ -2099,7 +2099,7 @@ def analyze_stock(stock, kospi, market=None):
             opinion = judge_opinion(score, th_info)  # 재판정 단일화 (③ 리팩토링)
             if opinion != "매수":
                 market_brake = "시장 비우호적 — 매수 신호 보류"
-                nuance = "관찰 구간 (소량만)" if score >= 4 else "관찰 — 신호 부족"
+                nuance = "관찰 구간 (소량만)" if score >= th_info["buy"] - 2 else "관찰 — 신호 부족"
             else:
                 market_brake = "시장 비우호적 — 신중 진입 권장"
     cautious = assess_cautious_entry(opinion, score, ichimoku, stoch_rsi,
