@@ -658,7 +658,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-17-r74";
+const APP_VERSION = "v2026-07-17-r75";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -1576,9 +1576,9 @@ function renderCard(s,idx){
       var obs=[], concl="";
       var bigUp=s.changePct>=3, bigDn=s.changePct<=-3;
       var fSell=(s.investor&&s.investor.streak<=-5), fBuy=(s.investor&&s.investor.foreign>0);
-      var div=(s.divergence&&String(s.divergence).indexOf("약세")>=0)||(s.divergence&&s.divergence.type==="bearish");
+      var div=!!(s.divergence&&s.divergence.bearish);
       var noTrend=(s.adx&&s.adx.adx!=null&&s.adx.adx<15);
-      var volUp=(s.volumeRatio&&s.volumeRatio>=2);
+      var volUp=(s.volRatio&&s.volRatio>=2);
       if(bigUp&&fSell){ obs.push("급등인데 외국인은 "+Math.abs(s.investor.streak)+"일째 매도"); concl="주인 없는 반등 — 숏커버·기술적 반등 가능성. 외국인 전환(⚡잠정) 확인 전 추격 금지."; }
       else if(bigUp&&fBuy&&volUp){ obs.push("급등 + 외국인 매수 + 거래 급증"); concl="주인 있는 상승 — 신뢰도 높은 움직임."; }
       else if(bigDn&&fBuy){ obs.push("급락인데 외국인은 순매수"); concl="개인 투매를 외국인이 받는 그림 — 과매도 반등 후보."; }
@@ -1664,7 +1664,7 @@ function renderCard(s,idx){
       <div style="flex-shrink:0">${svgGauge(s.score,-8,8,bt,st2,124)}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;color:var(--text2);margin-bottom:3px">신호 강도</div>
-        <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=st2?"강한 매도":s.score<=-3?"매도":"관망"}</div>
+        <div style="font-size:13px;font-weight:800;color:${sc}">${s.score>=bt?"강한 매수":s.score>=bt-2?"매수 근접":s.score<=-7?"강한 매도":s.score<=st2?"매도":s.score<=-3?"매도 기울기":"관망"}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">🎯 매수 문턱 <b style="color:#00e5a0">${bt}</b>${buyCount>=1?`<span style="color:#f5b942"> (${buyCount}차 추매 상향)</span>`:(s.buyThreshold&&s.buyThreshold.label!=="기본"?" ("+s.buyThreshold.label+")":"")} · 매도 <b style="color:#ff4060">${st2}</b><br>문턱까지 <b style="color:${sc}">${s.score>=bt?"도달":(bt-s.score)+"점"}</b> 남음</div>
         ${escalMsg}
         ${s.opinion==="매도"?`<div style="font-size:11px;margin-top:5px;font-weight:700;color:#ff8090">실행: ${s.score<=-7?"전량 정리 검토 (강한 매도)":"분할 축소 (보유분 일부 정리)"} <span style="color:var(--text3);font-weight:400">· 매수 의견 아님</span></div>`:""}
