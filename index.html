@@ -29,9 +29,9 @@
   --blue:#7a9cc4;
   --purple:#a890d0;
   --cyan:#6ab0bc;
-  --gold:#d4af6a;
-  --gold2:#b8954f;
-  --gold-dim:rgba(212,175,106,0.15);
+  --gold:#dbe4f0;
+  --gold2:#a8bcd8;
+  --gold-dim:rgba(219,228,240,0.15);
   --text:#e8e4dc;
   --text2:#9a958c;
   --text3:#827c72;
@@ -68,7 +68,7 @@ body::before{content:'';position:fixed;inset:-20%;pointer-events:none;z-index:-2
   background:
     radial-gradient(ellipse 60% 45% at 18% 12%, rgba(0,140,160,.13), transparent 60%),
     radial-gradient(ellipse 55% 40% at 85% 20%, rgba(110,80,200,.11), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 50% 95%, rgba(212,175,106,.07), transparent 65%);
+    radial-gradient(ellipse 50% 40% at 50% 95%, rgba(219,228,240,.07), transparent 65%);
   animation:calmAurora 46s ease-in-out infinite alternate;}
 @keyframes calmAurora{
   0%{transform:translate(0,0) scale(1);opacity:.85}
@@ -123,7 +123,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 
 .btn-main{
   display:flex;align-items:center;gap:6px;
-  background:linear-gradient(135deg,#d4af6a,#b8954f);
+  background:linear-gradient(135deg,#dbe4f0,#a8bcd8);
   border:1px solid rgba(0,229,160,.25);
   border-radius:12px;padding:9px 16px;
   font-size:12px;font-weight:700;color:var(--green);
@@ -266,7 +266,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 .card-hdr{
   background:var(--glass-bg);
   border:1px solid var(--border);
-  border-bottom:1px solid rgba(212,175,106,0.06);
+  border-bottom:1px solid rgba(219,228,240,0.06);
   border-radius:14px 14px 0 0;
   box-shadow:var(--shadow);
   padding:14px 16px 12px;
@@ -276,7 +276,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 .card-code{font-size:11px;color:var(--gold2);font-family:'JetBrains Mono',monospace;margin-bottom:3px;letter-spacing:1.5px}
 .card-name{font-size:22px;font-weight:900;letter-spacing:-.5px}
 .card-hdr-prices{display:flex;align-items:baseline;gap:8px;margin-top:4px}
-.card-cur-price{font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--gold);letter-spacing:0;text-shadow:0 0 12px rgba(212,175,106,0.35)}
+.card-cur-price{font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--gold);letter-spacing:0;text-shadow:0 0 12px rgba(219,228,240,0.35)}
 .card-change-pct{font-size:12px;font-weight:700}
 .card-hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:80px}
 .card-opinion-pill{font-size:11px;font-weight:800;border-radius:20px;padding:4px 10px;text-align:center;white-space:nowrap}
@@ -522,7 +522,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 ::-webkit-scrollbar-thumb{background:rgba(120,150,200,.25);border-radius:3px}
 ::-webkit-scrollbar-track{background:transparent}
 /* 텍스트 선택: 골드 액센트 */
-::selection{background:rgba(212,175,106,.3)}
+::selection{background:rgba(219,228,240,.3)}
 /* ── PREMIUM POLISH — 고급감은 디테일의 정밀도에서 ── */
 /* 유리 깊이: 다층 그림자 + 상단 하이라이트 + 넉넉한 모서리 */
 .card{border-radius:18px;
@@ -551,7 +551,7 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-top:1px solid rgba(120,150,200,0.18);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
 #bottomNav::before{content:'';position:absolute;top:-1px;left:12%;right:12%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(212,175,106,.55),transparent)}
+  background:linear-gradient(90deg,transparent,rgba(219,228,240,.55),transparent)}
 #bottomNav button{flex:1;background:none;border:none;color:var(--text2);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;font-size:11px;font-weight:600}
 #bottomNav button span{font-size:19px;line-height:1;transition:transform .15s}
@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-18-r79";
+const APP_VERSION = "v2026-07-18-r80";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -1033,8 +1033,8 @@ function renderActionBriefing(stocks){
       : "<div style='color:var(--text2)'>오늘은 액션 없음 — 전 종목 관망이 정석인 날이에요. 무리한 진입이 제일 큰 리스크입니다.</div>";
     return "<div style='position:relative;margin-bottom:18px;padding:16px 16px 13px;"
       + "background:linear-gradient(165deg,#101828,#0a0e18);"
-      + "border:1px solid rgba(212,175,106,.32);border-radius:4px;"
-      + "box-shadow:0 0 26px rgba(212,175,106,.10),inset 0 1px 0 rgba(255,255,255,.05);"
+      + "border:1px solid rgba(219,228,240,.32);border-radius:4px;"
+      + "box-shadow:0 0 26px rgba(219,228,240,.10),inset 0 1px 0 rgba(255,255,255,.05);"
       + "font-size:12px;line-height:1.7'>"
       // HUD 타게팅 브래킷 — 둥근 카드들 사이에서 유일하게 각진 프레임
       + "<span style='position:absolute;top:-2px;left:-2px;width:15px;height:15px;border-top:2.5px solid var(--gold);border-left:2.5px solid var(--gold)'></span>"
@@ -1042,7 +1042,7 @@ function renderActionBriefing(stocks){
       + "<span style='position:absolute;bottom:-2px;left:-2px;width:15px;height:15px;border-bottom:2.5px solid var(--gold);border-left:2.5px solid var(--gold)'></span>"
       + "<span style='position:absolute;bottom:-2px;right:-2px;width:15px;height:15px;border-bottom:2.5px solid var(--gold);border-right:2.5px solid var(--gold)'></span>"
       + "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;padding-bottom:8px;"
-      +   "border-bottom:1px solid transparent;border-image:linear-gradient(90deg,rgba(212,175,106,.5),transparent 70%) 1'>"
+      +   "border-bottom:1px solid transparent;border-image:linear-gradient(90deg,rgba(219,228,240,.5),transparent 70%) 1'>"
       +   "<span style='font-size:14px;font-weight:800;color:var(--gold);letter-spacing:1px'>🧭 오늘의 액션</span>"
       +   "<span style='font-size:11px;color:var(--gold);opacity:.6;font-family:JetBrains Mono,monospace;letter-spacing:2.5px'>BRIEFING</span>"
       + "</div>"
@@ -1054,7 +1054,7 @@ function renderActionBriefing(stocks){
           return "<div style='font-size:11px;color:#9ab;margin:-2px 0 8px;font-family:JetBrains Mono,monospace'>시장 <b style='color:"+mc+"'>"+(m.label||"")+" "+(m.score>0?"+":"")+m.score+"</b> · 문턱 <b>"+bt+"</b>"+(k&&typeof k.changePct==="number"?" · KOSPI <b style='color:"+(k.changePct>=0?"#00e5a0":"#ff6680")+"'>"+(k.changePct>0?"+":"")+k.changePct+"%</b>":"")+"</div>";
         })()
       + summary
-      + "<div style='margin-top:9px;padding-top:7px;border-top:1px dashed rgba(212,175,106,.25);font-size:10.5px;color:#8a94a8;line-height:1.7'>행동 사다리 — 매수: <b style='color:#00e5a0'>확인매수(계획물량)</b> › <b style='color:#00d4ff'>선취(1/3)</b> › <b style='color:#ffd60a'>예열(주시)</b> › 관망 · 매도: <b style='color:#ff8090'>분할축소(-5~-6)</b> › <b style='color:#ff4060'>전량검토(-7↓)</b></div>"
+      + "<div style='margin-top:9px;padding-top:7px;border-top:1px dashed rgba(219,228,240,.25);font-size:10.5px;color:#8a94a8;line-height:1.7'>행동 사다리 — 매수: <b style='color:#00e5a0'>확인매수(계획물량)</b> › <b style='color:#00d4ff'>선취(1/3)</b> › <b style='color:#ffd60a'>예열(주시)</b> › 관망 · 매도: <b style='color:#ff8090'>분할축소(-5~-6)</b> › <b style='color:#ff4060'>전량검토(-7↓)</b></div>"
       + "</div>";
   }catch(e){ return ""; }
 }
@@ -1242,8 +1242,8 @@ function renderMarketBanner(m){
       })():"")
     +(m.expiry&&m.expiry.warn?(function(){
         var e=m.expiry;
-        var bc=e.level==="high"?"#d9657a":"#d4af6a";
-        return "<div style='margin-top:8px;padding:9px 11px;background:"+(e.level==="high"?"rgba(217,101,122,0.1)":"rgba(212,175,106,0.08)")+";border:1px solid "+bc+"40;border-radius:8px'>"
+        var bc=e.level==="high"?"#d9657a":"#dbe4f0";
+        return "<div style='margin-top:8px;padding:9px 11px;background:"+(e.level==="high"?"rgba(217,101,122,0.1)":"rgba(219,228,240,0.08)")+";border:1px solid "+bc+"40;border-radius:8px'>"
           +"<div style='font-size:11px;color:"+bc+";line-height:1.6;font-weight:600'>"+e.text+"</div>"
           +(e.rebalance?"<div style='font-size:11px;color:#9a958c;line-height:1.5;margin-top:4px'>"+e.rebalance+"</div>":"")
         +"</div>";
@@ -1630,7 +1630,7 @@ function renderCard(s,idx){
       var holdNote="";
       if(window._bc>=3) holdNote=`<div style="font-size:11px;color:#ff6680;margin-top:6px;line-height:1.5">🚫 단, 이미 ${window._bc}차 보유 중이에요. 위 해석과 별개로 추매는 물타기 위험 — 신규 진입 관점의 참고로만 보세요.</div>`;
       else if(window._bc>=1) holdNote=`<div style="font-size:11px;color:#f5b942;margin-top:6px;line-height:1.5">⚠️ 이미 ${window._bc}차 보유 중 — 추매라면 위 해석보다 보수적으로. 신규 진입 기준의 판단이에요.</div>`;
-      return `<div style="margin-top:10px;padding:11px 13px;border-radius:10px;background:rgba(212,175,106,.06);border:1px solid rgba(212,175,106,.28)">
+      return `<div style="margin-top:10px;padding:11px 13px;border-radius:10px;background:rgba(219,228,240,.06);border:1px solid rgba(219,228,240,.28)">
         <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:4px">🧠 종합 해석 — 신호의 조합이 말하는 것</div>
         <div style="font-size:12px;color:var(--text);line-height:1.7">${obs.join(" · ")}<br><b style="color:var(--gold)">→ ${concl}</b></div>${holdNote}
       </div>`;
@@ -3241,7 +3241,7 @@ function renderJournal(){
         <span style="color:#8090b0"> · 1%+ ${partialWins.length}회</span><br>
         <span style="color:#8090b0;font-size:11px">일부 팔고 보유 중인 거래의 실현분 — 전량청산 승률과 별도 집계</span>
       </div>`:""}
-      ${(violatedTrades.length>0||followedTrades.length>0)?`<div style="margin-bottom:12px;padding:11px 12px;background:rgba(212,175,106,0.06);border-radius:10px;border:1px solid rgba(212,175,106,0.2)">
+      ${(violatedTrades.length>0||followedTrades.length>0)?`<div style="margin-bottom:12px;padding:11px 12px;background:rgba(219,228,240,0.06);border-radius:10px;border:1px solid rgba(219,228,240,0.2)">
         <div style="font-size:11.5px;color:#8fa8cc;font-weight:700;margin-bottom:8px">🪞 신호를 따랐을 때 vs 어겼을 때</div>
         <div style="display:flex;gap:8px">
           <div style="flex:1;text-align:center;background:rgba(92,184,138,0.1);border-radius:8px;padding:8px 4px">
@@ -3736,7 +3736,7 @@ function renderRecover(){
       </div>
       <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #2a2820;padding-top:9px">
         <span style="font-size:11px;color:#8090b0">목표 변경</span>
-        <input id="recoverTargetInput" type="number" value="${_t/10000}" onchange="window.__recoverTarget=Math.round(this.value*10000);renderRecover();" style="width:70px;background:#16161b;border:1px solid rgba(212,175,106,0.14);border-radius:6px;color:#e8e4dc;padding:5px 8px;font-size:13px;text-align:right">
+        <input id="recoverTargetInput" type="number" value="${_t/10000}" onchange="window.__recoverTarget=Math.round(this.value*10000);renderRecover();" style="width:70px;background:#16161b;border:1px solid rgba(219,228,240,0.14);border-radius:6px;color:#e8e4dc;padding:5px 8px;font-size:13px;text-align:right">
         <span style="font-size:11px;color:#8090b0">만원</span>
         <span style="margin-left:auto;font-size:12px;color:${shortfall>0?'#ffd60a':'#00e5a0'};font-weight:700">${shortfall>0?`부족 ₩${shortfall.toLocaleString()}`:'쿠션 충분 ✓'}</span>
       </div>
@@ -3826,7 +3826,7 @@ function buyRange(s){
     belowMode="hold"; belowColor="#d9657a";
     belowText="보류 — 하락추세라 지지선 아래는 더 빠질 위험(떨어지는 칼날). 반등 확인 후 대응";
   } else {
-    belowMode="careful"; belowColor="#d4af6a";
+    belowMode="careful"; belowColor="#dbe4f0";
     belowText="신중 — 지지선 아래는 지지가 버티는지 확인하고 소량만";
   }
   // 현재가가 어느 구간인지
@@ -3848,7 +3848,7 @@ function renderBuyRange(s){
   if(r.zone==="in"){ curColor="#5cb88a"; curMsg="✅ 현재가는 매수 적정 구간 안이에요"; }
   else if(r.zone==="below"){ curColor=r.belowColor; curMsg="현재가가 지지선(A) 아래 — "+(r.belowMode==="buy"?"적극 매수 구간":r.belowMode==="hold"?"보류 구간":"신중 구간"); }
   else { curColor="#d9657a"; curMsg="⚠️ 현재가가 권장 상단(B) 초과 — 추격 매수 주의, 다음 기회 기다리기"; }
-  return `<div style="background:rgba(212,175,106,0.06);border:1px solid rgba(212,175,106,0.2);border-radius:10px;padding:12px 13px;margin-bottom:10px">
+  return `<div style="background:rgba(219,228,240,0.06);border:1px solid rgba(219,228,240,0.2);border-radius:10px;padding:12px 13px;margin-bottom:10px">
     <div style="font-size:11px;color:#7a9cc8;font-weight:700;letter-spacing:.5px;margin-bottom:8px">💰 매수 가격대</div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
       <div style="flex:1;text-align:center;background:rgba(92,184,138,0.1);border-radius:8px;padding:7px 4px">
@@ -3881,9 +3881,9 @@ function renderBuyRange(s){
         <div style="font-size:11px;color:${mc};font-weight:700;text-align:center">현재가 ${s.price>r.B?"매수 범위 위 — 추격 구간":s.price<r.A?"지지선 아래 — 지지 확인 구간":"매수 범위 안 ✓"}</div>
       </div>`;
     })()}
-    ${s.atr&&s.atrStopLoss?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(212,175,106,0.1)">🛡 <b style="color:#9ab">매수 보유 시 하방 손절 (2×ATR)</b>: <b style="color:#ff8090;font-family:'JetBrains Mono',monospace">${W(s.atrStopLoss)}</b> 아래로 빠지면 정상 출렁임이 아닌 이탈 <span style="opacity:.8">(일평균 변동 ±${s.atr.pct}%${s.atr.pct>=4?" — 고변동 장세, 손절폭이 넓으니 물량으로 리스크 조절":""})</span></div>`:""}
+    ${s.atr&&s.atrStopLoss?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(219,228,240,0.1)">🛡 <b style="color:#9ab">매수 보유 시 하방 손절 (2×ATR)</b>: <b style="color:#ff8090;font-family:'JetBrains Mono',monospace">${W(s.atrStopLoss)}</b> 아래로 빠지면 정상 출렁임이 아닌 이탈 <span style="opacity:.8">(일평균 변동 ±${s.atr.pct}%${s.atr.pct>=4?" — 고변동 장세, 손절폭이 넓으니 물량으로 리스크 조절":""})</span></div>`:""}
     ${s.pivot&&s.pivot.s1&&r.A&&Math.abs(s.pivot.s1-r.A)/r.A>0.02?`<div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:6px">※ 지지선 기준이 화면마다 다른 이유: 여기 <b>A</b>는 단기 지지(일목·이평 기반), 요약표의 <b>S1 ${W(s.pivot.s1)}</b>은 피봇 기반 — A가 깨지면 S1이 다음 방어선이에요.</div>`:""}
-    <div style="font-size:11px;color:#9a958c;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px solid rgba(212,175,106,0.1)">
+    <div style="font-size:11px;color:#9a958c;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px solid rgba(219,228,240,0.1)">
       <b style="color:${r.belowColor}">A 이하</b>: ${r.belowText}
     </div>
     <div style="font-size:11px;color:#5e5a52;margin-top:5px">※ 5분 갱신이라 실제가가 다를 수 있어요. 이 범위로 "지금 살 자리인지"를 판단하세요.</div>
