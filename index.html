@@ -18,11 +18,11 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0e17;
-  --bg2:#101624;
-  --bg3:#161e30;
-  --border:rgba(120,150,200,0.14);
-  --border2:rgba(120,150,200,0.28);
+  --bg:#1a1b20;
+  --bg2:#222329;
+  --bg3:#2a2b33;
+  --border:rgba(255,255,255,0.055);
+  --border2:rgba(255,255,255,0.11);
   --green:#5cb88a;
   --red:#d9657a;
   --yellow:#ffd60a;
@@ -36,9 +36,9 @@
   --text2:#9a958c;
   --text3:#827c72;
   /* ── 프리미엄 다크 카드 토큰 ── */
-  --glass-bg:linear-gradient(160deg,#121a2c,#0c111d);
-  --glass-bg2:#141c2e;
-  --glass-border:rgba(120,150,200,0.14);
+  --glass-bg:linear-gradient(160deg,#27282f,#1f2026);
+  --glass-bg2:#26272e;
+  --glass-border:rgba(255,255,255,0.05);
   --glass-glow:rgba(90,130,200,0.08);
   --glass-blur:12px;
   --shadow:0 6px 24px rgba(0,0,0,0.4);
@@ -57,9 +57,9 @@ body::before{
   content:'';
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:
-    radial-gradient(ellipse at 50% 0%,#0e1524 0%,transparent 55%),
-    radial-gradient(ellipse at 50% 100%,#0c1220 0%,transparent 50%),
-    #0a0e17;
+    radial-gradient(ellipse at 50% 0%,#20212a 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 100%,#1c1a20 0%,transparent 50%),
+    #1a1b20;
   pointer-events:none;z-index:-3;
 }
 /* 상황실 원칙: 배경은 조용히 — 신호만 빛난다. 미세 그리드로 관제실 질감만 */
@@ -75,8 +75,8 @@ body::before{content:'';position:fixed;inset:-20%;pointer-events:none;z-index:-2
   50%{transform:translate(2.5%,1.5%) scale(1.06);opacity:1}
   100%{transform:translate(-2%,2.5%) scale(1.02);opacity:.9}}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
-  background-image:linear-gradient(rgba(120,150,200,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(120,150,200,.035) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(220,222,230,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(220,222,230,.028) 1px,transparent 1px);
   background-size:44px 44px;
   -webkit-mask-image:radial-gradient(ellipse at 50% 25%,black 30%,transparent 78%);
   mask-image:radial-gradient(ellipse at 50% 25%,black 30%,transparent 78%);}
@@ -107,7 +107,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 
 /* ── HEADER ── */
 .hdr{
-  background:rgba(10,14,23,0.88);
+  background:rgba(26,27,32,0.9);
   backdrop-filter:blur(14px) saturate(140%);
   -webkit-backdrop-filter:blur(14px) saturate(140%);
   border-bottom:1px solid rgba(120,150,200,0.18);
@@ -525,7 +525,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 ::selection{background:rgba(219,228,240,.3)}
 /* ── PREMIUM POLISH — 고급감은 디테일의 정밀도에서 ── */
 /* 유리 깊이: 다층 그림자 + 상단 하이라이트 + 넉넉한 모서리 */
-.card{border-radius:18px;
+.card{border-radius:22px;
   box-shadow:0 1px 2px rgba(0,0,0,.5),0 10px 34px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.055),inset 0 0 0 1px rgba(120,150,200,.05)}
 /* 화면 가장자리 비네트 — 시선이 콘텐츠 중앙으로 */
@@ -548,7 +548,7 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #bottomNav button{letter-spacing:.3px}
 /* ── 하단 탭 바 (엄지 동선) ── */
 #bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;
-  background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(26,27,32,0.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-top:1px solid rgba(120,150,200,0.18);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
 #bottomNav::before{content:'';position:absolute;top:-1px;left:12%;right:12%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(219,228,240,.55),transparent)}
@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-19-r82";
+const APP_VERSION = "v2026-07-19-r83";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -823,6 +823,22 @@ function B(items,color){
 
 /* ── SVG 시각화 (스파크라인 · 게이지 · 레이더) ── */
 // 네온 스파크라인 — 최근 가격 흐름을 한 줄 곡선으로
+// 링(도넛) 게이지 — 0~100 지표의 히어로 그래픽 (레퍼런스 킷 문법)
+function svgRing(v,size,color,label){
+  v=Math.max(0,Math.min(100,+v||0));
+  var r=(size/2)-5, C=2*Math.PI*r, off=C*(1-v/100);
+  return "<div style='display:inline-flex;flex-direction:column;align-items:center;gap:3px'>"
+    +"<svg width='"+size+"' height='"+size+"' viewBox='0 0 "+size+" "+size+"'>"
+    +"<circle cx='"+size/2+"' cy='"+size/2+"' r='"+r+"' fill='none' stroke='rgba(255,255,255,.07)' stroke-width='5'/>"
+    +"<circle cx='"+size/2+"' cy='"+size/2+"' r='"+r+"' fill='none' stroke='"+color+"' stroke-width='5' stroke-linecap='round'"
+    +" stroke-dasharray='"+C.toFixed(1)+"' stroke-dashoffset='"+off.toFixed(1)+"' transform='rotate(-90 "+size/2+" "+size/2+")'"
+    +" style='filter:drop-shadow(0 0 4px "+color+"66)'/>"
+    +"<text x='"+size/2+"' y='"+(size/2+4)+"' text-anchor='middle' fill='"+color+"' font-size='"+Math.round(size*0.24)+"' font-weight='800' font-family='JetBrains Mono,monospace'>"+Math.round(v)+"</text>"
+    +"</svg>"
+    +(label?"<span style='font-size:10.5px;color:#9a958c'>"+label+"</span>":"")
+    +"</div>";
+}
+
 function svgSpark(data,w,h,color,entryPrice){
   if(!data||data.length<2) return "";
   var min=Math.min.apply(null,data), max=Math.max.apply(null,data);
@@ -1589,22 +1605,11 @@ function renderCard(s,idx){
       <div class="stat"><div class="stat-l">볼린저 상단</div><div class="stat-v" style="color:#ff4060">${W(s.boll?.upper)}</div></div>
       <div class="stat"><div class="stat-l">볼린저 하단</div><div class="stat-v" style="color:#00e5a0">${W(s.boll?.lower)}</div></div>
     </div>
-    ${s.boll?.position!=null?`<div class="bar52">
-      <div class="bar52-row">
-        <span class="bar52-lbl">볼린저 위치</span>
-        <span class="bar52-val" style="color:${s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffd60a"}">${s.boll.position}%</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${s.boll.position}%;background:linear-gradient(90deg,#00e5a0,#ffd60a,#ff4060)"></div></div>
-      <div class="bar52-note">${s.boll.position>80?"⚠️ 상단 근접 — 단기 과열":s.boll.position<20?"📍 하단 근접 — 반등 가능":"중간 구간"}</div>
-    </div>`:""}
-    ${bo.position!=null?`<div class="bar52">
-      <div class="bar52-row">
-        <span class="bar52-lbl">52주 위치</span>
-        <span class="bar52-val" style="color:${boC}">${bo.position}% ${bo.nearHigh?"🔥":bo.nearLow?"💎":""}</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${bo.position}%;background:${boC}"></div></div>
-      <div class="bar52-note">${bo.comment}</div>
-    </div>`:""}
+    ${(s.boll?.position!=null)||bo.position!=null?`<div style="display:flex;justify-content:center;gap:28px;margin:12px 0 4px">
+      ${s.boll?.position!=null?svgRing(s.boll.position,64,s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffd60a","볼린저 위치"):""}
+      ${bo.position!=null?svgRing(bo.position,64,boC,"52주 위치"+(bo.nearHigh?" 🔥":bo.nearLow?" 💎":"")):""}
+    </div>
+    <div class="bar52-note" style="text-align:center">${s.boll?.position>80?"⚠️ 볼린저 상단 근접 — 단기 과열":s.boll?.position<20?"📍 볼린저 하단 근접 — 반등 가능":bo.comment||""}</div>`:""}
     <div class="src-row"><span class="dot"></span>${s.source}${s.tradedAt?" · "+s.tradedAt.slice(11,16):""} · 자동수집</div>
   </div>
 
