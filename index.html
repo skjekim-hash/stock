@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-18-r81";
+const APP_VERSION = "v2026-07-19-r82";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -858,34 +858,45 @@ function svgSpark(data,w,h,color,entryPrice){
 }
 // 반원 게이지 — 점수와 매수/매도 문턱을 아크 위에 표시
 function svgGauge(score,min,max,buyTh,sellTh,w,showLabel){
-  var h=Math.round(w*0.62), cx=w/2, cy=h-10, r=w/2-12;
+  var h=Math.round(w*0.62), cx=w/2, cy=h-9, r=w/2-11;
   var clamp=function(v){return Math.max(min,Math.min(max,v));};
-  var ang=function(v){return 180-((clamp(v)-min)/(max-min))*180;};  // 값→각도 (180°=min, 0°=max)
-  var pt=function(a,rr){var rad=a*Math.PI/180;return [(cx+rr*Math.cos(rad)).toFixed(1),(cy-rr*Math.sin(rad)).toFixed(1)];};
+  var ang=function(v){return 180-((clamp(v)-min)/(max-min))*180;};
+  var pt=function(a,rr){var rad=a*Math.PI/180;return [(cx+rr*Math.cos(rad)),(cy-rr*Math.sin(rad))];};
+  var P=function(p){return p[0].toFixed(1)+" "+p[1].toFixed(1);};
   var arc=function(a1,a2,col,sw,op){
     var s=pt(a1,r), e=pt(a2,r);
-    return "<path d='M"+s[0]+" "+s[1]+" A"+r+" "+r+" 0 0 1 "+e[0]+" "+e[1]+"' fill='none' stroke='"+col+"' stroke-width='"+sw+"' stroke-linecap='round' opacity='"+op+"'/>";
+    return "<path d='M"+P(s)+" A"+r+" "+r+" 0 0 1 "+P(e)+"' fill='none' stroke='"+col+"' stroke-width='"+sw+"' stroke-linecap='butt' opacity='"+op+"'/>";
   };
-  // 구간: [min~매도문턱]=빨강, [매도~매수]=노랑, [매수~max]=초록
-  var g=arc(ang(min),ang(sellTh),"#ff4060",5,.75)
-       +arc(ang(sellTh),ang(buyTh),"#ffd60a",5,.55)
-       +arc(ang(buyTh),ang(max),"#00e5a0",5,.75);
-  // 문턱 눈금 (매수 문턱은 오늘 레짐에 따라 움직임)
-  var tick=function(v,col){
-    var a=ang(v), p1=pt(a,r-5), p2=pt(a,r+6);
-    return "<line x1='"+p1[0]+"' y1='"+p1[1]+"' x2='"+p2[0]+"' y2='"+p2[1]+"' stroke='"+col+"' stroke-width='2' style='filter:drop-shadow(0 0 3px "+col+")'/>";
-  };
-  // 계기판 미세 눈금 (2점 간격)
-  for(var tv=min; tv<=max; tv+=2){
-    var ta=ang(tv), tp1=pt(ta,r-3), tp2=pt(ta,r+1);
-    g+="<line x1='"+tp1[0]+"' y1='"+tp1[1]+"' x2='"+tp2[0]+"' y2='"+tp2[1]+"' stroke='rgba(219,228,240,.28)' stroke-width='1'/>";
+  var GAP=2.2;  // 존 사이 미세 갭 — 크리스프한 분리
+  var g="";
+  g+=arc(180,0,"rgba(219,228,240,.10)",5,1);                 // 배경 트랙
+  g+=arc(180,ang(sellTh)+GAP,"#ff4060",5,.8);                // 매도 존
+  g+=arc(ang(sellTh)-GAP,ang(buyTh)+GAP,"#ffd60a",5,.5);     // 중립 존
+  g+=arc(ang(buyTh)-GAP,0,"#00e5a0",5,.8);                   // 매수 존
+  for(var tv=min; tv<=max; tv+=2){                            // 바깥 미세 눈금
+    var ta=ang(tv), q1=pt(ta,r+4), q2=pt(ta,r+7);
+    g+="<line x1='"+q1[0].toFixed(1)+"' y1='"+q1[1].toFixed(1)+"' x2='"+q2[0].toFixed(1)+"' y2='"+q2[1].toFixed(1)+"' stroke='rgba(219,228,240,.30)' stroke-width='1'/>";
   }
-  g+=tick(buyTh,"#00e5a0")+tick(sellTh,"#ff4060");
-  // 바늘
+  var major=function(v,col){
+    var a=ang(v), m1=pt(a,r+3), m2=pt(a,r+9);
+    return "<line x1='"+m1[0].toFixed(1)+"' y1='"+m1[1].toFixed(1)+"' x2='"+m2[0].toFixed(1)+"' y2='"+m2[1].toFixed(1)+"' stroke='"+col+"' stroke-width='2' style='filter:drop-shadow(0 0 3px "+col+")'/>";
+  };
+  g+=major(buyTh,"#00e5a0")+major(sellTh,"#ff4060");
+  var fs2=Math.max(8,Math.round(w*0.075));                    // 양끝 라벨
+  g+="<text x='"+(cx-r-2)+"' y='"+(cy+fs2+1)+"' text-anchor='middle' fill='rgba(219,228,240,.4)' font-size='"+fs2+"' font-family='JetBrains Mono,monospace'>"+min+"</text>";
+  g+="<text x='"+(cx+r+2)+"' y='"+(cy+fs2+1)+"' text-anchor='middle' fill='rgba(219,228,240,.4)' font-size='"+fs2+"' font-family='JetBrains Mono,monospace'>+"+max+"</text>";
   var sc=score>=buyTh?"#00e5a0":score<=sellTh?"#ff4060":"#ffd60a";
-  var na=ang(score), np=pt(na,r-9);
-  g+="<line x1='"+cx+"' y1='"+cy+"' x2='"+np[0]+"' y2='"+np[1]+"' stroke='"+sc+"' stroke-width='2.4' stroke-linecap='round' style='filter:drop-shadow(0 0 4px "+sc+")'/>"
-    +"<circle cx='"+cx+"' cy='"+cy+"' r='3.4' fill='"+sc+"'/>";
+  var na=ang(score), rad=na*Math.PI/180;
+  var dx=Math.cos(rad), dy=-Math.sin(rad);
+  var px=-dy, py=dx;
+  var bw=Math.max(1.6,w*0.014);
+  var tip=[cx+dx*(r-7), cy+dy*(r-7)];                         // 테이퍼드 바늘
+  var b1=[cx+px*bw-dx*4, cy+py*bw-dy*4];
+  var b2=[cx-px*bw-dx*4, cy-py*bw-dy*4];
+  g+="<polygon points='"+P(tip)+" "+P(b1)+" "+P(b2)+"' fill='"+sc+"' style='filter:drop-shadow(0 0 4px "+sc+")'/>";
+  g+="<circle cx='"+cx+"' cy='"+cy+"' r='"+Math.max(3.5,w*0.032)+"' fill='#141c2e' stroke='rgba(219,228,240,.5)' stroke-width='1'/>";
+  g+="<circle cx='"+cx+"' cy='"+cy+"' r='1.5' fill='"+sc+"'/>";
+  g+="<text x='"+cx+"' y='"+(cy-r*0.36)+"' text-anchor='middle' fill='"+sc+"' font-size='"+Math.round(w*0.15)+"' font-weight='800' font-family='JetBrains Mono,monospace' letter-spacing='-0.5'>"+(score>0?"+":"")+score+"</text>";
   return "<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible'>"+g+"</svg>";
 }
 // 육각 레이더 — 6개 지표의 '체형'을 한 도형으로
