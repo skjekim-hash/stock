@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-18-r80";
+const APP_VERSION = "v2026-07-18-r81";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -838,7 +838,12 @@ function svgSpark(data,w,h,color,entryPrice){
   });
   var last=pts[pts.length-1].split(",");
   var c=color||((data[data.length-1]>=data[0])?"#00e5a0":"#ff4060");
-  var svg="<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>";
+  var gid="sg"+c.replace("#","");
+  var svg="<svg width='"+w+"' height='"+h+"' viewBox='0 0 "+w+" "+h+"' style='overflow:visible;vertical-align:middle'>"
+    +"<defs><linearGradient id='"+gid+"' x1='0' y1='0' x2='0' y2='1'>"
+    +"<stop offset='0%' stop-color='"+c+"' stop-opacity='0.32'/>"
+    +"<stop offset='100%' stop-color='"+c+"' stop-opacity='0.02'/></linearGradient></defs>"
+    +"<polygon points='"+pts[0].split(",")[0]+","+(h-1)+" "+pts.join(" ")+" "+last[0]+","+(h-1)+"' fill='url(#"+gid+")'/>";
   // 매수가 기준선 (있을 때만) — 현재가가 이 선 위면 이익, 아래면 손실
   if(entryPrice!=null && entryPrice>0){
     var ey=h-3-((entryPrice-min)/span)*(h-6);
@@ -870,6 +875,11 @@ function svgGauge(score,min,max,buyTh,sellTh,w,showLabel){
     var a=ang(v), p1=pt(a,r-5), p2=pt(a,r+6);
     return "<line x1='"+p1[0]+"' y1='"+p1[1]+"' x2='"+p2[0]+"' y2='"+p2[1]+"' stroke='"+col+"' stroke-width='2' style='filter:drop-shadow(0 0 3px "+col+")'/>";
   };
+  // 계기판 미세 눈금 (2점 간격)
+  for(var tv=min; tv<=max; tv+=2){
+    var ta=ang(tv), tp1=pt(ta,r-3), tp2=pt(ta,r+1);
+    g+="<line x1='"+tp1[0]+"' y1='"+tp1[1]+"' x2='"+tp2[0]+"' y2='"+tp2[1]+"' stroke='rgba(219,228,240,.28)' stroke-width='1'/>";
+  }
   g+=tick(buyTh,"#00e5a0")+tick(sellTh,"#ff4060");
   // 바늘
   var sc=score>=buyTh?"#00e5a0":score<=sellTh?"#ff4060":"#ffd60a";
