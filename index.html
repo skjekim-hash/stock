@@ -523,6 +523,29 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
 ::-webkit-scrollbar-track{background:transparent}
 /* 텍스트 선택: 골드 액센트 */
 ::selection{background:rgba(212,175,106,.3)}
+/* ── PREMIUM POLISH — 고급감은 디테일의 정밀도에서 ── */
+/* 유리 깊이: 다층 그림자 + 상단 하이라이트 + 넉넉한 모서리 */
+.card{border-radius:18px;
+  box-shadow:0 1px 2px rgba(0,0,0,.5),0 10px 34px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.055),inset 0 0 0 1px rgba(120,150,200,.05)}
+/* 화면 가장자리 비네트 — 시선이 콘텐츠 중앙으로 */
+html::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:radial-gradient(ellipse 120% 100% at 50% 40%,transparent 62%,rgba(0,0,0,.34) 100%)}
+/* 타이포 위계: 제목 자간·본문 렌더 정밀도 */
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.hdr-title{letter-spacing:-0.5px;font-weight:800}
+.sec-title{font-weight:800}
+.card-cur-price{letter-spacing:-0.5px}
+/* 칩·버튼 라운드 통일 + 미세 자간 */
+.chip,.rec-mini{border-radius:12px}
+.mb-label,.sec-num{letter-spacing:1px}
+/* 정보행 간 호흡 */
+.irow{padding-top:11px;padding-bottom:11px}
+/* 모달 유리 정제 */
+.modal-box,.sheet{border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06)}
+/* 탭바: 유리 위 얇은 광 */
+#bottomNav{box-shadow:0 -8px 24px rgba(0,0,0,.35)}
+#bottomNav button{letter-spacing:.3px}
 /* ── 하단 탭 바 (엄지 동선) ── */
 #bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;
   background:rgba(10,14,23,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -658,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-18-r76";
+const APP_VERSION = "v2026-07-18-r78";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -982,12 +1005,24 @@ function renderActionBriefing(stocks){
       }
       if(!acted) watch++;
     });
+    // ⏳ 30일 기한 임박 감지 (26일+ 보유) — 최우선 액션
+    var expire=[];
+    (function(){
+      var g={};
+      loadJournal().forEach(function(e){
+        if(e.status!=="보유"||!e.code||!e.date) return;
+        var d=Math.floor((new Date(kstDateStr())-new Date(String(e.date).slice(0,10)))/86400000);
+        if(d>=26){ if(!g[e.code]||d>g[e.code].d) g[e.code]={code:e.code,d:d}; }
+      });
+      expire=Object.values(g).sort(function(a,b){return b.d-a.d;});
+    })();
     var jump=function(s){
       var st=(typeof STOCKS!=="undefined"&&STOCKS.find(function(x){return x.code===s.code;}))||{};
       var nm=(st.emoji?st.emoji+" ":"")+(st.name||s.name||s.code);
       return "<b style=\"color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer\" onclick=\"jumpToCard('"+s.code+"')\">"+nm+"</b>";
     };
     var lines=[];
+    if(expire.length) lines.push("<div style='margin-bottom:5px'><span style='color:#ff6680;font-weight:800'>⏳ 기한 임박 "+expire.length+"</span> — "+expire.map(function(x){return jump({code:x.code})+" <span style='color:var(--text3)'>("+x.d+"일)</span>";}).join(", ")+" <b style='color:#ff8090;cursor:pointer;text-decoration:underline' onclick='openJournal()'>이번 주 매듭 대상</b></div>");
     if(buy.length)   lines.push("<div style='margin-bottom:5px'><span style='color:#00e5a0;font-weight:800'>✅ 매수 문턱 도달 "+buy.length+"</span> — "+buy.map(jump).join(", ")+" <span style='color:var(--text3)'>(계획 물량)</span></div>");
     if(early.length) lines.push("<div style='margin-bottom:5px'><span style='color:#00d4ff;font-weight:800'>★ 선취 후보 "+early.length+"</span> — "+early.map(jump).join(", ")+" <span style='color:var(--text3)'>(1/3 물량 · 손절가 필수)</span></div>");
     if(warm.length)  lines.push("<div style='margin-bottom:5px'><span style='color:#ffc340;font-weight:800'>🔥 예열 "+warm.length+"</span> — "+warm.map(function(w){return jump(w.s)+" <span style='color:var(--text3)'>(문턱까지 "+w.gap+"점·개선 중)</span>";}).join(", ")+" <span style='color:var(--text3)'>— 선취·방아쇠 주시</span></div>");
@@ -1011,6 +1046,13 @@ function renderActionBriefing(stocks){
       +   "<span style='font-size:14px;font-weight:800;color:var(--gold);letter-spacing:1px'>🧭 오늘의 액션</span>"
       +   "<span style='font-size:11px;color:var(--gold);opacity:.6;font-family:JetBrains Mono,monospace;letter-spacing:2.5px'>BRIEFING</span>"
       + "</div>"
+      + (function(){
+          var m=window.__market&&window.__market.summary, k=window.__kospi;
+          if(!m) return "";
+          var mc=m.score>=1.5?"#00e5a0":m.score<=-1.5?"#ff6680":"#ffc340";
+          var bt=m.buyThreshold||6;
+          return "<div style='font-size:11px;color:#9ab;margin:-2px 0 8px;font-family:JetBrains Mono,monospace'>시장 <b style='color:"+mc+"'>"+(m.label||"")+" "+(m.score>0?"+":"")+m.score+"</b> · 문턱 <b>"+bt+"</b>"+(k&&typeof k.changePct==="number"?" · KOSPI <b style='color:"+(k.changePct>=0?"#00e5a0":"#ff6680")+"'>"+(k.changePct>0?"+":"")+k.changePct+"%</b>":"")+"</div>";
+        })()
       + summary
       + "<div style='margin-top:9px;padding-top:7px;border-top:1px dashed rgba(212,175,106,.25);font-size:10.5px;color:#8a94a8;line-height:1.7'>행동 사다리 — 매수: <b style='color:#00e5a0'>확인매수(계획물량)</b> › <b style='color:#00d4ff'>선취(1/3)</b> › <b style='color:#ffc340'>예열(주시)</b> › 관망 · 매도: <b style='color:#ff8090'>분할축소(-5~-6)</b> › <b style='color:#ff4060'>전량검토(-7↓)</b></div>"
       + "</div>";
