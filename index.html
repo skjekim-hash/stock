@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-19-r83";
+const APP_VERSION = "v2026-07-20-r85";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -823,6 +823,19 @@ function B(items,color){
 
 /* ── SVG 시각화 (스파크라인 · 게이지 · 레이더) ── */
 // 네온 스파크라인 — 최근 가격 흐름을 한 줄 곡선으로
+// 밴드 포지션 바 — 구간(하단~상단) 위의 현재 위치 (매수가격대 바와 같은 문법)
+function bandPos(label,val,lo,hi,mc,grad){
+  val=Math.max(0,Math.min(100,+val||0));
+  return "<div style='margin:9px 0'>"
+    +"<div style='display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px'>"
+    +"<span style='color:#9a958c'>"+label+"</span><b style='color:"+mc+";font-family:JetBrains Mono,monospace'>"+Math.round(val)+"%</b></div>"
+    +"<div style='position:relative;height:10px;border-radius:6px;background:"+grad+";box-shadow:inset 0 1px 3px rgba(0,0,0,.5)'>"
+    +"<span style='position:absolute;left:"+val+"%;top:-4px;bottom:-4px;width:2.5px;transform:translateX(-50%);background:#fff;border-radius:2px;box-shadow:0 0 7px "+mc+",0 0 2px #fff'></span>"
+    +"</div>"
+    +"<div style='display:flex;justify-content:space-between;font-size:10px;color:#5a6068;margin-top:3px'><span>"+lo+"</span><span>"+hi+"</span></div>"
+    +"</div>";
+}
+
 // 링(도넛) 게이지 — 0~100 지표의 히어로 그래픽 (레퍼런스 킷 문법)
 function svgRing(v,size,color,label){
   v=Math.max(0,Math.min(100,+v||0));
@@ -1605,11 +1618,9 @@ function renderCard(s,idx){
       <div class="stat"><div class="stat-l">볼린저 상단</div><div class="stat-v" style="color:#ff4060">${W(s.boll?.upper)}</div></div>
       <div class="stat"><div class="stat-l">볼린저 하단</div><div class="stat-v" style="color:#00e5a0">${W(s.boll?.lower)}</div></div>
     </div>
-    ${(s.boll?.position!=null)||bo.position!=null?`<div style="display:flex;justify-content:center;gap:28px;margin:12px 0 4px">
-      ${s.boll?.position!=null?svgRing(s.boll.position,64,s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffd60a","볼린저 위치"):""}
-      ${bo.position!=null?svgRing(bo.position,64,boC,"52주 위치"+(bo.nearHigh?" 🔥":bo.nearLow?" 💎":"")):""}
-    </div>
-    <div class="bar52-note" style="text-align:center">${s.boll?.position>80?"⚠️ 볼린저 상단 근접 — 단기 과열":s.boll?.position<20?"📍 볼린저 하단 근접 — 반등 가능":bo.comment||""}</div>`:""}
+    ${s.boll?.position!=null?bandPos("볼린저 위치",s.boll.position,"하단 "+W(s.boll.lower),"상단 "+W(s.boll.upper),s.boll.position>80?"#ff4060":s.boll.position<20?"#00e5a0":"#ffd60a","linear-gradient(90deg,rgba(0,229,160,.5),rgba(255,214,10,.4),rgba(255,64,96,.5))"):""}
+    ${bo.position!=null?bandPos("52주 위치"+(bo.nearHigh?" 🔥":bo.nearLow?" 💎":""),bo.position,"52주 최저","52주 최고",boC,"linear-gradient(90deg,rgba(255,255,255,.08),rgba(255,255,255,.14))"):""}
+    ${(s.boll?.position>80||s.boll?.position<20)?`<div class="bar52-note" style="text-align:center">${s.boll.position>80?"⚠️ 볼린저 상단 근접 — 단기 과열":"📍 볼린저 하단 근접 — 반등 가능"}</div>`:""}
     <div class="src-row"><span class="dot"></span>${s.source}${s.tradedAt?" · "+s.tradedAt.slice(11,16):""} · 자동수집</div>
   </div>
 
@@ -2029,7 +2040,7 @@ function renderCard(s,idx){
       <span class="sec-title" style="color:#ffd60a">기술 지표</span>
     </div>
     <div style="display:flex;justify-content:center;margin:2px 0 8px">${svgRadar(s)}</div>
-    <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px;line-height:1.6">도형이 클수록 과열, 작을수록 과매도 · <span style="color:#ff8090">빨강 꼭짓점=과열(80+)</span> · <span style="color:#7de8c0">초록=과매도(20↓)</span><br>💡 살 자리 = 쪼그라든 도형 · 들고 갈 모양 = 추세(ADX)만 긴 도형 · 피할 것 = 꽉 찬 도형</div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:10px;line-height:1.6">도형이 클수록 과열, 작을수록 과매도 · <span style="color:#ff8090">빨강 꼭짓점=과열(80+)</span> · <span style="color:#7de8c0">초록=과매도(20↓)</span><br>💡 살 자리 = 쪼그라든 도형 · 들고 갈 모양 = 추세(ADX)만 긴 도형 <b style='color:#ff8090'>(단, ADX는 방향이 없어요 — 하락 추세도 길어집니다. 위 MACD·일목으로 방향 확인)</b> · 피할 것 = 꽉 찬 도형</div>
     <div class="sec-sub">모멘텀</div>
     <div class="rsi-wrap">
       <div class="rsi-row">
