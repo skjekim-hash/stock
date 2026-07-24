@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-24 18:30:24 KST",
-  "updatedTime": "18:30",
+  "updatedAt": "2026-07-24 18:35:13 KST",
+  "updatedTime": "18:35",
   "kospi": {
     "price": 6690.62,
     "change": -406.27,
@@ -15,18 +15,18 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 28644.0,
-      "pct": 0.08
+      "price": 28665.25,
+      "pct": 0.16
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1462.38,
-      "pct": -0.8
+      "price": 1462.58,
+      "pct": -0.78
     },
     "vix": {
       "name": "공포지수(VIX)",
-      "price": 18.75,
-      "pct": 0.27
+      "price": 18.74,
+      "pct": 0.21
     },
     "tnx": {
       "name": "미국 10년물 금리",
@@ -36,7 +36,7 @@
     "dxy": {
       "name": "달러인덱스",
       "price": 101.38,
-      "pct": -0.07
+      "pct": -0.06
     },
     "cny": {
       "name": "위안/달러",
@@ -60,18 +60,18 @@
     },
     "oil": {
       "name": "WTI 유가",
-      "price": 89.0,
-      "pct": -3.46
+      "price": 88.89,
+      "pct": -3.58
     },
     "copper": {
       "name": "구리",
-      "price": 6.35,
-      "pct": 0.17
+      "price": 6.36,
+      "pct": 0.23
     },
     "gold": {
       "name": "금",
-      "price": 4056.6,
-      "pct": 0.16
+      "price": 4057.9,
+      "pct": 0.19
     },
     "kospi": {
       "name": "코스피",
@@ -95,8 +95,8 @@
     },
     "smsn": {
       "name": "삼성전자 GDR",
-      "price": 4336.0,
-      "pct": -3.3
+      "price": 4338.0,
+      "pct": -3.26
     },
     "murata": {
       "name": "무라타",
@@ -121,7 +121,7 @@
     "summary": {
       "mood": "neutral",
       "label": "중립",
-      "score": -1.5,
+      "score": -1.4,
       "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
       "buyThreshold": 6,
       "thresholdNote": "기본 문턱 6"
@@ -170,7 +170,7 @@
       "high52w": 2987000,
       "low52w": 245000,
       "opinion": "중립",
-      "score": 2,
+      "score": 0,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -198,17 +198,21 @@
         1919000,
         1759000
       ],
-      "nuance": "관찰 — 신호 부족",
+      "nuance": "완전 중립 (관망)",
       "buyTrack": {
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
+            "v": -2
+          },
+          {
+            "k": "OBV",
             "v": -2
           },
           {
@@ -218,10 +222,6 @@
           {
             "k": "일목",
             "v": -2
-          },
-          {
-            "k": "이격도",
-            "v": 2
           }
         ]
       },
@@ -231,16 +231,16 @@
           "v": -2
         },
         {
+          "k": "OBV",
+          "v": -2
+        },
+        {
           "k": "스토캐RSI",
           "v": 2
         },
         {
           "k": "일목",
           "v": -2
-        },
-        {
-          "k": "이격도",
-          "v": 2
         }
       ],
       "macro": {
@@ -260,6 +260,7 @@
         ],
         "sell": [
           "MACD 하락(데드)",
+          "OBV 하락(분산)",
           "일목 매도"
         ]
       },
@@ -297,7 +298,7 @@
       },
       "atrStopLoss": 1338000,
       "cmf": {
-        "value": -0.282,
+        "value": -0.285,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
@@ -365,9 +366,9 @@
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.64,
+        "ratio": 0.7,
         "surge": false,
-        "comment": "거래대금 평이 (0.6배)"
+        "comment": "거래대금 평이 (0.7배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -383,7 +384,7 @@
       },
       "wr": -90.1,
       "wrComment": "과매도",
-      "mfi": 43.6,
+      "mfi": 43.4,
       "mfiComment": "중립",
       "adx": {
         "adx": 45.0,
@@ -392,11 +393,11 @@
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 54139591,
-        "slope": -1.8,
+        "obv": 53663719,
+        "slope": -2.6,
         "trend": "하락"
       },
-      "vwap": 1838280,
+      "vwap": 1837578,
       "pivot": {
         "p": 1904000,
         "r1": 1963000,
@@ -420,13 +421,13 @@
         "strength": 0
       },
       "fg": {
-        "score": 42,
+        "score": 41,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 순매도",
       "fc": "외국인 -976,779주 · 기관 -483,881주 (07/24 기준)",
-      "volRatio": 0.82,
+      "volRatio": 0.89,
       "investor": {
         "foreign": -976779,
         "institution": -483881,
@@ -552,8 +553,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.82,
-        "comment": "거래량 평이 (0.82x)"
+        "ratio": 0.89,
+        "comment": "거래량 평이 (0.89x)"
       },
       "news": [],
       "dart": [
@@ -594,7 +595,7 @@
         }
       ],
       "basis": [
-        "RSI 40.3 · Williams%R -90.1 · MFI 43.6 — 다중 과매도",
+        "RSI 40.3 · Williams%R -90.1 · MFI 43.4 — 다중 과매도",
         "외국인 -976,779주 · 기관 -483,881주 · OBV 하락",
         "주봉 중립 · 55%"
       ],
@@ -606,9 +607,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 1787000,
+        "nxtPrice": 1789000,
         "closePrice": 1759000,
-        "nxtChgPct": 1.59,
+        "nxtChgPct": 1.71,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -657,9 +658,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -700,7 +701,7 @@
       "macro": {
         "adj": -0.7,
         "parts": [
-          "삼성GDR -3.3% → -0.8",
+          "삼성GDR -3.26% → -0.8",
           "SOX -0.54% → -0.2",
           "마이크론 +3.2% → +0.5",
           "NVDA -1.56% → -0.2"
@@ -1061,9 +1062,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 252500,
+        "nxtPrice": 253000,
         "closePrice": 249500,
-        "nxtChgPct": 1.2,
+        "nxtChgPct": 1.4,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -1112,9 +1113,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -1155,7 +1156,7 @@
       "macro": {
         "adj": -0.7,
         "parts": [
-          "환율 -0.8% → -0.2",
+          "환율 -0.78% → -0.2",
           "월풀 -3.9% → -0.6"
         ]
       },
@@ -1205,7 +1206,7 @@
       },
       "atrStopLoss": 138214,
       "cmf": {
-        "value": -0.02,
+        "value": -0.021,
         "comment": "중립"
       },
       "cmfBars": [
@@ -1273,7 +1274,7 @@
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.65,
+        "ratio": 0.69,
         "surge": false,
         "comment": "거래대금 평이 (0.7배)"
       },
@@ -1291,7 +1292,7 @@
       },
       "wr": -86.0,
       "wrComment": "과매도",
-      "mfi": 49.7,
+      "mfi": 49.6,
       "mfiComment": "중립",
       "adx": {
         "adx": 5.9,
@@ -1300,11 +1301,11 @@
         "strength": "추세 없음(횡보)"
       },
       "obv": {
-        "obv": 39283725,
-        "slope": 7.6,
+        "obv": 39223464,
+        "slope": 7.4,
         "trend": "상승"
       },
-      "vwap": 177289,
+      "vwap": 177251,
       "pivot": {
         "p": 184467,
         "r1": 190533,
@@ -1334,7 +1335,7 @@
       },
       "ft": "외국인 2일 연속 순매도",
       "fc": "외국인 -234,445주 · 기관 -188,135주 (07/24 기준)",
-      "volRatio": 0.72,
+      "volRatio": 0.76,
       "investor": {
         "foreign": -234445,
         "institution": -188135,
@@ -1460,8 +1461,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.72,
-        "comment": "거래량 평이 (0.72x)"
+        "ratio": 0.76,
+        "comment": "거래량 평이 (0.76x)"
       },
       "news": [],
       "dart": [
@@ -1502,7 +1503,7 @@
         }
       ],
       "basis": [
-        "RSI 41.0 · Williams%R -86.0 · MFI 49.7 — 다중 과매도",
+        "RSI 41.0 · Williams%R -86.0 · MFI 49.6 — 다중 과매도",
         "외국인 -234,445주 · 기관 -188,135주 · OBV 상승",
         "주봉 중립 · 27%"
       ],
@@ -1565,9 +1566,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -1982,12 +1983,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +10점 ≥ 문턱 7 (시장 비우호 → 강화)"
+        "desc": "합산 +10점 ≥ 문턱 6 (기본)"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -2026,11 +2027,11 @@
         }
       ],
       "macro": {
-        "adj": -0.2,
+        "adj": -0.1,
         "parts": [
-          "환율 -0.8% → -0.2",
+          "환율 -0.78% → -0.2",
           "토요타 -1.75% → -0.3",
-          "유가 -3.46% → +0.3"
+          "유가 -3.58% → +0.4"
         ]
       },
       "sigReasons": {
@@ -2383,9 +2384,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 400000,
+        "nxtPrice": 400500,
         "closePrice": 401000,
-        "nxtChgPct": -0.25,
+        "nxtChgPct": -0.12,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -2434,9 +2435,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -2524,7 +2525,7 @@
       },
       "atrStopLoss": 152328,
       "cmf": {
-        "value": -0.178,
+        "value": -0.177,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
@@ -2592,7 +2593,7 @@
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.7,
+        "ratio": 0.75,
         "surge": false,
         "comment": "거래대금 평이 (0.7배)"
       },
@@ -2610,7 +2611,7 @@
       },
       "wr": -75.7,
       "wrComment": "중립",
-      "mfi": 39.8,
+      "mfi": 39.7,
       "mfiComment": "중립",
       "adx": {
         "adx": 0.5,
@@ -2619,11 +2620,11 @@
         "strength": "추세 없음(횡보)"
       },
       "obv": {
-        "obv": 6895881,
-        "slope": 35.1,
+        "obv": 6822231,
+        "slope": 33.7,
         "trend": "상승"
       },
-      "vwap": 172962,
+      "vwap": 172940,
       "pivot": {
         "p": 176800,
         "r1": 179600,
@@ -2647,7 +2648,7 @@
       },
       "ft": "외국인 순매도",
       "fc": "외국인 -36,411주 · 기관 -63,306주 (07/24 기준)",
-      "volRatio": 0.7,
+      "volRatio": 0.75,
       "investor": {
         "foreign": -36411,
         "institution": -63306,
@@ -2773,8 +2774,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.7,
-        "comment": "거래량 평이 (0.7x)"
+        "ratio": 0.75,
+        "comment": "거래량 평이 (0.75x)"
       },
       "news": [],
       "dart": [
@@ -2815,7 +2816,7 @@
         }
       ],
       "basis": [
-        "RSI 51.7 · Williams%R -75.7 · MFI 39.8 — 지표 중립권",
+        "RSI 51.7 · Williams%R -75.7 · MFI 39.7 — 지표 중립권",
         "외국인 -36,411주 · 기관 -63,306주 · OBV 상승",
         "주봉 중립 · 74%"
       ],
@@ -2827,9 +2828,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 171500,
+        "nxtPrice": 171800,
         "closePrice": 171500,
-        "nxtChgPct": 0.0,
+        "nxtChgPct": 0.17,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -2878,9 +2879,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -2967,7 +2968,7 @@
       },
       "atrStopLoss": 88314,
       "cmf": {
-        "value": 0.148,
+        "value": 0.147,
         "comment": "매집 우세 (조용한 유입)"
       },
       "cmfBars": [
@@ -3035,9 +3036,9 @@
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 4.34,
+        "ratio": 4.51,
         "surge": true,
-        "comment": "거래대금 급증 (4.3배) — 강한 세력 진입"
+        "comment": "거래대금 급증 (4.5배) — 강한 세력 진입"
       },
       "cautiousEntry": {
         "entry": false,
@@ -3053,7 +3054,7 @@
       },
       "wr": -20.1,
       "wrComment": "중립",
-      "mfi": 74.3,
+      "mfi": 74.6,
       "mfiComment": "중립",
       "adx": {
         "adx": 40.4,
@@ -3062,11 +3063,11 @@
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 10807443,
-        "slope": 533.4,
+        "obv": 10962435,
+        "slope": 542.5,
         "trend": "상승"
       },
-      "vwap": 94770,
+      "vwap": 94844,
       "pivot": {
         "p": 97067,
         "r1": 103033,
@@ -3096,7 +3097,7 @@
       },
       "ft": "외국인 7일 연속 순매도",
       "fc": "외국인 -1,104,725주 · 기관 +977,122주 (07/24 기준)",
-      "volRatio": 3.35,
+      "volRatio": 3.46,
       "investor": {
         "foreign": -1104725,
         "institution": 977122,
@@ -3222,8 +3223,8 @@
       },
       "volSurge": {
         "surge": true,
-        "ratio": 3.35,
-        "comment": "거래량 급증 (3.35x)"
+        "ratio": 3.46,
+        "comment": "거래량 급증 (3.46x)"
       },
       "news": [],
       "dart": [
@@ -3264,7 +3265,7 @@
         }
       ],
       "basis": [
-        "RSI 61.7 · Williams%R -20.1 · MFI 74.3 — 지표 중립권",
+        "RSI 61.7 · Williams%R -20.1 · MFI 74.6 — 지표 중립권",
         "외국인 -1,104,725주 · 기관 +977,122주 · OBV 상승",
         "주봉 매도 · 55%"
       ],
@@ -3276,9 +3277,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 100200,
+        "nxtPrice": 100100,
         "closePrice": 100000,
-        "nxtChgPct": 0.2,
+        "nxtChgPct": 0.1,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -3327,12 +3328,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +7점 ≥ 문턱 7 (시장 비우호 → 강화)"
+        "desc": "합산 +7점 ≥ 문턱 6 (기본)"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 비우호 → 강화",
+        "label": "기본",
         "drivers": [
           {
             "k": "강세 다이버전스",
@@ -3422,7 +3423,7 @@
       },
       "atrStopLoss": 186758,
       "cmf": {
-        "value": -0.0,
+        "value": -0.001,
         "comment": "중립"
       },
       "cmfBars": [
@@ -3495,9 +3496,9 @@
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 1.11,
+        "ratio": 1.16,
         "surge": false,
-        "comment": "거래대금 평이 (1.1배)"
+        "comment": "거래대금 평이 (1.2배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -3513,7 +3514,7 @@
       },
       "wr": -32.1,
       "wrComment": "중립",
-      "mfi": 44.5,
+      "mfi": 44.4,
       "mfiComment": "중립",
       "adx": {
         "adx": 29.2,
@@ -3522,11 +3523,11 @@
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 21168513,
-        "slope": 14.2,
+        "obv": 21122002,
+        "slope": 13.9,
         "trend": "상승"
       },
-      "vwap": 203790,
+      "vwap": 203832,
       "pivot": {
         "p": 214333,
         "r1": 225667,
@@ -3556,7 +3557,7 @@
       },
       "ft": "외국인 2일 연속 순매도",
       "fc": "외국인 -169,779주 · 기관 +59,167주 (07/24 기준)",
-      "volRatio": 1.05,
+      "volRatio": 1.1,
       "investor": {
         "foreign": -169779,
         "institution": 59167,
@@ -3682,8 +3683,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 1.05,
-        "comment": "거래량 평이 (1.05x)"
+        "ratio": 1.1,
+        "comment": "거래량 평이 (1.1x)"
       },
       "news": [],
       "dart": [
@@ -3724,7 +3725,7 @@
         }
       ],
       "basis": [
-        "RSI 52.4 · Williams%R -32.1 · MFI 44.5 — 지표 중립권",
+        "RSI 52.4 · Williams%R -32.1 · MFI 44.4 — 지표 중립권",
         "외국인 -169,779주 · 기관 +59,167주 · OBV 상승",
         "주봉 중립 · 21%"
       ],
@@ -3736,9 +3737,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 211500,
+        "nxtPrice": 212000,
         "closePrice": 207500,
-        "nxtChgPct": 1.93,
+        "nxtChgPct": 2.17,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
