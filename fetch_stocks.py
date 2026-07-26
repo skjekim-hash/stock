@@ -42,6 +42,7 @@ STOCKS = [
     {"code": "105560", "yf": "105560.KS", "name": "KB금융",     "emoji": "🟣"},
     {"code": "017670", "yf": "017670.KS", "name": "SK텔레콤",   "emoji": "🩵"},
     {"code": "035420", "yf": "035420.KS", "name": "NAVER",      "emoji": "🟤"},
+    {"code": "035900", "yf": "035900.KQ", "name": "JYP Ent.",   "emoji": "🎤"},
 ]
 KOSPI_CODE = "0001"
 KST = timezone(timedelta(hours=9))
@@ -60,8 +61,9 @@ MACRO_SENS = {
     "105560": {"tnx": 0.3, "xlf": 0.25, "vix": -0.1},                                 # KB금융: 美금융ETF 추가
     "017670": {"vix": 0.05},                                                          # SK텔레콤: 방어주 (유지)
     "035420": {"nasdaq": 0.30, "googl": 0.20, "tnx": -0.3},                           # NAVER: 알파벳 추가
+    "035900": {"spot": 0.20, "nasdaq": 0.15, "fx": 0.10},                             # JYP: 스포티파이 동행·성장주·환율 수혜
 }
-MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC", "nvda": "NVDA", "mu": "마이크론", "skhy": "하이닉스ADR", "smsn": "삼성GDR", "murata": "무라타", "tm": "토요타", "whr": "월풀", "googl": "알파벳", "xlf": "美금융ETF", "oil": "유가", "copper": "구리"}
+MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC", "nvda": "NVDA", "mu": "마이크론", "skhy": "하이닉스ADR", "smsn": "삼성GDR", "murata": "무라타", "tm": "토요타", "whr": "월풀", "googl": "알파벳", "xlf": "美금융ETF", "oil": "유가", "copper": "구리", "spot": "스포티파이"}
 
 def calc_macro_adj(code, market):
     """종목별 매크로 조정치와 근거 설명. 반환: (adj(-2~+2), parts[])"""
@@ -538,6 +540,7 @@ def fetch_market_signal():
         ("TM",    "토요타 ADR",        "tm"),     # 현대차: 글로벌 완성차 비교군
         ("WHR",   "월풀",              "whr"),    # LG전자: 가전 비교군
         ("GOOGL", "알파벳",            "googl"),  # NAVER: 플랫폼·광고 비교군
+        ("SPOT",  "스포티파이",        "spot"),   # JYP: K-pop 스트리밍 소비 대리지표
     ]
     out = {}
     for sym, name, key in targets:
@@ -1047,6 +1050,7 @@ def calc_fair_value(code, price, fin):
         "105560": {"per": 9,  "pbr": 0.9, "name": "은행"},
         "017670": {"per": 12, "pbr": 1.0, "name": "통신"},
         "035420": {"per": 25, "pbr": 1.8, "name": "인터넷/플랫폼"},
+        "035900": {"per": 22, "pbr": 4.0, "name": "엔터테인먼트"},
     }
     sd = sector_data.get(code, {"per": 15, "pbr": 1.5, "name": "일반"})
 
