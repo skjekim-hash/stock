@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-20-r86";
+const APP_VERSION = "v2026-07-26-r87";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -4175,7 +4175,7 @@ function renderSim(){
   const jBorder = {ok:"#2ecc71",caution:"#ffd60a",danger:"#ff6b6b"}[j.level];
 
   // 종목 선택 칩
-  const chips = stocks.map(x=>`<button onclick="simPickStock('${x.code}')" style="background:${x.code===s.code?'#2a4a7a':'#2a2820'};color:${x.code===s.code?'#fff':'#8090b0'};border:none;border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap">${x.code===s.code?'● ':''}${({'000660':'하이닉스','005930':'삼성전자','066570':'LG전자','009150':'삼성전기','005380':'현대차','105560':'KB금융','017670':'SKT','035420':'NAVER'})[x.code]||x.code}</button>`).join("");
+  const chips = stocks.map(x=>`<button onclick="simPickStock('${x.code}')" style="background:${x.code===s.code?'#2a4a7a':'#2a2820'};color:${x.code===s.code?'#fff':'#8090b0'};border:none;border-radius:16px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap">${x.code===s.code?'● ':''}${({'000660':'하이닉스','005930':'삼성전자','066570':'LG전자','009150':'삼성전기','005380':'현대차','105560':'KB금융','017670':'SKT','035420':'NAVER','035900':'JYP'})[x.code]||((STOCKS.find(function(t){return t.code===x.code;})||{}).name||x.code)}</button>`).join("");
 
   const totalCost = entry*shares;
   const pos = s.breakout?.position ?? 50;
