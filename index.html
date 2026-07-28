@@ -681,7 +681,7 @@ body{padding-bottom:74px;font-variant-numeric:tabular-nums}
 
 <script>
 // 배포할 때마다 이 값을 올리면 화면 하단에서 버전 확인 가능
-const APP_VERSION = "v2026-07-26-r87";
+const APP_VERSION = "v2026-07-26-r88";
 // 추매 1회당 매수 문턱 가산치 — 카드·게이지·액션브리핑이 모두 이 값을 공유해야 어긋나지 않음
 const ADD_PER_BUY = 2;
 document.addEventListener("DOMContentLoaded", function(){
@@ -2527,7 +2527,7 @@ function scoreSignalAccuracy(currentStocks){
   var today = new Date(kstDateStr());
   var result = {
     sell:{hit:0,miss:0,total:0}, buy:{hit:0,miss:0,total:0},
-    turn:{hit:0,miss:0,total:0}, missDrv:{},   // 🌊 외인 전환 신호: 3일 후 +1% 이상이면 적중
+    turn:{hit:0,miss:0,total:0}, missDrv:{}, byStock:{},   // 🌊 외인 전환 신호: 3일 후 +1% 이상이면 적중
     // 중기(30일) 채점 — 실제 매매 스타일 기준
     buyMid:{hit:0,miss:0,total:0, pending:0},
     sellMid:{hit:0,miss:0,total:0, pending:0},
@@ -2601,15 +2601,16 @@ function scoreSignalAccuracy(currentStocks){
       }
       // ── 단기(3일) 채점 ── 신호 직후 바로 움직였나
       // 매도 신호: 이후 떨어지면 적중 / 오르면 빗나감
+      var bs=result.byStock[code]||(result.byStock[code]={name:sig.name||code,bH:0,bT:0,sH:0,sT:0});
       if(isSell){
-        result.sell.total++;
-        if(chg <= HIT) result.sell.hit++; else result.sell.miss++;
+        result.sell.total++; bs.sT++;
+        if(chg <= HIT){ result.sell.hit++; bs.sH++; } else result.sell.miss++;
         if(chg > 3) result.examples.push({type:"매도빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
       }
       // 매수 신호: 이후 오르면 적중 / 떨어지면 빗나감
       else if(isBuy){
-        result.buy.total++;
-        if(chg >= -HIT) result.buy.hit++; else result.buy.miss++;
+        result.buy.total++; bs.bT++;
+        if(chg >= -HIT){ result.buy.hit++; bs.bH++; } else result.buy.miss++;
         if(chg < -3) result.examples.push({type:"매수빗나감", name:sig.name, date:snap.date, chg:chg.toFixed(1)});
       }
     });
@@ -2913,6 +2914,20 @@ function renderSignalAccuracy(){
       </div>
     </div>
     ${(bmRate!==null&&buyRate!==null&&bmRate-buyRate>=15)?`<div style="font-size:10.5px;color:#7fdfff;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:7px 10px;margin-bottom:8px;line-height:1.5">💡 매수 신호가 <b>3일엔 ${buyRate}%지만 30일 보면 ${bmRate}%</b>. 신호가 틀린 게 아니라 <b>천천히 오르는 것</b>일 수 있어요 — 조급하게 손절하지 마세요.</div>`:""}`;
+  // 📋 종목별 신호 성적 분해 (표본 3건 이상)
+  (function(){
+    var rows=Object.keys(r.byStock||{}).map(function(c){return r.byStock[c];})
+      .filter(function(b){return (b.bT+b.sT)>=3;})
+      .sort(function(a,b){return (b.bT+b.sT)-(a.bT+a.sT);});
+    if(!rows.length) return;
+    var pc=function(hh,t){ if(!t) return "<span style='color:#5a6068'>—</span>";
+      var p=Math.round(hh/t*100), c=p>=60?"#00e5a0":p>=40?"#ffd60a":"#ff6680";
+      return "<b style='color:"+c+"'>"+p+"%</b><span style='color:#5a6068;font-size:10px'>("+t+")</span>"; };
+    html += "<div style='margin-bottom:8px;padding:9px 11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px'>"
+      +"<div style='font-size:11px;color:#9ab;font-weight:700;margin-bottom:5px'>📋 종목별 성적 <span style='font-weight:400;color:#5a6068'>(매수% · 매도%, 3건↑)</span></div>"
+      +rows.map(function(b){return "<div style='display:flex;justify-content:space-between;font-size:11px;padding:2px 0'><span style='color:#c8c4bc'>"+b.name+"</span><span>매수 "+pc(b.bH,b.bT)+" · 매도 "+pc(b.sH,b.sT)+"</span></div>";}).join("")
+      +"</div>";
+  })();
   // 🔬 빗나간 매수 부검 — 공통 기여 지표 Top3 (튜닝 2라운드의 재료)
   (function(){
     var ks=Object.keys(r.missDrv||{});
