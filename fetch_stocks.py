@@ -1700,6 +1700,31 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
         elif _hold >= 30: score += _t("외인 보유·환율", -1)   # 외국인 상당 보유 → 일부 취약
         # 30% 미만은 환율 영향 적어 차감 없음 (내수·개인 비중 높은 종목)
     # ── ③ 종목별 매크로 조정 (SOX·나스닥·환율·금리 감응 차등, ±2 캡) ──
+    # ── 레짐 조건부 가중 (ADX 게이팅) — 와일더 DMI·엘더 삼중창 원리 ──
+    # 추세장엔 추세지표, 횡보장엔 오실레이터에게 발언권. 상쇄로 인한 만성 중립을 해소.
+    _regime = None
+    if adx and adx.get("adx") is not None:
+        if adx["adx"] >= 25:
+            _regime = "up" if adx.get("pdi", 0) >= adx.get("ndi", 0) else "down"
+        elif adx["adx"] < 20:
+            _regime = "range"
+    if _regime:
+        _TREND = ("MACD", "일목", "이평 배열", "SAR", "주봉", "구름대")
+        _OSC   = ("RSI", "스토캐스틱", "윌리엄스R", "CCI", "스토캐RSI", "MFI")
+        _boost = 0.0
+        for _k, _v in list(contrib.items()):
+            if _regime == "range":
+                if _k in _TREND: _boost += -0.5 * _v      # 횡보: 추세 크로스는 휩쏘 위험 — 반감
+                elif _k in _OSC: _boost += 0.5 * _v       # 횡보: 과매도/과열 반전이 유효 — 증폭
+            elif _regime == "down":
+                if _k in _OSC and _v > 0: _boost += -0.5 * _v    # 하락추세: 과매도 '매수'는 칼날 — 반감
+                elif _k in _TREND and _v < 0: _boost += 0.5 * _v # 하락추세: 추세 매도 증폭
+            elif _regime == "up":
+                if _k in _OSC and _v < 0: _boost += -0.5 * _v    # 상승추세: 과열 '매도'는 조기 하차 — 반감
+                elif _k in _TREND and _v > 0: _boost += 0.5 * _v # 상승추세: 추세 매수 증폭
+        if _boost:
+            _rlbl = {"up": "상승추세", "down": "하락추세", "range": "횡보"}[_regime]
+            score += _t("레짐 가중(" + _rlbl + ")", round(_boost, 1))
     score += _t("매크로", macro_adj)
     score = round(score)
     # ── ② 레짐 가변 매수 문턱 ──────────────────────────
