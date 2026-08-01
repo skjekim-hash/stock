@@ -1582,7 +1582,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     # RSI
     if rsi: score += _t("RSI", 2 if rsi < 30 else 1 if rsi < 45 else -2 if rsi > 70 else -1 if rsi > 60 else 0)
     # MACD
-    if macd and macd_sig: score += _t("MACD", 2 if macd > macd_sig else -2)
+    if macd and macd_sig: score += _t("MACD", 1 if macd > macd_sig else -2)  # 튜닝2(7/29): 매수 가산 +2→+1 (부검 MACD×7 — 급락장 데드캣 크로스), 매도 -2 유지
     # Williams %R: -70 이하로 문턱 낮춤 (기존 -80)
     if wr: score += _t("윌리엄스R", 1 if wr < -70 else -1 if wr > -20 else 0)
     # 스토캐스틱
@@ -1590,7 +1590,7 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     # MFI: 범위 확장 (기존 극단만 → 40/60으로 확장)
     if mfi: score += _t("MFI", 2 if mfi < 20 else 1 if mfi < 40 else -2 if mfi > 80 else -1 if mfi > 60 else 0)
     # OBV: +1 → +2로 강화 (수급 대체)
-    if obv: score += _t("OBV", 2 if obv["slope"] > 2 else -2 if obv["slope"] < -2 else 0)
+    if obv: score += _t("OBV", 1 if obv["slope"] > 2 else -2 if obv["slope"] < -2 else 0)  # 튜닝2(7/29): 매수 가산 +2→+1 (부검 OBV×7 — 숏커버 거래량 함정), 매도 -2 유지
     # ADX: 횡보 구간 반등 가능성 반영
     if adx:
         if adx["adx"] < 15: score += _t("ADX", 1)    # 추세 없음 → 반등 여지
