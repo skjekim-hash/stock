@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-21 06:20:20 KST",
-  "updatedTime": "06:20",
+  "updatedAt": "2026-08-21 06:25:12 KST",
+  "updatedTime": "06:25",
   "kospi": {
     "price": 6852.58,
     "change": 381.41,
@@ -20,8 +20,8 @@
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1394.05,
-      "pct": 0.5
+      "price": 1393.98,
+      "pct": 0.49
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -35,7 +35,7 @@
     },
     "dxy": {
       "name": "달러인덱스",
-      "price": 98.87,
+      "price": 98.88,
       "pct": 0.04
     },
     "cny": {
@@ -183,7 +183,6 @@
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        1830000,
         1919000,
         1759000,
         1816000,
@@ -202,6 +201,7 @@
         1593000,
         1645000,
         1662000,
+        1500000,
         1691000
       ],
       "nuance": "관찰 구간 (소량만)",
@@ -218,15 +218,15 @@
             "v": -2
           },
           {
-            "k": "일목",
-            "v": -2
-          },
-          {
             "k": "매크로",
             "v": 2.0
           },
           {
-            "k": "RSI",
+            "k": "MACD",
+            "v": 1
+          },
+          {
+            "k": "OBV",
             "v": 1
           }
         ]
@@ -237,15 +237,15 @@
           "v": -2
         },
         {
-          "k": "일목",
-          "v": -2
-        },
-        {
           "k": "매크로",
           "v": 2.0
         },
         {
-          "k": "RSI",
+          "k": "MACD",
+          "v": 1
+        },
+        {
+          "k": "OBV",
           "v": 1
         }
       ],
@@ -264,8 +264,7 @@
           "매크로 +2.0"
         ],
         "sell": [
-          "스토캐스틱RSI 과매수",
-          "일목 매도"
+          "스토캐스틱RSI 과매수"
         ]
       },
       "contrarian": "",
@@ -273,7 +272,7 @@
       "marginCallRisk": "",
       "turnover": "",
       "chaseWarning": "",
-      "marketBrake": "",
+      "marketBrake": "시장 비우호적 — 매수 신호 보류",
       "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-08-20",
       "fairValue": 3317917,
@@ -291,22 +290,21 @@
       "eps": 224313,
       "bps": 231952,
       "boll": {
-        "upper": 1904253,
-        "mid": 1589650,
-        "lower": 1275047,
-        "position": 36
+        "upper": 1881502,
+        "mid": 1582700,
+        "lower": 1283898,
+        "position": 68
       },
       "atr": {
-        "atr": 155214,
-        "pct": 10.35
+        "atr": 158643,
+        "pct": 9.38
       },
-      "atrStopLoss": 1380572,
+      "atrStopLoss": 1373714,
       "cmf": {
-        "value": -0.27,
+        "value": -0.198,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
-        -1.0,
         0.44,
         -0.9,
         0.91,
@@ -325,24 +323,25 @@
         -0.22,
         -0.46,
         -0.71,
-        -0.62
+        -0.62,
+        0.6
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 42.6,
-      "rsiComment": "저점권",
-      "macd": -8.046,
-      "macdSignal": -10.03,
-      "macdHist": 1.984,
+      "rsi": 49.6,
+      "rsiComment": "중립",
+      "macd": -6.051,
+      "macdSignal": -8.328,
+      "macdHist": 2.277,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 42.2,
+      "stoch": 75.9,
       "stochComment": "중립",
       "stochRsi": {
         "k": 89.2,
-        "d": 94.3,
+        "d": 92.8,
         "signal": "매도",
         "comment": "과매수 구간(89) — 조정 주의"
       },
@@ -354,25 +353,25 @@
         "senkouB": 2116500,
         "cloudTop": 2116500,
         "cloudBot": 1645500,
-        "signal": "매도",
-        "comment": "구름대 아래 + 전환선<기준선 — 강한 하락 추세"
+        "signal": "중립",
+        "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": -46.4,
+        "value": 42.1,
         "signal": "중립",
-        "comment": "중립(-46)"
+        "comment": "중립(42)"
       },
       "psar": {
-        "psar": 1358133,
+        "psar": 1375487,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩1,358,133)",
+        "comment": "상승 추세 유지 (손절선 ₩1,375,487)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.7,
+        "ratio": 1.03,
         "surge": false,
-        "comment": "거래대금 평이 (0.7배)"
+        "comment": "거래대금 평이 (1.0배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -386,32 +385,32 @@
         "color": "",
         "title": ""
       },
-      "wr": -57.8,
+      "wr": -24.1,
       "wrComment": "중립",
-      "mfi": 46.8,
+      "mfi": 56.4,
       "mfiComment": "중립",
       "adx": {
-        "adx": 11.4,
-        "pdi": 30.7,
-        "ndi": 24.4,
-        "strength": "추세 없음(횡보)"
+        "adx": 21.9,
+        "pdi": 37.3,
+        "ndi": 23.9,
+        "strength": "약한 추세"
       },
       "obv": {
-        "obv": 21065229,
-        "slope": 92.4,
+        "obv": 26518199,
+        "slope": 69.7,
         "trend": "상승"
       },
-      "vwap": 1596591,
+      "vwap": 1630328,
       "pivot": {
-        "p": 1698000,
-        "r1": 1756000,
-        "r2": 1850000,
-        "s1": 1604000,
-        "s2": 1546000
+        "p": 1515000,
+        "r1": 1544000,
+        "r2": 1588000,
+        "s1": 1471000,
+        "s2": 1442000
       },
-      "sma5": 1580800,
-      "sma20": 1589650,
-      "sma60": null,
+      "sma5": 1618200,
+      "sma20": 1582700,
+      "sma60": 2049333,
       "patterns": [],
       "contra": {
         "signals": [],
@@ -419,13 +418,13 @@
         "strength": 0
       },
       "fg": {
-        "score": 45,
+        "score": 57,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 순매수",
       "fc": "외국인 +312,973주 · 기관 -13,214주 (08/20 기준)",
-      "volRatio": 0.74,
+      "volRatio": 0.95,
       "investor": {
         "foreign": 312973,
         "institution": -13214,
@@ -523,10 +522,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 52.0,
-        "macd": 8.849,
-        "macdSignal": 15.633,
-        "comment": "주봉 RSI 52.0 · MACD 데드크로스"
+        "rsi": 51.9,
+        "macd": 9.544,
+        "macdSignal": 15.916,
+        "comment": "주봉 RSI 51.9 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -551,8 +550,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.74,
-        "comment": "거래량 평이 (0.74x)"
+        "ratio": 0.95,
+        "comment": "거래량 평이 (0.95x)"
       },
       "news": [],
       "dart": [
@@ -593,7 +592,7 @@
         }
       ],
       "basis": [
-        "RSI 42.6 · Williams%R -57.8 · MFI 46.8 — 지표 중립권",
+        "RSI 49.6 · Williams%R -24.1 · MFI 56.4 — 지표 중립권",
         "외국인 +312,973주 · 기관 -13,214주 · OBV 상승",
         "주봉 중립 · 26%"
       ],
@@ -613,14 +612,13 @@
       "high52w": 374500,
       "low52w": 189200,
       "opinion": "중립",
-      "score": 6,
+      "score": 5,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        260500,
         270000,
         249500,
         254000,
@@ -639,6 +637,7 @@
         268000,
         274500,
         268500,
+        247500,
         271000
       ],
       "nuance": "관찰 구간 (소량만)",
@@ -697,13 +696,11 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
           "매크로 +2.0"
         ],
         "sell": [
           "스토캐스틱RSI 과매수",
-          "MFI 66 높음",
-          "일목 매도"
+          "MFI 64 높음"
         ]
       },
       "contrarian": "",
@@ -729,22 +726,21 @@
       "eps": 22292,
       "bps": 71907,
       "boll": {
-        "upper": 283750,
-        "mid": 245125,
-        "lower": 206500,
-        "position": 53
+        "upper": 285367,
+        "mid": 245650,
+        "lower": 205933,
+        "position": 82
       },
       "atr": {
-        "atr": 20321,
-        "pct": 8.21
+        "atr": 20429,
+        "pct": 7.54
       },
-      "atrStopLoss": 230358,
+      "atrStopLoss": 230142,
       "cmf": {
-        "value": -0.18,
+        "value": -0.109,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
-        -0.94,
         0.4,
         -0.74,
         0.28,
@@ -763,54 +759,55 @@
         0.29,
         0.79,
         -0.7,
-        -0.75
+        -0.75,
+        0.8
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 47.1,
+      "rsi": 53.5,
       "rsiComment": "중립",
-      "macd": -2.114,
-      "macdSignal": -4.336,
-      "macdHist": 2.222,
+      "macd": -1.237,
+      "macdSignal": -3.416,
+      "macdHist": 2.179,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 52.9,
+      "stoch": 71.9,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 84.5,
-        "d": 93.8,
+        "k": 80.5,
+        "d": 87.3,
         "signal": "매도",
-        "comment": "과매수 구간(85) — 조정 주의"
+        "comment": "과매수 구간(80) — 조정 주의"
       },
       "divergence": null,
       "ichimoku": {
         "tenkan": 257750,
-        "kijun": 240850,
-        "senkouA": 249300,
+        "kijun": 238600,
+        "senkouA": 248175,
         "senkouB": 281850,
         "cloudTop": 281850,
-        "cloudBot": 249300,
-        "signal": "매도",
-        "comment": "구름대 아래 — 하락 우위"
+        "cloudBot": 248175,
+        "signal": "중립",
+        "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": 13.8,
+        "value": 84.0,
         "signal": "중립",
-        "comment": "중립(14)"
+        "comment": "중립(84)"
       },
       "psar": {
-        "psar": 215436,
+        "psar": 221241,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩215,436)",
+        "comment": "상승 추세 유지 (손절선 ₩221,241)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.78,
+        "ratio": 0.98,
         "surge": false,
-        "comment": "거래대금 평이 (0.8배)"
+        "comment": "거래대금 평이 (1.0배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -824,32 +821,32 @@
         "color": "",
         "title": ""
       },
-      "wr": -47.1,
+      "wr": -28.1,
       "wrComment": "중립",
-      "mfi": 65.6,
+      "mfi": 64.5,
       "mfiComment": "중립",
       "adx": {
-        "adx": 33.6,
-        "pdi": 35.3,
-        "ndi": 17.6,
+        "adx": 40.8,
+        "pdi": 41.6,
+        "ndi": 17.5,
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 49816473,
-        "slope": 24.9,
-        "trend": "상승"
+        "obv": 75912392,
+        "slope": 0.7,
+        "trend": "횡보"
       },
-      "vwap": 263086,
+      "vwap": 265801,
       "pivot": {
-        "p": 273833,
-        "r1": 282667,
-        "r2": 296833,
-        "s1": 259667,
-        "s2": 250833
+        "p": 249500,
+        "r1": 252500,
+        "r2": 257500,
+        "s1": 244500,
+        "s2": 241500
       },
-      "sma5": 262800,
-      "sma20": 245125,
-      "sma60": null,
+      "sma5": 265900,
+      "sma20": 245650,
+      "sma60": 289150,
       "patterns": [],
       "contra": {
         "signals": [],
@@ -857,13 +854,13 @@
         "strength": 0
       },
       "fg": {
-        "score": 55,
+        "score": 58,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 순매수",
       "fc": "외국인 +4,221,606주 · 기관 +599,886주 (08/20 기준)",
-      "volRatio": 0.76,
+      "volRatio": 0.87,
       "investor": {
         "foreign": 4221606,
         "institution": 599886,
@@ -961,10 +958,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 54.7,
-        "macd": 7.164,
-        "macdSignal": 11.125,
-        "comment": "주봉 RSI 54.7 · MACD 데드크로스"
+        "rsi": 55.3,
+        "macd": 7.698,
+        "macdSignal": 11.342,
+        "comment": "주봉 RSI 55.3 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -989,8 +986,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.76,
-        "comment": "거래량 평이 (0.76x)"
+        "ratio": 0.87,
+        "comment": "거래량 평이 (0.87x)"
       },
       "news": [],
       "dart": [
@@ -1031,8 +1028,8 @@
         }
       ],
       "basis": [
-        "RSI 47.1 · Williams%R -47.1 · MFI 65.6 — 지표 중립권",
-        "외국인 +4,221,606주 · 기관 +599,886주 · OBV 상승",
+        "RSI 53.5 · Williams%R -28.1 · MFI 64.5 — 지표 중립권",
+        "외국인 +4,221,606주 · 기관 +599,886주 · OBV 횡보",
         "주봉 중립 · 44%"
       ],
       "risk": [],
@@ -1051,14 +1048,13 @@
       "high52w": 438000,
       "low52w": 141900,
       "opinion": "중립",
-      "score": 5,
+      "score": 0,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        182700,
         187500,
         169200,
         172300,
@@ -1077,9 +1073,10 @@
         206500,
         215000,
         208000,
+        201500,
         202500
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "완전 중립 (관망)",
       "buyTrack": {
         "type": "none"
       },
@@ -1093,12 +1090,12 @@
             "v": 3.0
           },
           {
-            "k": "스토캐RSI",
+            "k": "OBV",
             "v": -2
           },
           {
-            "k": "캔들 패턴",
-            "v": 2
+            "k": "스토캐RSI",
+            "v": -2
           },
           {
             "k": "MACD",
@@ -1112,12 +1109,12 @@
           "v": 3.0
         },
         {
-          "k": "스토캐RSI",
+          "k": "OBV",
           "v": -2
         },
         {
-          "k": "캔들 패턴",
-          "v": 2
+          "k": "스토캐RSI",
+          "v": -2
         },
         {
           "k": "MACD",
@@ -1131,12 +1128,12 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
           "52주 하단(20%)"
         ],
         "sell": [
+          "OBV 하락(분산)",
           "스토캐스틱RSI 과매수",
-          "MFI 68 높음"
+          "MFI 70 높음"
         ]
       },
       "contrarian": "",
@@ -1162,22 +1159,21 @@
       "eps": 5420,
       "bps": 142232,
       "boll": {
-        "upper": 218984,
-        "mid": 180075,
-        "lower": 141166,
-        "position": 78
+        "upper": 221180,
+        "mid": 181065,
+        "lower": 140950,
+        "position": 77
       },
       "atr": {
-        "atr": 14007,
-        "pct": 6.95
+        "atr": 13636,
+        "pct": 6.73
       },
-      "atrStopLoss": 174486,
+      "atrStopLoss": 175228,
       "cmf": {
-        "value": 0.062,
+        "value": 0.098,
         "comment": "매집 우세 (조용한 유입)"
       },
       "cmfBars": [
-        -0.55,
         1.0,
         -0.85,
         -0.2,
@@ -1196,54 +1192,55 @@
         -0.11,
         -0.08,
         -0.81,
-        -0.36
+        -0.36,
+        -0.2
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 55.4,
+      "rsi": 55.8,
       "rsiComment": "중립",
-      "macd": 1.357,
-      "macdSignal": -1.858,
-      "macdHist": 3.215,
+      "macd": 1.608,
+      "macdSignal": -1.157,
+      "macdHist": 2.765,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 65.6,
+      "stoch": 63.3,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 87.5,
-        "d": 94.4,
+        "k": 77.8,
+        "d": 87.0,
         "signal": "매도",
-        "comment": "과매수 구간(87) — 조정 주의"
+        "comment": "고점 데드크로스"
       },
       "divergence": null,
       "ichimoku": {
-        "tenkan": 201550,
+        "tenkan": 204800,
         "kijun": 186700,
-        "senkouA": 194125,
-        "senkouB": 238950,
-        "cloudTop": 238950,
-        "cloudBot": 194125,
+        "senkouA": 195750,
+        "senkouB": 217200,
+        "cloudTop": 217200,
+        "cloudBot": 195750,
         "signal": "중립",
         "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": 93.6,
+        "value": 84.4,
         "signal": "중립",
-        "comment": "중립(94)"
+        "comment": "중립(84)"
       },
       "psar": {
-        "psar": 174319,
+        "psar": 181180,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩174,319)",
+        "comment": "상승 추세 유지 (손절선 ₩181,180)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.72,
+        "ratio": 0.47,
         "surge": false,
-        "comment": "거래대금 평이 (0.7배)"
+        "comment": "거래대금 감소 (0.5배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -1257,52 +1254,46 @@
         "color": "",
         "title": ""
       },
-      "wr": -34.4,
+      "wr": -36.7,
       "wrComment": "중립",
-      "mfi": 68.1,
+      "mfi": 69.6,
       "mfiComment": "중립",
       "adx": {
         "adx": 81.9,
-        "pdi": 42.0,
-        "ndi": 4.2,
+        "pdi": 43.2,
+        "ndi": 4.3,
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 5607520,
-        "slope": 8.2,
-        "trend": "상승"
+        "obv": 6159946,
+        "slope": -3.7,
+        "trend": "하락"
       },
-      "vwap": 207288,
+      "vwap": 210471,
       "pivot": {
-        "p": 215000,
-        "r1": 224500,
-        "r2": 241000,
-        "s1": 198500,
-        "s2": 189000
+        "p": 203100,
+        "r1": 208900,
+        "r2": 216300,
+        "s1": 195700,
+        "s2": 189900
       },
-      "sma5": 207200,
-      "sma20": 180075,
-      "sma60": null,
-      "patterns": [
-        {
-          "name": "역망치",
-          "type": "상승반전",
-          "color": "#00e676"
-        }
-      ],
+      "sma5": 206700,
+      "sma20": 181065,
+      "sma60": 209485,
+      "patterns": [],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 60,
-        "label": "탐욕",
-        "color": "#ffd166"
+        "score": 53,
+        "label": "중립",
+        "color": "#9ab"
       },
       "ft": "외국인 2일 연속 순매수",
       "fc": "외국인 +64,711주 · 기관 -70,144주 (08/20 기준)",
-      "volRatio": 0.65,
+      "volRatio": 0.44,
       "investor": {
         "foreign": 64711,
         "institution": -70144,
@@ -1401,8 +1392,8 @@
       "weekly": {
         "opinion": "중립",
         "rsi": 56.6,
-        "macd": 8.146,
-        "macdSignal": 10.237,
+        "macd": 8.176,
+        "macdSignal": 10.249,
         "comment": "주봉 RSI 56.6 · MACD 데드크로스"
       },
       "monthly": {
@@ -1428,8 +1419,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.65,
-        "comment": "거래량 평이 (0.65x)"
+        "ratio": 0.44,
+        "comment": "거래량 평이 (0.44x)"
       },
       "news": [],
       "dart": [
@@ -1470,8 +1461,8 @@
         }
       ],
       "basis": [
-        "RSI 55.4 · Williams%R -34.4 · MFI 68.1 — 지표 중립권",
-        "외국인 +64,711주 · 기관 -70,144주 · OBV 상승",
+        "RSI 55.8 · Williams%R -36.7 · MFI 69.6 — 지표 중립권",
+        "외국인 +64,711주 · 기관 -70,144주 · OBV 하락",
         "주봉 중립 · 20%"
       ],
       "risk": [],
@@ -1490,14 +1481,13 @@
       "high52w": 2417000,
       "low52w": 865000,
       "opinion": "중립",
-      "score": 1,
+      "score": 0,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        1345000,
         1448000,
         1326000,
         1325000,
@@ -1516,9 +1506,10 @@
         1503000,
         1558000,
         1440000,
+        1387000,
         1396000
       ],
-      "nuance": "관찰 — 신호 부족",
+      "nuance": "완전 중립 (관망)",
       "buyTrack": {
         "type": "none"
       },
@@ -1528,38 +1519,38 @@
         "label": "시장 비우호 → 강화",
         "drivers": [
           {
+            "k": "레짐 가중(상승추세)",
+            "v": 2.5
+          },
+          {
+            "k": "OBV",
+            "v": -2
+          },
+          {
             "k": "스토캐RSI",
             "v": -2
           },
           {
             "k": "MACD",
             "v": 1
-          },
-          {
-            "k": "OBV",
-            "v": 1
-          },
-          {
-            "k": "SAR",
-            "v": 1
           }
         ]
       },
       "scoreDrivers": [
+        {
+          "k": "레짐 가중(상승추세)",
+          "v": 2.5
+        },
+        {
+          "k": "OBV",
+          "v": -2
+        },
         {
           "k": "스토캐RSI",
           "v": -2
         },
         {
           "k": "MACD",
-          "v": 1
-        },
-        {
-          "k": "OBV",
-          "v": 1
-        },
-        {
-          "k": "SAR",
           "v": 1
         }
       ],
@@ -1572,10 +1563,10 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
           "52주 하단(34%)"
         ],
         "sell": [
+          "OBV 하락(분산)",
           "스토캐스틱RSI 과매수"
         ]
       },
@@ -1602,22 +1593,21 @@
       "eps": 10587,
       "bps": 129912,
       "boll": {
-        "upper": 1596548,
-        "mid": 1279800,
-        "lower": 963052,
-        "position": 67
+        "upper": 1601964,
+        "mid": 1282350,
+        "lower": 962736,
+        "position": 68
       },
       "atr": {
-        "atr": 146143,
-        "pct": 10.54
+        "atr": 137286,
+        "pct": 9.83
       },
-      "atrStopLoss": 1103714,
+      "atrStopLoss": 1121428,
       "cmf": {
-        "value": -0.166,
+        "value": -0.107,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
-        -0.93,
         0.43,
         -0.88,
         -0.17,
@@ -1636,26 +1626,27 @@
         0.34,
         0.06,
         -0.79,
-        -0.09
+        -0.09,
+        0.42
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 50.2,
+      "rsi": 50.5,
       "rsiComment": "중립",
-      "macd": -1.657,
-      "macdSignal": -5.184,
-      "macdHist": 3.527,
+      "macd": -1.323,
+      "macdSignal": -4.385,
+      "macdHist": 3.062,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 71.0,
+      "stoch": 64.6,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 85.2,
-        "d": 93.0,
+        "k": 71.3,
+        "d": 83.4,
         "signal": "매도",
-        "comment": "과매수 구간(85) — 조정 주의"
+        "comment": "고점 데드크로스"
       },
       "divergence": null,
       "ichimoku": {
@@ -1669,19 +1660,19 @@
         "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": 55.2,
+        "value": 52.5,
         "signal": "중립",
-        "comment": "중립(55)"
+        "comment": "중립(52)"
       },
       "psar": {
-        "psar": 1178031,
+        "psar": 1220228,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩1,178,031)",
+        "comment": "상승 추세 유지 (손절선 ₩1,220,228)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.9,
+        "ratio": 0.93,
         "surge": false,
         "comment": "거래대금 평이 (0.9배)"
       },
@@ -1697,46 +1688,52 @@
         "color": "",
         "title": ""
       },
-      "wr": -29.0,
+      "wr": -35.4,
       "wrComment": "중립",
-      "mfi": 56.6,
+      "mfi": 57.5,
       "mfiComment": "중립",
       "adx": {
-        "adx": 21.1,
-        "pdi": 30.9,
-        "ndi": 20.1,
-        "strength": "약한 추세"
+        "adx": 26.7,
+        "pdi": 32.9,
+        "ndi": 19.0,
+        "strength": "강한 추세"
       },
       "obv": {
-        "obv": 2916331,
-        "slope": 11.7,
-        "trend": "상승"
+        "obv": 3682529,
+        "slope": -2.3,
+        "trend": "하락"
       },
-      "vwap": 1460537,
+      "vwap": 1469020,
       "pivot": {
-        "p": 1485667,
-        "r1": 1549333,
-        "r2": 1658667,
-        "s1": 1376333,
-        "s2": 1312667
+        "p": 1389333,
+        "r1": 1428667,
+        "r2": 1470333,
+        "s1": 1347667,
+        "s2": 1308333
       },
-      "sma5": 1444600,
-      "sma20": 1279800,
-      "sma60": null,
-      "patterns": [],
+      "sma5": 1456800,
+      "sma20": 1282350,
+      "sma60": 1622300,
+      "patterns": [
+        {
+          "name": "도지",
+          "type": "반전경고",
+          "color": "#ffd166"
+        }
+      ],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 56,
+        "score": 52,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 4일 연속 순매도",
       "fc": "외국인 -165,951주 · 기관 -75,766주 (08/20 기준)",
-      "volRatio": 0.81,
+      "volRatio": 0.84,
       "investor": {
         "foreign": -165951,
         "institution": -75766,
@@ -1835,8 +1832,8 @@
       "weekly": {
         "opinion": "중립",
         "rsi": 54.5,
-        "macd": 14.328,
-        "macdSignal": 19.221,
+        "macd": 14.368,
+        "macdSignal": 19.237,
         "comment": "주봉 RSI 54.5 · MACD 데드크로스"
       },
       "monthly": {
@@ -1862,14 +1859,14 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.81,
-        "comment": "거래량 평이 (0.81x)"
+        "ratio": 0.84,
+        "comment": "거래량 평이 (0.84x)"
       },
       "news": [],
       "dart": [],
       "basis": [
-        "RSI 50.2 · Williams%R -29.0 · MFI 56.6 — 지표 중립권",
-        "외국인 -165,951주 · 기관 -75,766주 · OBV 상승",
+        "RSI 50.5 · Williams%R -35.4 · MFI 57.5 — 지표 중립권",
+        "외국인 -165,951주 · 기관 -75,766주 · OBV 하락",
         "주봉 중립 · 34%"
       ],
       "risk": [],
@@ -1895,7 +1892,6 @@
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        418000,
         432000,
         401000,
         403000,
@@ -1914,6 +1910,7 @@
         418500,
         453000,
         435000,
+        414000,
         417500
       ],
       "nuance": "관찰 구간 (소량만)",
@@ -1926,45 +1923,44 @@
         "label": "시장 비우호 → 강화",
         "drivers": [
           {
-            "k": "레짐 가중(상승추세)",
-            "v": 2.5
-          },
-          {
-            "k": "스토캐RSI",
-            "v": -2
-          },
-          {
             "k": "52주 위치",
             "v": 2
           },
           {
+            "k": "레짐 가중(상승추세)",
+            "v": 2.0
+          },
+          {
             "k": "MACD",
             "v": 1
+          },
+          {
+            "k": "MFI",
+            "v": -1
           }
         ]
       },
       "scoreDrivers": [
         {
-          "k": "레짐 가중(상승추세)",
-          "v": 2.5
-        },
-        {
-          "k": "스토캐RSI",
-          "v": -2
-        },
-        {
           "k": "52주 위치",
           "v": 2
         },
         {
+          "k": "레짐 가중(상승추세)",
+          "v": 2.0
+        },
+        {
           "k": "MACD",
           "v": 1
+        },
+        {
+          "k": "MFI",
+          "v": -1
         }
       ],
       "macro": {
-        "adj": 0.2,
+        "adj": 0.1,
         "parts": [
-          "환율 +0.5% → +0.1",
           "토요타 +1.83% → +0.3",
           "유가 +2.16% → -0.2"
         ]
@@ -1972,12 +1968,10 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
           "52주 저점권(18%)"
         ],
         "sell": [
-          "스토캐스틱RSI 과매수",
-          "일목 매도"
+          "MFI 66 높음"
         ]
       },
       "contrarian": "",
@@ -2003,22 +1997,21 @@
       "eps": 32437,
       "bps": 456242,
       "boll": {
-        "upper": 451194,
-        "mid": 401850,
-        "lower": 352506,
-        "position": 62
+        "upper": 451137,
+        "mid": 401825,
+        "lower": 352513,
+        "position": 66
       },
       "atr": {
-        "atr": 24000,
-        "pct": 5.8
+        "atr": 23393,
+        "pct": 5.6
       },
-      "atrStopLoss": 369500,
+      "atrStopLoss": 370714,
       "cmf": {
-        "value": 0.024,
-        "comment": "중립"
+        "value": 0.052,
+        "comment": "매집 우세 (조용한 유입)"
       },
       "cmfBars": [
-        -0.4,
         0.88,
         -0.23,
         0.09,
@@ -2037,54 +2030,55 @@
         -0.58,
         0.83,
         -0.51,
-        -0.06
+        -0.06,
+        0.12
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 46.2,
+      "rsi": 47.2,
       "rsiComment": "중립",
-      "macd": -3.162,
-      "macdSignal": -5.919,
-      "macdHist": 2.757,
+      "macd": -2.854,
+      "macdSignal": -5.266,
+      "macdHist": 2.412,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 60.8,
+      "stoch": 55.1,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 83.5,
-        "d": 92.7,
-        "signal": "매도",
-        "comment": "과매수 구간(83) — 조정 주의"
+        "k": 67.9,
+        "d": 82.0,
+        "signal": "중립",
+        "comment": "K 68 / D 82"
       },
       "divergence": null,
       "ichimoku": {
         "tenkan": 423250,
-        "kijun": 410250,
-        "senkouA": 416750,
-        "senkouB": 526750,
-        "cloudTop": 526750,
-        "cloudBot": 416750,
-        "signal": "매도",
-        "comment": "구름대 아래 — 하락 우위"
+        "kijun": 399000,
+        "senkouA": 411125,
+        "senkouB": 502750,
+        "cloudTop": 502750,
+        "cloudBot": 411125,
+        "signal": "중립",
+        "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": 48.1,
+        "value": 59.1,
         "signal": "중립",
-        "comment": "중립(48)"
+        "comment": "중립(59)"
       },
       "psar": {
-        "psar": 375593,
+        "psar": 383984,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩375,593)",
+        "comment": "상승 추세 유지 (손절선 ₩383,984)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.74,
+        "ratio": 0.59,
         "surge": false,
-        "comment": "거래대금 평이 (0.7배)"
+        "comment": "거래대금 평이 (0.6배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -2098,46 +2092,52 @@
         "color": "",
         "title": ""
       },
-      "wr": -39.2,
+      "wr": -44.9,
       "wrComment": "중립",
-      "mfi": 58.3,
+      "mfi": 65.8,
       "mfiComment": "중립",
       "adx": {
-        "adx": 49.4,
-        "pdi": 29.9,
-        "ndi": 10.1,
+        "adx": 50.4,
+        "pdi": 31.5,
+        "ndi": 10.4,
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": -15396825,
-        "slope": 2.4,
+        "obv": -14975582,
+        "slope": 1.4,
         "trend": "상승"
       },
-      "vwap": 430706,
+      "vwap": 431707,
       "pivot": {
-        "p": 440500,
-        "r1": 454000,
-        "r2": 473000,
-        "s1": 421500,
-        "s2": 408000
+        "p": 414333,
+        "r1": 422167,
+        "r2": 430333,
+        "s1": 406167,
+        "s2": 398333
       },
-      "sma5": 426000,
-      "sma20": 401850,
-      "sma60": null,
-      "patterns": [],
+      "sma5": 427600,
+      "sma20": 401825,
+      "sma60": 503617,
+      "patterns": [
+        {
+          "name": "도지",
+          "type": "반전경고",
+          "color": "#ffd166"
+        }
+      ],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 53,
+        "score": 49,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 순매수",
       "fc": "외국인 +64,885주 · 기관 -111,758주 (08/20 기준)",
-      "volRatio": 0.74,
+      "volRatio": 0.58,
       "investor": {
         "foreign": 64885,
         "institution": -111758,
@@ -2235,10 +2235,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 44.1,
-        "macd": -3.304,
-        "macdSignal": 2.805,
-        "comment": "주봉 RSI 44.1 · MACD 데드크로스"
+        "rsi": 44.0,
+        "macd": -3.252,
+        "macdSignal": 2.826,
+        "comment": "주봉 RSI 44.0 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -2263,8 +2263,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.74,
-        "comment": "거래량 평이 (0.74x)"
+        "ratio": 0.58,
+        "comment": "거래량 평이 (0.58x)"
       },
       "news": [],
       "dart": [
@@ -2305,7 +2305,7 @@
         }
       ],
       "basis": [
-        "RSI 46.2 · Williams%R -39.2 · MFI 58.3 — 지표 중립권",
+        "RSI 47.2 · Williams%R -44.9 · MFI 65.8 — 지표 중립권",
         "외국인 +64,885주 · 기관 -111,758주 · OBV 상승",
         "주봉 중립 · 18%"
       ],
@@ -2325,14 +2325,13 @@
       "high52w": 194500,
       "low52w": 145000,
       "opinion": "중립",
-      "score": 2,
+      "score": 5,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        175100,
         176300,
         171500,
         172600,
@@ -2351,9 +2350,10 @@
         168100,
         168500,
         168500,
+        166400,
         160000
       ],
-      "nuance": "관찰 — 신호 부족",
+      "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
         "type": "none"
       },
@@ -2364,38 +2364,38 @@
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
-            "v": 3.0
+            "v": 5.0
           },
           {
             "k": "MACD",
             "v": -2
           },
           {
-            "k": "일목",
+            "k": "OBV",
             "v": -2
           },
           {
-            "k": "캔들 패턴",
-            "v": 2
+            "k": "일목",
+            "v": -2
           }
         ]
       },
       "scoreDrivers": [
         {
           "k": "레짐 가중(횡보)",
-          "v": 3.0
+          "v": 5.0
         },
         {
           "k": "MACD",
           "v": -2
         },
         {
-          "k": "일목",
+          "k": "OBV",
           "v": -2
         },
         {
-          "k": "캔들 패턴",
-          "v": 2
+          "k": "일목",
+          "v": -2
         }
       ],
       "macro": {
@@ -2408,13 +2408,13 @@
       },
       "sigReasons": {
         "buy": [
-          "OBV 상승(매집)",
+          "RSI 40 낮음",
           "52주 하단(30%)"
         ],
         "sell": [
           "MACD 하락(데드)",
-          "일목 매도",
-          "MFI 63 높음"
+          "OBV 하락(분산)",
+          "일목 매도"
         ]
       },
       "contrarian": "",
@@ -2440,22 +2440,21 @@
       "eps": 15817,
       "bps": 167092,
       "boll": {
-        "upper": 177031,
-        "mid": 169440,
-        "lower": 161849,
-        "position": 30
+        "upper": 176855,
+        "mid": 168685,
+        "lower": 160515,
+        "position": -3
       },
       "atr": {
-        "atr": 6214,
-        "pct": 3.73
+        "atr": 5850,
+        "pct": 3.66
       },
-      "atrStopLoss": 147572,
+      "atrStopLoss": 148300,
       "cmf": {
-        "value": 0.012,
+        "value": -0.02,
         "comment": "중립"
       },
       "cmfBars": [
-        -0.68,
         -0.25,
         0.09,
         0.11,
@@ -2474,54 +2473,55 @@
         0.0,
         0.24,
         1.0,
-        0.94
+        0.94,
+        -0.93
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 46.5,
-      "rsiComment": "중립",
-      "macd": -0.152,
-      "macdSignal": 0.223,
-      "macdHist": -0.375,
+      "rsi": 39.6,
+      "rsiComment": "저점권",
+      "macd": -0.583,
+      "macdSignal": 0.069,
+      "macdHist": -0.652,
       "macdComment": "데드크로스 — 하락 압력",
-      "stoch": 38.2,
-      "stochComment": "중립",
+      "stoch": 1.2,
+      "stochComment": "과매도 반등 임박",
       "stochRsi": {
-        "k": 33.6,
-        "d": 40.9,
+        "k": 17.3,
+        "d": 32.9,
         "signal": "중립",
-        "comment": "K 34 / D 41"
+        "comment": "K 17 / D 33"
       },
       "divergence": null,
       "ichimoku": {
-        "tenkan": 168400,
-        "kijun": 175250,
-        "senkouA": 171825,
+        "tenkan": 168350,
+        "kijun": 173100,
+        "senkouA": 170725,
         "senkouB": 169750,
-        "cloudTop": 171825,
+        "cloudTop": 170725,
         "cloudBot": 169750,
         "signal": "매도",
         "comment": "구름대 아래 + 전환선<기준선 — 강한 하락 추세"
       },
       "cci": {
-        "value": -113.3,
+        "value": -163.1,
         "signal": "매수",
-        "comment": "과매도(-113)"
+        "comment": "과매도(-163)"
       },
       "psar": {
-        "psar": 171339,
+        "psar": 170418,
         "trend": "하락",
         "signal": "매도",
-        "comment": "하락 추세 (저항선 ₩171,339)",
+        "comment": "하락 추세 (저항선 ₩170,418)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.87,
+        "ratio": 1.23,
         "surge": false,
-        "comment": "거래대금 평이 (0.9배)"
+        "comment": "거래대금 평이 (1.2배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -2535,57 +2535,46 @@
         "color": "",
         "title": ""
       },
-      "wr": -61.8,
-      "wrComment": "중립",
-      "mfi": 62.9,
+      "wr": -98.8,
+      "wrComment": "과매도",
+      "mfi": 52.4,
       "mfiComment": "중립",
       "adx": {
-        "adx": 7.3,
-        "pdi": 14.4,
-        "ndi": 12.4,
+        "adx": 1.8,
+        "pdi": 13.8,
+        "ndi": 13.3,
         "strength": "추세 없음(횡보)"
       },
       "obv": {
-        "obv": 13554591,
-        "slope": 10.8,
-        "trend": "상승"
+        "obv": 12222291,
+        "slope": -9.6,
+        "trend": "하락"
       },
-      "vwap": 167202,
+      "vwap": 165811,
       "pivot": {
-        "p": 167700,
-        "r1": 169300,
-        "r2": 170100,
-        "s1": 166900,
-        "s2": 165300
+        "p": 164300,
+        "r1": 168700,
+        "r2": 171000,
+        "s1": 162000,
+        "s2": 157600
       },
-      "sma5": 167500,
-      "sma20": 169440,
-      "sma60": null,
-      "patterns": [
-        {
-          "name": "도지",
-          "type": "반전경고",
-          "color": "#ffd166"
-        },
-        {
-          "name": "망치형",
-          "type": "상승반전",
-          "color": "#00e676"
-        }
-      ],
+      "sma5": 166300,
+      "sma20": 168685,
+      "sma60": 165288,
+      "patterns": [],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 46,
-        "label": "중립",
-        "color": "#9ab"
+        "score": 32,
+        "label": "공포",
+        "color": "#ffd166"
       },
       "ft": "외국인 2일 연속 순매도",
       "fc": "외국인 -84,612주 · 기관 -267,834주 (08/20 기준)",
-      "volRatio": 0.89,
+      "volRatio": 1.26,
       "investor": {
         "foreign": -84612,
         "institution": -267834,
@@ -2683,10 +2672,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 50.1,
-        "macd": 4.057,
-        "macdSignal": 5.193,
-        "comment": "주봉 RSI 50.1 · MACD 데드크로스"
+        "rsi": 50.3,
+        "macd": 3.811,
+        "macdSignal": 5.092,
+        "comment": "주봉 RSI 50.3 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -2711,8 +2700,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.89,
-        "comment": "거래량 평이 (0.89x)"
+        "ratio": 1.26,
+        "comment": "거래량 평이 (1.26x)"
       },
       "news": [],
       "dart": [
@@ -2753,8 +2742,8 @@
         }
       ],
       "basis": [
-        "RSI 46.5 · Williams%R -61.8 · MFI 62.9 — 지표 중립권",
-        "외국인 -84,612주 · 기관 -267,834주 · OBV 상승",
+        "RSI 39.6 · Williams%R -98.8 · MFI 52.4 — 다중 과매도",
+        "외국인 -84,612주 · 기관 -267,834주 · OBV 하락",
         "주봉 중립 · 30%"
       ],
       "risk": [],
@@ -2772,15 +2761,14 @@
       "changePct": -1.43,
       "high52w": 139500,
       "low52w": 76000,
-      "opinion": "매수",
-      "score": 7,
+      "opinion": "중립",
+      "score": 6,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        94100,
         99500,
         100000,
         97900,
@@ -2799,14 +2787,16 @@
         91100,
         100500,
         99800,
+        98000,
         96600
       ],
-      "nuance": "",
+      "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
-        "type": "confirm",
-        "label": "확인 매수",
-        "size": "계획 물량",
-        "desc": "합산 +7점 ≥ 문턱 7 (시장 비우호 → 강화)"
+        "type": "early",
+        "label": "선취 매수",
+        "size": "1/3 물량",
+        "desc": "선행 신호 2개 결집 — 손절가 80,518원 필수",
+        "stopLoss": 80518
       },
       "buyThreshold": {
         "buy": 7,
@@ -2818,16 +2808,16 @@
             "v": 4.0
           },
           {
+            "k": "OBV",
+            "v": -2
+          },
+          {
             "k": "스토캐RSI",
             "v": -2
           },
           {
             "k": "일목",
             "v": 2
-          },
-          {
-            "k": "MACD",
-            "v": 1
           }
         ]
       },
@@ -2837,16 +2827,16 @@
           "v": 4.0
         },
         {
+          "k": "OBV",
+          "v": -2
+        },
+        {
           "k": "스토캐RSI",
           "v": -2
         },
         {
           "k": "일목",
           "v": 2
-        },
-        {
-          "k": "MACD",
-          "v": 1
         }
       ],
       "macro": {
@@ -2858,12 +2848,13 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
-          "일목 강한 매수"
+          "일목 강한 매수",
+          "52주 하단(32%)"
         ],
         "sell": [
+          "OBV 하락(분산)",
           "스토캐스틱RSI 과매수",
-          "MFI 69 높음"
+          "MFI 74 높음"
         ]
       },
       "contrarian": "",
@@ -2871,8 +2862,8 @@
       "marginCallRisk": "",
       "turnover": "",
       "chaseWarning": "",
-      "marketBrake": "시장 비우호적 — 신중 진입 권장",
-      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
+      "marketBrake": "",
+      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-08-20",
       "fairValue": 119368,
       "fairValueGap": 23.6,
@@ -2889,22 +2880,21 @@
       "eps": 3480,
       "bps": 72456,
       "boll": {
-        "upper": 104909,
-        "mid": 90290,
-        "lower": 75671,
-        "position": 76
+        "upper": 105204,
+        "mid": 90415,
+        "lower": 75626,
+        "position": 71
       },
       "atr": {
-        "atr": 6621,
-        "pct": 6.76
+        "atr": 6614,
+        "pct": 6.85
       },
-      "atrStopLoss": 83358,
+      "atrStopLoss": 83372,
       "cmf": {
-        "value": -0.004,
+        "value": -0.046,
         "comment": "중립"
       },
       "cmfBars": [
-        0.6,
         0.77,
         0.09,
         -0.51,
@@ -2923,26 +2913,27 @@
         -0.61,
         0.93,
         -0.55,
-        0.48
+        0.48,
+        -0.42
       ],
-      "suggestedPrice": 96600,
-      "suggestedLabel": "매수 추천가",
-      "targetPrice": 104328,
-      "targetPrice2": 106667,
-      "stopLoss": 97433,
-      "rsi": 58.5,
+      "suggestedPrice": 0,
+      "suggestedLabel": "해당없음",
+      "targetPrice": 0,
+      "targetPrice2": 0,
+      "stopLoss": 0,
+      "rsi": 56.6,
       "rsiComment": "중립",
-      "macd": 1.361,
-      "macdSignal": -0.441,
-      "macdHist": 1.802,
+      "macd": 1.621,
+      "macdSignal": -0.033,
+      "macdHist": 1.654,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 77.0,
+      "stoch": 68.8,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 94.2,
-        "d": 86.5,
+        "k": 85.5,
+        "d": 90.1,
         "signal": "매도",
-        "comment": "과매수 구간(94) — 조정 주의"
+        "comment": "과매수 구간(86) — 조정 주의"
       },
       "divergence": null,
       "ichimoku": {
@@ -2956,27 +2947,30 @@
         "comment": "구름대 위 + 전환선>기준선 — 강한 상승 추세"
       },
       "cci": {
-        "value": 74.1,
+        "value": 74.2,
         "signal": "중립",
         "comment": "중립(74)"
       },
       "psar": {
-        "psar": 79000,
+        "psar": 80518,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩79,000)",
+        "comment": "상승 추세 유지 (손절선 ₩80,518)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.87,
+        "ratio": 0.77,
         "surge": false,
-        "comment": "거래대금 평이 (0.9배)"
+        "comment": "거래대금 평이 (0.8배)"
       },
       "cautiousEntry": {
-        "entry": false,
-        "signals": [],
-        "reason": "",
-        "stopLoss": 0
+        "entry": true,
+        "signals": [
+          "일목균형표 강세",
+          "파라볼릭 SAR 상승"
+        ],
+        "reason": "중립이지만 선행 매수 신호 2개 확인 — 1/3 물량 선취 검토 (손절가 필수)",
+        "stopLoss": 80518
       },
       "overheat": {
         "level": "none",
@@ -2984,46 +2978,52 @@
         "color": "",
         "title": ""
       },
-      "wr": -23.0,
+      "wr": -31.2,
       "wrComment": "중립",
-      "mfi": 69.4,
+      "mfi": 74.4,
       "mfiComment": "중립",
       "adx": {
         "adx": 47.8,
-        "pdi": 37.2,
+        "pdi": 37.3,
         "ndi": 13.2,
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 11327315,
-        "slope": 24.1,
-        "trend": "상승"
+        "obv": 9853656,
+        "slope": -15.9,
+        "trend": "하락"
       },
-      "vwap": 95638,
+      "vwap": 96798,
       "pivot": {
-        "p": 100867,
-        "r1": 103233,
-        "r2": 106667,
-        "s1": 97433,
-        "s2": 95067
+        "p": 96700,
+        "r1": 101400,
+        "r2": 104800,
+        "s1": 93300,
+        "s2": 88600
       },
-      "sma5": 95440,
-      "sma20": 90290,
-      "sma60": null,
-      "patterns": [],
+      "sma5": 97200,
+      "sma20": 90415,
+      "sma60": 93615,
+      "patterns": [
+        {
+          "name": "강세장악",
+          "type": "상승반전",
+          "color": "#00e676"
+        }
+      ],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 64,
-        "label": "탐욕",
-        "color": "#ffd166"
+        "score": 56,
+        "label": "중립",
+        "color": "#9ab"
       },
       "ft": "외국인 4일 연속 순매도",
       "fc": "외국인 -257,125주 · 기관 +9,126주 (08/20 기준)",
-      "volRatio": 0.8,
+      "volRatio": 0.74,
       "investor": {
         "foreign": -257125,
         "institution": 9126,
@@ -3121,10 +3121,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 55.5,
-        "macd": 4.886,
-        "macdSignal": 6.107,
-        "comment": "주봉 RSI 55.5 · MACD 데드크로스"
+        "rsi": 55.6,
+        "macd": 4.797,
+        "macdSignal": 6.071,
+        "comment": "주봉 RSI 55.6 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -3149,8 +3149,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.8,
-        "comment": "거래량 평이 (0.8x)"
+        "ratio": 0.74,
+        "comment": "거래량 평이 (0.74x)"
       },
       "news": [],
       "dart": [
@@ -3191,15 +3191,15 @@
         }
       ],
       "basis": [
-        "RSI 58.5 · Williams%R -23.0 · MFI 69.4 — 지표 중립권",
-        "외국인 -257,125주 · 기관 +9,126주 · OBV 상승",
+        "RSI 56.6 · Williams%R -31.2 · MFI 74.4 — 지표 중립권",
+        "외국인 -257,125주 · 기관 +9,126주 · OBV 하락",
         "주봉 중립 · 32%"
       ],
       "risk": [],
       "notes": [
-        "피봇 S1 지지 확인 후 분할 매수",
-        "OBV 수급 지속 확인",
-        "주봉 신호 일치 시 비중 확대"
+        "주봉·일봉 동시 매수 신호 확인 후 진입",
+        "외국인 순매수 전환 시 진입 검토",
+        "공매도 감소 + 거래량 증가 조합 주시"
       ],
       "noChart": false
     },
@@ -3211,14 +3211,13 @@
       "high52w": 304000,
       "low52w": 181100,
       "opinion": "중립",
-      "score": -2,
+      "score": 0,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        196900,
         220000,
         207500,
         225000,
@@ -3237,9 +3236,10 @@
         226500,
         228000,
         217000,
+        208000,
         219500
       ],
-      "nuance": "약한 매도 우위",
+      "nuance": "완전 중립 (관망)",
       "buyTrack": {
         "type": "none"
       },
@@ -3253,15 +3253,15 @@
             "v": -4
           },
           {
+            "k": "레짐 가중(상승추세)",
+            "v": 2.0
+          },
+          {
             "k": "MACD",
             "v": 1
           },
           {
-            "k": "OBV",
-            "v": 1
-          },
-          {
-            "k": "일목",
+            "k": "MFI",
             "v": -1
           }
         ]
@@ -3272,15 +3272,15 @@
           "v": -4
         },
         {
+          "k": "레짐 가중(상승추세)",
+          "v": 2.0
+        },
+        {
           "k": "MACD",
           "v": 1
         },
         {
-          "k": "OBV",
-          "v": 1
-        },
-        {
-          "k": "일목",
+          "k": "MFI",
           "v": -1
         }
       ],
@@ -3295,12 +3295,11 @@
       "sigReasons": {
         "buy": [
           "MACD 상승(골든)",
-          "OBV 상승(매집)",
           "52주 하단(31%)"
         ],
         "sell": [
           "하락 다이버전스",
-          "일목 매도",
+          "MFI 65 높음",
           "매크로 -0.7"
         ]
       },
@@ -3327,22 +3326,21 @@
       "eps": 12885,
       "bps": 196985,
       "boll": {
-        "upper": 234459,
-        "mid": 214155,
-        "lower": 193851,
-        "position": 35
+        "upper": 234081,
+        "mid": 215285,
+        "lower": 196489,
+        "position": 61
       },
       "atr": {
-        "atr": 11764,
-        "pct": 5.66
+        "atr": 12057,
+        "pct": 5.49
       },
-      "atrStopLoss": 195972,
+      "atrStopLoss": 195386,
       "cmf": {
-        "value": -0.067,
-        "comment": "분산 우세 (조용한 이탈)"
+        "value": -0.023,
+        "comment": "중립"
       },
       "cmfBars": [
-        -0.87,
         1.0,
         -0.24,
         -0.23,
@@ -3361,26 +3359,27 @@
         0.52,
         -0.2,
         -0.57,
-        0.54
+        0.54,
+        0.43
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 48.4,
+      "rsi": 53.7,
       "rsiComment": "중립",
-      "macd": 1.156,
-      "macdSignal": 0.907,
-      "macdHist": 0.249,
+      "macd": 1.153,
+      "macdSignal": 0.918,
+      "macdHist": 0.235,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 34.8,
+      "stoch": 57.8,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 46.7,
-        "d": 63.2,
+        "k": 31.8,
+        "d": 49.7,
         "signal": "중립",
-        "comment": "K 47 / D 63"
+        "comment": "K 32 / D 50"
       },
       "divergence": {
         "bullish": false,
@@ -3395,25 +3394,25 @@
         "senkouB": 237550,
         "cloudTop": 237550,
         "cloudBot": 212775,
-        "signal": "매도",
-        "comment": "구름대 아래 — 하락 우위"
+        "signal": "중립",
+        "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": -64.2,
+        "value": 18.9,
         "signal": "중립",
-        "comment": "중립(-64)"
+        "comment": "중립(19)"
       },
       "psar": {
-        "psar": 200733,
+        "psar": 201399,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩200,733)",
+        "comment": "상승 추세 유지 (손절선 ₩201,399)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.52,
+        "ratio": 0.72,
         "surge": false,
-        "comment": "거래대금 평이 (0.5배)"
+        "comment": "거래대금 평이 (0.7배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -3427,52 +3426,46 @@
         "color": "",
         "title": ""
       },
-      "wr": -65.2,
+      "wr": -42.2,
       "wrComment": "중립",
-      "mfi": 56.7,
+      "mfi": 64.8,
       "mfiComment": "중립",
       "adx": {
-        "adx": 15.1,
-        "pdi": 32.5,
-        "ndi": 24.0,
-        "strength": "추세 없음(횡보)"
+        "adx": 26.8,
+        "pdi": 40.0,
+        "ndi": 23.1,
+        "strength": "강한 추세"
       },
       "obv": {
-        "obv": 27937874,
-        "slope": 3.8,
-        "trend": "상승"
+        "obv": 28899774,
+        "slope": 0.5,
+        "trend": "횡보"
       },
-      "vwap": 220147,
+      "vwap": 220189,
       "pivot": {
-        "p": 219167,
-        "r1": 223833,
-        "r2": 230667,
-        "s1": 212333,
-        "s2": 207667
+        "p": 206833,
+        "r1": 210667,
+        "r2": 213333,
+        "s1": 204167,
+        "s2": 200333
       },
-      "sma5": 219000,
-      "sma20": 214155,
-      "sma60": null,
-      "patterns": [
-        {
-          "name": "도지",
-          "type": "반전경고",
-          "color": "#ffd166"
-        }
-      ],
+      "sma5": 219800,
+      "sma20": 215285,
+      "sma60": 215923,
+      "patterns": [],
       "contra": {
         "signals": [],
         "action": "현 신호 유효",
         "strength": 0
       },
       "fg": {
-        "score": 44,
+        "score": 53,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 2일 연속 순매수",
       "fc": "외국인 +188,436주 · 기관 +74,229주 (08/20 기준)",
-      "volRatio": 0.54,
+      "volRatio": 0.7,
       "investor": {
         "foreign": 188436,
         "institution": 74229,
@@ -3570,10 +3563,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 50.8,
-        "macd": -2.174,
-        "macdSignal": -2.955,
-        "comment": "주봉 RSI 50.8 · MACD 골든크로스"
+        "rsi": 50.6,
+        "macd": -1.852,
+        "macdSignal": -2.823,
+        "comment": "주봉 RSI 50.6 · MACD 골든크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -3598,8 +3591,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.54,
-        "comment": "거래량 평이 (0.54x)"
+        "ratio": 0.7,
+        "comment": "거래량 평이 (0.7x)"
       },
       "news": [],
       "dart": [
@@ -3640,8 +3633,8 @@
         }
       ],
       "basis": [
-        "RSI 48.4 · Williams%R -65.2 · MFI 56.7 — 지표 중립권",
-        "외국인 +188,436주 · 기관 +74,229주 · OBV 상승",
+        "RSI 53.7 · Williams%R -42.2 · MFI 64.8 — 지표 중립권",
+        "외국인 +188,436주 · 기관 +74,229주 · OBV 횡보",
         "주봉 중립 · 31%"
       ],
       "risk": [],
@@ -3659,15 +3652,14 @@
       "changePct": 0.38,
       "high52w": 88500,
       "low52w": 38150,
-      "opinion": "중립",
-      "score": 3,
+      "opinion": "매수",
+      "score": 11,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
-        43750,
         45650,
         44850,
         47000,
@@ -3686,21 +3678,22 @@
         40850,
         41050,
         39350,
+        39950,
         40100
       ],
-      "nuance": "관찰 — 신호 부족",
+      "nuance": "",
       "buyTrack": {
-        "type": "none"
+        "type": "early",
+        "label": "선취 매수 (추세 미확인)",
+        "size": "1/3 물량",
+        "desc": "점수는 문턱 도달(+11≥7)이나 5일선 아래+분산 우세 — 추세 확인 전 소량만",
+        "stopLoss": 38897
       },
       "buyThreshold": {
         "buy": 7,
         "sell": -5,
         "label": "시장 비우호 → 강화",
         "drivers": [
-          {
-            "k": "레짐 가중(하락추세)",
-            "v": -7.0
-          },
           {
             "k": "강세 다이버전스",
             "v": 4
@@ -3712,14 +3705,14 @@
           {
             "k": "MACD",
             "v": -2
+          },
+          {
+            "k": "일목",
+            "v": -2
           }
         ]
       },
       "scoreDrivers": [
-        {
-          "k": "레짐 가중(하락추세)",
-          "v": -7.0
-        },
         {
           "k": "강세 다이버전스",
           "v": 4
@@ -3731,6 +3724,10 @@
         {
           "k": "MACD",
           "v": -2
+        },
+        {
+          "k": "일목",
+          "v": -2
         }
       ],
       "macro": {
@@ -3741,11 +3738,10 @@
         "buy": [
           "상승 다이버전스",
           "스토캐스틱RSI 과매도 반등",
-          "52주 저점권(4%)"
+          "OBV 상승(매집)"
         ],
         "sell": [
           "MACD 하락(데드)",
-          "OBV 하락(분산)",
           "일목 매도"
         ]
       },
@@ -3754,8 +3750,8 @@
       "marginCallRisk": "",
       "turnover": "",
       "chaseWarning": "",
-      "marketBrake": "",
-      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
+      "marketBrake": "시장 비우호적 — 신중 진입 권장",
+      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-08-20",
       "fairValue": 67389,
       "fairValueGap": 68.1,
@@ -3772,22 +3768,21 @@
       "eps": 3469,
       "bps": 18887,
       "boll": {
-        "upper": 49272,
-        "mid": 44310,
-        "lower": 39348,
-        "position": 6
+        "upper": 49416,
+        "mid": 44128,
+        "lower": 38839,
+        "position": 12
       },
       "atr": {
-        "atr": 2204,
-        "pct": 5.52
+        "atr": 2050,
+        "pct": 5.11
       },
-      "atrStopLoss": 35692,
+      "atrStopLoss": 36000,
       "cmf": {
-        "value": -0.239,
+        "value": -0.247,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
-        -1.0,
         1.0,
         -0.43,
         0.5,
@@ -3806,26 +3801,27 @@
         -0.97,
         -0.36,
         -0.64,
-        0.95
+        0.95,
+        -0.9
       ],
-      "suggestedPrice": 0,
-      "suggestedLabel": "해당없음",
-      "targetPrice": 0,
-      "targetPrice2": 0,
-      "stopLoss": 0,
-      "rsi": 33.6,
+      "suggestedPrice": 40100,
+      "suggestedLabel": "매수 추천가",
+      "targetPrice": 44912,
+      "targetPrice2": 41217,
+      "stopLoss": 38733,
+      "rsi": 34.2,
       "rsiComment": "저점권",
-      "macd": -5.277,
-      "macdSignal": -4.387,
-      "macdHist": -0.89,
+      "macd": -5.491,
+      "macdSignal": -4.594,
+      "macdHist": -0.897,
       "macdComment": "데드크로스 — 하락 압력",
-      "stoch": 18.7,
-      "stochComment": "과매도 반등 임박",
+      "stoch": 20.2,
+      "stochComment": "중립",
       "stochRsi": {
-        "k": 7.4,
-        "d": 14.3,
+        "k": 9.4,
+        "d": 7.3,
         "signal": "매수",
-        "comment": "과매도 구간(7) — 반등 임박"
+        "comment": "과매도 구간(9) — 반등 임박"
       },
       "divergence": {
         "bullish": true,
@@ -3835,30 +3831,30 @@
       },
       "ichimoku": {
         "tenkan": 42975,
-        "kijun": 45225,
-        "senkouA": 44100,
+        "kijun": 43800,
+        "senkouA": 43388,
         "senkouB": 48075,
         "cloudTop": 48075,
-        "cloudBot": 44100,
+        "cloudBot": 43388,
         "signal": "매도",
         "comment": "구름대 아래 + 전환선<기준선 — 강한 하락 추세"
       },
       "cci": {
-        "value": -168.9,
+        "value": -114.4,
         "signal": "매수",
-        "comment": "과매도(-169)"
+        "comment": "과매도(-114)"
       },
       "psar": {
-        "psar": 46876,
+        "psar": 46178,
         "trend": "하락",
         "signal": "매도",
-        "comment": "하락 추세 (저항선 ₩46,876)",
+        "comment": "하락 추세 (저항선 ₩46,178)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.72,
+        "ratio": 0.79,
         "surge": false,
-        "comment": "거래대금 평이 (0.7배)"
+        "comment": "거래대금 평이 (0.8배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -3872,46 +3868,54 @@
         "color": "",
         "title": ""
       },
-      "wr": -81.3,
-      "wrComment": "과매도",
-      "mfi": 24.2,
+      "wr": -79.8,
+      "wrComment": "중립",
+      "mfi": 29.3,
       "mfiComment": "중립",
       "adx": {
-        "adx": 35.1,
-        "pdi": 13.8,
-        "ndi": 28.7,
-        "strength": "강한 추세"
+        "adx": 20.3,
+        "pdi": 18.5,
+        "ndi": 27.9,
+        "strength": "약한 추세"
       },
       "obv": {
-        "obv": -3591921,
-        "slope": -101.5,
-        "trend": "하락"
+        "obv": -3314044,
+        "slope": 6.4,
+        "trend": "상승"
       },
-      "vwap": 41628,
+      "vwap": 41203,
       "pivot": {
-        "p": 39817,
-        "r1": 40683,
-        "r2": 42017,
-        "s1": 38483,
-        "s2": 37617
+        "p": 39367,
+        "r1": 40583,
+        "r2": 41217,
+        "s1": 38733,
+        "s2": 37517
       },
-      "sma5": 41440,
-      "sma20": 44310,
-      "sma60": null,
-      "patterns": [],
+      "sma5": 40260,
+      "sma20": 44128,
+      "sma60": 49804,
+      "patterns": [
+        {
+          "name": "도지",
+          "type": "반전경고",
+          "color": "#ffd166"
+        }
+      ],
       "contra": {
-        "signals": [],
-        "action": "현 신호 유효",
-        "strength": 0
+        "signals": [
+          "🟢 RSI 저점 + OBV 상승 → 세력 매집 가능성"
+        ],
+        "action": "역발상 매수 기회",
+        "strength": 2
       },
       "fg": {
-        "score": 37,
-        "label": "공포",
-        "color": "#ffd166"
+        "score": 40,
+        "label": "중립",
+        "color": "#9ab"
       },
       "ft": "외국인 2일 연속 순매수",
       "fc": "외국인 +45,615주 · 기관 +2,720주 (08/20 기준)",
-      "volRatio": 0.78,
+      "volRatio": 0.83,
       "investor": {
         "foreign": 45615,
         "institution": 2720,
@@ -4009,10 +4013,10 @@
       "creditRatio": 0,
       "weekly": {
         "opinion": "중립",
-        "rsi": 30.9,
-        "macd": -16.67,
-        "macdSignal": -14.371,
-        "comment": "주봉 RSI 30.9 · MACD 데드크로스"
+        "rsi": 30.7,
+        "macd": -16.647,
+        "macdSignal": -14.361,
+        "comment": "주봉 RSI 30.7 · MACD 데드크로스"
       },
       "monthly": {
         "opinion": "중립",
@@ -4037,8 +4041,8 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.78,
-        "comment": "거래량 평이 (0.78x)"
+        "ratio": 0.83,
+        "comment": "거래량 평이 (0.83x)"
       },
       "news": [],
       "dart": [
@@ -4079,15 +4083,15 @@
         }
       ],
       "basis": [
-        "RSI 33.6 · Williams%R -81.3 · MFI 24.2 — 다중 과매도",
-        "외국인 +45,615주 · 기관 +2,720주 · OBV 하락",
+        "RSI 34.2 · Williams%R -79.8 · MFI 29.3 — 지표 중립권",
+        "외국인 +45,615주 · 기관 +2,720주 · OBV 상승",
         "주봉 중립 · 52주 신저가 근접"
       ],
       "risk": [],
       "notes": [
-        "주봉·일봉 동시 매수 신호 확인 후 진입",
-        "외국인 순매수 전환 시 진입 검토",
-        "공매도 감소 + 거래량 증가 조합 주시"
+        "피봇 S1 지지 확인 후 분할 매수",
+        "OBV 수급 지속 확인",
+        "주봉 신호 일치 시 비중 확대"
       ],
       "noChart": false
     }
