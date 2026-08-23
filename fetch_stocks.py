@@ -1574,10 +1574,10 @@ def judge_opinion(score, th_info):
 def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap, weekly_opinion,
                   investor, short_ratio, news_list,
-                  stoch_rsi=None, divergence=None, stock_th_adj=0,
+                  stoch_rsi=None, divergence=None,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
                   boll_data=None, weekly_rsi=None, patterns=None, fx_price=0,
-                  market_score=None, macro_adj=0.0):
+                  market_score=None, macro_adj=0.0, stock_th_adj=0):
     contrib = {}
     def _t(lbl, v):
         if v: contrib[lbl] = contrib.get(lbl, 0) + v
