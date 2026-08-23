@@ -63,6 +63,10 @@ MACRO_SENS = {
     "035420": {"nasdaq": 0.30, "googl": 0.20, "tnx": -0.3},                           # NAVER: 알파벳 추가
     "035900": {"spot": 0.20, "nasdaq": 0.15, "fx": 0.10},                             # JYP: 스포티파이 동행·성장주·환율 수혜
 }
+# 종목별 매수 문턱 보정 — 신호추적 데이터 기반 (2기간 연속 최하위 + 표본 10건↑만 편입)
+BUY_TH_ADJ = {
+    "005380": 1,   # 현대차: 매수 적중 29%(7건)→42%(12건) — 두 기간 연속 최하위, 신뢰 할인
+}
 MACRO_LABEL = {"sox": "SOX", "nasdaq": "나스닥선물", "fx": "환율", "tnx": "美금리", "vix": "VIX", "tsmc": "TSMC", "nvda": "NVDA", "mu": "마이크론", "skhy": "하이닉스ADR", "smsn": "삼성GDR", "murata": "무라타", "tm": "토요타", "whr": "월풀", "googl": "알파벳", "xlf": "美금융ETF", "oil": "유가", "copper": "구리", "spot": "스포티파이"}
 
 def calc_macro_adj(code, market):
@@ -1570,7 +1574,7 @@ def judge_opinion(score, th_info):
 def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
                   closes, price, h52, l52, vwap, weekly_opinion,
                   investor, short_ratio, news_list,
-                  stoch_rsi=None, divergence=None,
+                  stoch_rsi=None, divergence=None, stock_th_adj=0,
                   ichimoku=None, cci=None, psar=None, value_surge=None,
                   boll_data=None, weekly_rsi=None, patterns=None, fx_price=0,
                   market_score=None, macro_adj=0.0):
@@ -1710,7 +1714,8 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
             _regime = "range"
     if _regime:
         _TREND = ("MACD", "일목", "이평 배열", "SAR", "주봉", "구름대")
-        _OSC   = ("RSI", "스토캐스틱", "윌리엄스R", "CCI", "스토캐RSI", "MFI")
+        _OSC   = ("RSI", "스토캐스틱", "윌리엄스R", "CCI", "스토캐RSI", "MFI",
+                  "강세 다이버전스", "약세 다이버전스")  # 다이버전스=반전 신호 — 부검 ×5 반영, 하락추세에서 반감
         _boost = 0.0
         for _k, _v in list(contrib.items()):
             if _regime == "range":
@@ -1735,6 +1740,9 @@ def master_signal(rsi, macd, macd_sig, stoch, wr, mfi, adx, obv,
     if market_score is not None:
         if market_score >= 1.5:   buy_th, th_label = 5, "시장 우호 → 완화"
         elif market_score <= -1.5: buy_th, th_label = 7, "시장 비우호 → 강화"
+    if stock_th_adj:
+        buy_th += stock_th_adj
+        th_label += f" · 종목 신뢰 보정 +{stock_th_adj}"
     # ── 신호 근거 수집 (점수는 위에서 이미 확정됨. 여기선 '왜'를 설명만 한다) ──
     # 각 지표의 실제 판정을 (라벨, 기여점수)로 모아 → 기여 큰 순 상위 N개를 근거로.
     # 주의: 점수를 재계산하지 않는다. 위 로직과 같은 조건을 읽어 문구만 만든다.
@@ -2030,7 +2038,8 @@ def analyze_stock(stock, kospi, market=None):
         stoch_rsi, divergence, ichimoku, cci, psar, value_surge,
         boll_data=boll_result, weekly_rsi=weekly.get("rsi"), patterns=pats,
         fx_price=(market.get("fx", {}).get("price", 0) if market else 0),
-        market_score=_mkt_score, macro_adj=macro_adj
+        market_score=_mkt_score, macro_adj=macro_adj,
+        stock_th_adj=BUY_TH_ADJ.get(code, 0)
     )
 
     # ── 역발상 반등 감지 ──────────────────────────────
