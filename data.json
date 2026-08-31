@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-01 06:30:22 KST",
-  "updatedTime": "06:30",
+  "updatedAt": "2026-09-01 06:35:13 KST",
+  "updatedTime": "06:35",
   "kospi": {
     "price": 6820.02,
     "change": 31.14,
@@ -20,8 +20,8 @@
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1367.73,
-      "pct": -0.58
+      "price": 1367.61,
+      "pct": -0.59
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -40,8 +40,8 @@
     },
     "cny": {
       "name": "위안/달러",
-      "price": 6.72,
-      "pct": -0.09
+      "price": 6.71,
+      "pct": -0.23
     },
     "tsmc": {
       "name": "TSMC",
@@ -175,13 +175,14 @@
       "high52w": 2987000,
       "low52w": 1246000,
       "opinion": "중립",
-      "score": 1,
+      "score": 4,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
       "program": null,
       "flowTurnaround": false,
       "spark": [
+        1718000,
         1567000,
         1577000,
         1668000,
@@ -200,10 +201,9 @@
         1678000,
         1688000,
         1730000,
-        1653000,
         1674000
       ],
-      "nuance": "관찰 — 신호 부족",
+      "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
         "type": "none"
       },
@@ -212,6 +212,10 @@
         "sell": -5,
         "label": "기본",
         "drivers": [
+          {
+            "k": "레짐 가중(상승추세)",
+            "v": 3.0
+          },
           {
             "k": "스토캐RSI",
             "v": -2
@@ -223,14 +227,14 @@
           {
             "k": "MACD",
             "v": 1
-          },
-          {
-            "k": "MFI",
-            "v": -1
           }
         ]
       },
       "scoreDrivers": [
+        {
+          "k": "레짐 가중(상승추세)",
+          "v": 3.0
+        },
         {
           "k": "스토캐RSI",
           "v": -2
@@ -242,10 +246,6 @@
         {
           "k": "MACD",
           "v": 1
-        },
-        {
-          "k": "MFI",
-          "v": -1
         }
       ],
       "macro": {
@@ -264,7 +264,7 @@
         ],
         "sell": [
           "스토캐스틱RSI 과매수",
-          "MFI 60 높음"
+          "MFI 62 높음"
         ]
       },
       "contrarian": "",
@@ -290,21 +290,22 @@
       "eps": 224313,
       "bps": 370432,
       "boll": {
-        "upper": 1802797,
-        "mid": 1599650,
-        "lower": 1396503,
-        "position": 68
+        "upper": 1809082,
+        "mid": 1601850,
+        "lower": 1394618,
+        "position": 62
       },
       "atr": {
-        "atr": 120786,
-        "pct": 7.22
+        "atr": 120286,
+        "pct": 7.28
       },
-      "atrStopLoss": 1432428,
+      "atrStopLoss": 1433428,
       "cmf": {
-        "value": -0.23,
+        "value": -0.144,
         "comment": "분산 우세 (조용한 이탈)"
       },
       "cmfBars": [
+        1.0,
         -0.88,
         0.28,
         -0.22,
@@ -323,55 +324,54 @@
         0.86,
         -0.29,
         -0.45,
-        -1.0,
-        1.0
+        -1.0
       ],
       "suggestedPrice": 0,
       "suggestedLabel": "해당없음",
       "targetPrice": 0,
       "targetPrice2": 0,
       "stopLoss": 0,
-      "rsi": 49.3,
+      "rsi": 48.4,
       "rsiComment": "중립",
-      "macd": -2.357,
-      "macdSignal": -4.488,
-      "macdHist": 2.131,
+      "macd": -2.688,
+      "macdSignal": -5.085,
+      "macdHist": 2.397,
       "macdComment": "골든크로스 — 상승 모멘텀",
-      "stoch": 71.8,
+      "stoch": 66.8,
       "stochComment": "중립",
       "stochRsi": {
-        "k": 84.5,
-        "d": 87.5,
+        "k": 87.0,
+        "d": 87.6,
         "signal": "매도",
-        "comment": "과매수 구간(85) — 조정 주의"
+        "comment": "과매수 구간(87) — 조정 주의"
       },
       "divergence": null,
       "ichimoku": {
         "tenkan": 1639000,
-        "kijun": 1570000,
-        "senkouA": 1604500,
+        "kijun": 1597000,
+        "senkouA": 1618000,
         "senkouB": 2116500,
         "cloudTop": 2116500,
-        "cloudBot": 1604500,
+        "cloudBot": 1618000,
         "signal": "중립",
         "comment": "구름대 내부 — 방향성 미정"
       },
       "cci": {
-        "value": 27.8,
+        "value": 53.3,
         "signal": "중립",
-        "comment": "중립(28)"
+        "comment": "중립(53)"
       },
       "psar": {
-        "psar": 1479013,
+        "psar": 1465971,
         "trend": "상승",
         "signal": "매수",
-        "comment": "상승 추세 유지 (손절선 ₩1,479,013)",
+        "comment": "상승 추세 유지 (손절선 ₩1,465,971)",
         "nearFlip": false
       },
       "valueSurge": {
-        "ratio": 0.89,
+        "ratio": 0.74,
         "surge": false,
-        "comment": "거래대금 평이 (0.9배)"
+        "comment": "거래대금 평이 (0.7배)"
       },
       "cautiousEntry": {
         "entry": false,
@@ -385,37 +385,37 @@
         "color": "",
         "title": ""
       },
-      "wr": -28.2,
+      "wr": -33.2,
       "wrComment": "중립",
-      "mfi": 60.4,
+      "mfi": 61.6,
       "mfiComment": "중립",
       "adx": {
-        "adx": 22.8,
-        "pdi": 39.7,
-        "ndi": 25.0,
-        "strength": "약한 추세"
+        "adx": 30.4,
+        "pdi": 39.8,
+        "ndi": 21.3,
+        "strength": "강한 추세"
       },
       "obv": {
-        "obv": 25125017,
-        "slope": 35.9,
+        "obv": 21144356,
+        "slope": 46.2,
         "trend": "상승"
       },
-      "vwap": 1675744,
+      "vwap": 1691326,
       "pivot": {
-        "p": 1677000,
-        "r1": 1701000,
-        "r2": 1749000,
-        "s1": 1629000,
-        "s2": 1605000
+        "p": 1742000,
+        "r1": 1776000,
+        "r2": 1822000,
+        "s1": 1696000,
+        "s2": 1662000
       },
-      "sma5": 1684600,
-      "sma20": 1599650,
-      "sma60": 1980767,
+      "sma5": 1684000,
+      "sma20": 1601850,
+      "sma60": null,
       "patterns": [
         {
-          "name": "장대양봉",
-          "type": "강한상승",
-          "color": "#00e676"
+          "name": "장대음봉",
+          "type": "강한하락",
+          "color": "#ff4d6d"
         }
       ],
       "contra": {
@@ -424,13 +424,13 @@
         "strength": 0
       },
       "fg": {
-        "score": 56,
+        "score": 58,
         "label": "중립",
         "color": "#9ab"
       },
       "ft": "외국인 6일 연속 순매도",
       "fc": "외국인 -211,935주 · 기관 -314,294주 (08/31 기준)",
-      "volRatio": 0.92,
+      "volRatio": 0.76,
       "investor": {
         "foreign": -211935,
         "institution": -314294,
@@ -529,8 +529,8 @@
       "weekly": {
         "opinion": "중립",
         "rsi": 51.5,
-        "macd": 7.316,
-        "macdSignal": 13.177,
+        "macd": 8.405,
+        "macdSignal": 14.643,
         "comment": "주봉 RSI 51.5 · MACD 데드크로스"
       },
       "monthly": {
@@ -556,13 +556,49 @@
       },
       "volSurge": {
         "surge": false,
-        "ratio": 0.92,
-        "comment": "거래량 평이 (0.92x)"
+        "ratio": 0.76,
+        "comment": "거래량 평이 (0.76x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(개별회사용)]",
+          "date": "20260828",
+          "important": true,
+          "corp": "SK하이닉스",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828000879"
+        },
+        {
+          "title": "[기재정정]임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260821",
+          "important": false,
+          "corp": "SK하이닉스",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260821000615"
+        },
+        {
+          "title": "최대주주등소유주식변동신고서              ",
+          "date": "20260821",
+          "important": false,
+          "corp": "SK하이닉스",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260821800617"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260821",
+          "important": false,
+          "corp": "SK하이닉스",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260821000531"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260821",
+          "important": false,
+          "corp": "SK하이닉스",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260821000527"
+        }
+      ],
       "basis": [
-        "RSI 49.3 · Williams%R -28.2 · MFI 60.4 — 지표 중립권",
+        "RSI 48.4 · Williams%R -33.2 · MFI 61.6 — 지표 중립권",
         "외국인 -211,935주 · 기관 -314,294주 · OBV 상승",
         "주봉 중립 · 25%"
       ],
@@ -960,7 +996,43 @@
         "comment": "거래량 평이 (0.59x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(대표회사용)]",
+          "date": "20260831",
+          "important": true,
+          "corp": "삼성전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260831000250"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260831",
+          "important": false,
+          "corp": "삼성전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260831000066"
+        },
+        {
+          "title": "주식등의대량보유상황보고서(일반)",
+          "date": "20260828",
+          "important": false,
+          "corp": "삼성전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828001916"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260828",
+          "important": false,
+          "corp": "삼성전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828001836"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260826",
+          "important": false,
+          "corp": "삼성전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260826000445"
+        }
+      ],
       "basis": [
         "RSI 48.9 · Williams%R -51.2 · MFI 68.2 — 지표 중립권",
         "외국인 -2,293주 · 기관 -2,349,842주 · OBV 상승",
@@ -1365,7 +1437,43 @@
         "comment": "거래량 평이 (0.49x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(개별회사용)]",
+          "date": "20260831",
+          "important": true,
+          "corp": "LG전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260831001056"
+        },
+        {
+          "title": "반기보고서 (2026.06)",
+          "date": "20260814",
+          "important": false,
+          "corp": "LG전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814001997"
+        },
+        {
+          "title": "지급수단별ㆍ지급기간별지급금액및분쟁조정기구에관한사항",
+          "date": "20260813",
+          "important": false,
+          "corp": "LG전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260813001051"
+        },
+        {
+          "title": "중대재해발생(종속회사의주요경영사항)              ",
+          "date": "20260806",
+          "important": false,
+          "corp": "LG전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260806800672"
+        },
+        {
+          "title": "[기재정정]연결재무제표기준영업(잠정)실적(공정공시)              ",
+          "date": "20260730",
+          "important": true,
+          "corp": "LG전자",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260730800391"
+        }
+      ],
       "basis": [
         "RSI 53.5 · Williams%R -59.3 · MFI 64.1 — 지표 중립권",
         "외국인 +258,232주 · 기관 +124,846주 · OBV 상승",
@@ -1860,7 +1968,7 @@
       "macro": {
         "adj": -0.4,
         "parts": [
-          "환율 -0.58% → -0.2",
+          "환율 -0.59% → -0.2",
           "토요타 +1.06% → +0.2",
           "유가 +3.49% → -0.3"
         ]
@@ -2174,7 +2282,43 @@
         "comment": "거래량 평이 (0.69x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(대표회사용)]",
+          "date": "20260828",
+          "important": true,
+          "corp": "현대자동차",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828000940"
+        },
+        {
+          "title": "기업설명회(IR)개최(안내공시)              ",
+          "date": "20260828",
+          "important": false,
+          "corp": "현대자동차",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828800249"
+        },
+        {
+          "title": "기업설명회(IR)개최(안내공시)              ",
+          "date": "20260828",
+          "important": false,
+          "corp": "현대자동차",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828800244"
+        },
+        {
+          "title": "장래사업ㆍ경영계획(공정공시)              ",
+          "date": "20260826",
+          "important": false,
+          "corp": "현대자동차",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260826800246"
+        },
+        {
+          "title": "주식소각결정              ",
+          "date": "20260826",
+          "important": false,
+          "corp": "현대자동차",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260826800261"
+        }
+      ],
       "basis": [
         "RSI 41.9 · Williams%R -89.6 · MFI 50.4 — 다중 과매도",
         "외국인 +140,275주 · 기관 -4,415주 · OBV 하락",
@@ -2585,7 +2729,43 @@
         "comment": "거래량 평이 (0.96x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "증권발행실적보고서",
+          "date": "20260831",
+          "important": true,
+          "corp": "KB금융",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260831001290"
+        },
+        {
+          "title": "투자설명서",
+          "date": "20260831",
+          "important": false,
+          "corp": "KB금융",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260831000056"
+        },
+        {
+          "title": "[첨부정정]증권신고서(채무증권)",
+          "date": "20260826",
+          "important": false,
+          "corp": "KB금융",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260826000090"
+        },
+        {
+          "title": "[발행조건확정]증권신고서(채무증권)",
+          "date": "20260825",
+          "important": false,
+          "corp": "KB금융",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260825000482"
+        },
+        {
+          "title": "[기재정정]증권신고서(채무증권)",
+          "date": "20260825",
+          "important": false,
+          "corp": "KB금융",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260825000479"
+        }
+      ],
       "basis": [
         "RSI 54.5 · Williams%R -23.9 · MFI 50.1 — 지표 중립권",
         "외국인 -46,941주 · 기관 +93,635주 · OBV 상승",
@@ -2985,7 +3165,43 @@
         "comment": "거래량 평이 (0.77x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(개별회사용)]",
+          "date": "20260828",
+          "important": true,
+          "corp": "SK텔레콤",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260828000124"
+        },
+        {
+          "title": "타법인주식및출자증권처분결정              ",
+          "date": "20260827",
+          "important": false,
+          "corp": "SK텔레콤",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260827800684"
+        },
+        {
+          "title": "회사분할결정(종속회사의주요경영사항)              ",
+          "date": "20260827",
+          "important": true,
+          "corp": "SK텔레콤",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260827800679"
+        },
+        {
+          "title": "주요사항보고서(자기주식처분결정)",
+          "date": "20260827",
+          "important": true,
+          "corp": "SK텔레콤",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260827000390"
+        },
+        {
+          "title": "반기보고서 (2026.06)",
+          "date": "20260813",
+          "important": false,
+          "corp": "SK텔레콤",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260813001728"
+        }
+      ],
       "basis": [
         "RSI 56.0 · Williams%R -34.5 · MFI 68.2 — 지표 중립권",
         "외국인 +132,954주 · 기관 -664,167주 · OBV 하락",
@@ -3396,7 +3612,43 @@
         "comment": "거래량 평이 (0.87x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "대규모기업집단현황공시[분기별공시(대표회사용)]",
+          "date": "20260826",
+          "important": true,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260826000163"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260814",
+          "important": false,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814002859"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260814",
+          "important": false,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814002654"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260814",
+          "important": false,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814002598"
+        },
+        {
+          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+          "date": "20260814",
+          "important": false,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814002553"
+        }
+      ],
       "basis": [
         "RSI 52.6 · Williams%R -45.3 · MFI 76.1 — 지표 중립권",
         "외국인 -729주 · 기관 -16,631주 · OBV 하락",
@@ -3799,7 +4051,43 @@
         "comment": "거래량 평이 (0.32x)"
       },
       "news": [],
-      "dart": [],
+      "dart": [
+        {
+          "title": "반기보고서 (2026.06)",
+          "date": "20260814",
+          "important": false,
+          "corp": "JYP Ent.",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003204"
+        },
+        {
+          "title": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+          "date": "20260812",
+          "important": true,
+          "corp": "JYP Ent.",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260812900607"
+        },
+        {
+          "title": "기업설명회(IR)개최              ",
+          "date": "20260805",
+          "important": false,
+          "corp": "JYP Ent.",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260805900577"
+        },
+        {
+          "title": "결산실적공시예고              ",
+          "date": "20260805",
+          "important": true,
+          "corp": "JYP Ent.",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260805900573"
+        },
+        {
+          "title": "[첨부정정]지속가능경영보고서등관련사항(자율공시)              ",
+          "date": "20260731",
+          "important": false,
+          "corp": "JYP Ent.",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260731900367"
+        }
+      ],
       "basis": [
         "RSI 38.6 · Williams%R -79.4 · MFI 21.4 — 지표 중립권",
         "외국인 -5,647주 · 기관 -21,651주 · OBV 하락",
