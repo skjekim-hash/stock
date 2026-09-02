@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-03 06:45:16 KST",
-  "updatedTime": "06:45",
+  "updatedAt": "2026-09-03 06:50:13 KST",
+  "updatedTime": "06:50",
   "kospi": {
     "price": 6562.72,
     "change": -273.08,
@@ -16,12 +16,12 @@
     "nasdaq": {
       "name": "나스닥 선물",
       "price": 29141.0,
-      "pct": 0.05
+      "pct": -0.16
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1358.17,
-      "pct": -1.14
+      "price": 1358.38,
+      "pct": -1.12
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -61,17 +61,17 @@
     "oil": {
       "name": "WTI 유가",
       "price": 90.63,
-      "pct": 0.45
+      "pct": -0.42
     },
     "copper": {
       "name": "구리",
       "price": 6.61,
-      "pct": 0.1
+      "pct": 0.21
     },
     "gold": {
       "name": "금",
       "price": 4434.3,
-      "pct": 0.86
+      "pct": 0.45
     },
     "kospi": {
       "name": "코스피",
@@ -124,22 +124,22 @@
       "pct": 2.8
     },
     "summary": {
-      "mood": "favorable",
-      "label": "우호적",
-      "score": 1.6,
-      "advice": "미국 기술주 강세. 갭상승 가능성. 추격매수는 신중히, 눌림목 기다리는 것도 방법이에요.",
-      "buyThreshold": 5,
-      "thresholdNote": "시장 우호 — 문턱 5로 완화 (반 박자 빠른 진입)"
+      "mood": "neutral",
+      "label": "중립",
+      "score": 1.3,
+      "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
+      "buyThreshold": 6,
+      "thresholdNote": "기본 문턱 6"
     },
     "forecast": {
       "kospi": {
         "dir": "상승",
         "strength": "약",
         "color": "#00c896",
-        "bias": 0.5,
-        "low": 0.0,
-        "high": 1.0,
-        "text": "상승 경향 약 (대략 +0.5% 안팎)"
+        "bias": 0.4,
+        "low": -0.1,
+        "high": 0.9,
+        "text": "상승 경향 약 (대략 +0.4% 안팎)"
       },
       "semi": {
         "dir": "상승",
@@ -208,9 +208,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
@@ -639,14 +639,14 @@
         261000,
         250500
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "관찰 — 신호 부족",
       "buyTrack": {
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -1047,7 +1047,7 @@
       "changePct": -2.91,
       "high52w": 438000,
       "low52w": 141900,
-      "opinion": "매수",
+      "opinion": "중립",
       "score": 5,
       "source": "네이버 금융",
       "intradayFlow": null,
@@ -1076,17 +1076,14 @@
         206500,
         200500
       ],
-      "nuance": "",
+      "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
-        "type": "confirm",
-        "label": "확인 매수",
-        "size": "계획 물량",
-        "desc": "합산 +5점 ≥ 문턱 5 (시장 우호 → 완화)"
+        "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "일목",
@@ -1127,7 +1124,7 @@
       "macro": {
         "adj": 0.2,
         "parts": [
-          "환율 -1.14% → -0.2",
+          "환율 -1.12% → -0.2",
           "월풀 +2.58% → +0.4"
         ]
       },
@@ -1145,7 +1142,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
+      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-09-02",
       "fairValue": 233235,
       "fairValueGap": 16.3,
@@ -1198,11 +1195,11 @@
         -0.26,
         -0.14
       ],
-      "suggestedPrice": 200500,
-      "suggestedLabel": "매수 추천가",
-      "targetPrice": 216540,
-      "targetPrice2": 216833,
-      "stopLoss": 202167,
+      "suggestedPrice": 0,
+      "suggestedLabel": "해당없음",
+      "targetPrice": 0,
+      "targetPrice2": 0,
+      "stopLoss": 0,
       "rsi": 52.1,
       "rsiComment": "중립",
       "macd": 2.457,
@@ -1476,9 +1473,9 @@
       ],
       "risk": [],
       "notes": [
-        "피봇 S1 지지 확인 후 분할 매수",
-        "OBV 수급 지속 확인",
-        "주봉 신호 일치 시 비중 확대"
+        "주봉·일봉 동시 매수 신호 확인 후 진입",
+        "외국인 순매수 전환 시 진입 검토",
+        "공매도 감소 + 거래량 증가 조합 주시"
       ],
       "noChart": false
     },
@@ -1518,14 +1515,14 @@
         1430000,
         1400000
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "관찰 — 신호 부족",
       "buyTrack": {
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -1922,13 +1919,13 @@
         "type": "early",
         "label": "선취 매수 (추세 미확인)",
         "size": "1/3 물량",
-        "desc": "점수는 문턱 도달(+16≥6)이나 5일선 아래+분산 우세 — 추세 확인 전 소량만",
+        "desc": "점수는 문턱 도달(+16≥7)이나 5일선 아래+분산 우세 — 추세 확인 전 소량만",
         "stopLoss": 366660
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "시장 우호 → 완화 · 종목 신뢰 보정 +1",
+        "label": "기본 · 종목 신뢰 보정 +1",
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
@@ -1969,7 +1966,7 @@
       "macro": {
         "adj": -0.3,
         "parts": [
-          "환율 -1.14% → -0.3"
+          "환율 -1.12% → -0.3"
         ]
       },
       "sigReasons": {
@@ -2366,9 +2363,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
@@ -2807,9 +2804,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "MACD",
@@ -3247,9 +3244,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
@@ -3685,9 +3682,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
