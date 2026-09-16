@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-16 20:30:22 KST",
-  "updatedTime": "20:30",
+  "updatedAt": "2026-09-16 20:35:13 KST",
+  "updatedTime": "20:35",
   "kospi": {
     "price": 6717.97,
     "change": 90.71,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29375.75,
+      "price": 29376.0,
       "pct": 0.44
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1366.08,
-      "pct": 0.22
+      "price": 1367.23,
+      "pct": 0.31
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -35,8 +35,8 @@
     },
     "dxy": {
       "name": "달러인덱스",
-      "price": 99.69,
-      "pct": 0.08
+      "price": 99.68,
+      "pct": 0.07
     },
     "cny": {
       "name": "위안/달러",
@@ -60,17 +60,17 @@
     },
     "oil": {
       "name": "WTI 유가",
-      "price": 103.32,
-      "pct": -2.37
+      "price": 103.39,
+      "pct": -2.31
     },
     "copper": {
       "name": "구리",
-      "price": 6.51,
-      "pct": 1.02
+      "price": 6.5,
+      "pct": 0.95
     },
     "gold": {
       "name": "금",
-      "price": 4389.0,
+      "price": 4389.3,
       "pct": 1.3
     },
     "kospi": {
@@ -95,8 +95,8 @@
     },
     "smsn": {
       "name": "삼성전자 GDR",
-      "price": 4636.0,
-      "pct": 2.34
+      "price": 4640.0,
+      "pct": 2.43
     },
     "murata": {
       "name": "무라타",
@@ -126,10 +126,11 @@
     "summary": {
       "mood": "neutral",
       "label": "중립",
-      "score": -1.4,
+      "score": -1.5,
       "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
       "buyThreshold": 6,
-      "thresholdNote": "기본 문턱 6"
+      "thresholdNote": "기본 문턱 6",
+      "cnyNote": "위안은 안정인데 원화만 약세 — 한국 고유 악재 가능성. 외국인 이탈 신호일 수 있어 더 주의."
     },
     "fomc": {
       "warn": true,
@@ -213,9 +214,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "OBV",
@@ -649,9 +650,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -692,7 +693,7 @@
       "macro": {
         "adj": 0.6,
         "parts": [
-          "삼성GDR +2.34% → +0.6"
+          "삼성GDR +2.43% → +0.6"
         ]
       },
       "sigReasons": {
@@ -1085,7 +1086,7 @@
         202000,
         199600
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "관찰 — 신호 부족",
       "buyTrack": {
         "type": "early",
         "label": "선취 매수",
@@ -1094,9 +1095,9 @@
         "stopLoss": 192600
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "스토캐RSI",
@@ -1531,9 +1532,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "OBV",
@@ -1935,9 +1936,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 8,
         "sell": -5,
-        "label": "기본 · 종목 신뢰 보정 +1",
+        "label": "시장 비우호 → 강화 · 종목 신뢰 보정 +1",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1979,7 +1980,7 @@
         "adj": 0.1,
         "parts": [
           "토요타 -1.06% → -0.2",
-          "유가 -2.37% → +0.2"
+          "유가 -2.31% → +0.2"
         ]
       },
       "sigReasons": {
@@ -2372,12 +2373,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +10점 ≥ 문턱 6 (기본)"
+        "desc": "합산 +10점 ≥ 문턱 7 (시장 비우호 → 강화)"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(상승추세)",
@@ -2814,9 +2815,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -3254,9 +3255,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -3691,9 +3692,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "스토캐RSI",
