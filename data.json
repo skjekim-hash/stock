@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-20 06:45:16 KST",
-  "updatedTime": "06:45",
+  "updatedAt": "2026-10-20 06:50:43 KST",
+  "updatedTime": "06:50",
   "kospi": {
     "price": 5768.01,
     "change": 99.96,
@@ -16,12 +16,12 @@
     "nasdaq": {
       "name": "나스닥 선물",
       "price": 29743.75,
-      "pct": 1.2
+      "pct": 0.07
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1332.95,
-      "pct": -0.09
+      "price": 1332.32,
+      "pct": -0.14
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -35,8 +35,8 @@
     },
     "dxy": {
       "name": "달러인덱스",
-      "price": 101.99,
-      "pct": 0.15
+      "price": 101.98,
+      "pct": 0.14
     },
     "cny": {
       "name": "위안/달러",
@@ -61,7 +61,7 @@
     "oil": {
       "name": "WTI 유가",
       "price": 98.24,
-      "pct": -0.79
+      "pct": -0.3
     },
     "copper": {
       "name": "구리",
@@ -124,22 +124,22 @@
       "pct": -2.21
     },
     "summary": {
-      "mood": "favorable",
-      "label": "우호적",
-      "score": 2.1,
-      "advice": "미국 기술주 강세. 갭상승 가능성. 추격매수는 신중히, 눌림목 기다리는 것도 방법이에요.",
-      "buyThreshold": 5,
-      "thresholdNote": "시장 우호 — 문턱 5로 완화 (반 박자 빠른 진입)"
+      "mood": "neutral",
+      "label": "중립",
+      "score": 1.0,
+      "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
+      "buyThreshold": 6,
+      "thresholdNote": "기본 문턱 6"
     },
     "forecast": {
       "kospi": {
-        "dir": "상승",
-        "strength": "중",
-        "color": "#00c896",
-        "bias": 0.6,
-        "low": 0.1,
-        "high": 1.1,
-        "text": "상승 경향 중 (대략 +0.6% 안팎)"
+        "dir": "보합",
+        "strength": "약",
+        "color": "#9ab",
+        "bias": 0.3,
+        "low": -0.2,
+        "high": 0.8,
+        "text": "보합 경향 약 (대략 +0.3% 안팎)"
       },
       "semi": {
         "dir": "상승",
@@ -208,9 +208,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -661,12 +661,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +6점 ≥ 문턱 5 (시장 우호 → 완화)"
+        "desc": "합산 +6점 ≥ 문턱 6 (기본)"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1110,9 +1110,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1557,9 +1557,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1969,9 +1969,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "시장 우호 → 완화 · 종목 신뢰 보정 +1",
+        "label": "기본 · 종목 신뢰 보정 +1",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -2408,9 +2408,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -2846,9 +2846,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -3293,9 +3293,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -3334,9 +3334,8 @@
         }
       ],
       "macro": {
-        "adj": 0.3,
+        "adj": -0.0,
         "parts": [
-          "나스닥선물 +1.2% → +0.4",
           "알파벳 +1.05% → +0.2",
           "美금리 +0.75% → -0.2"
         ]
@@ -3736,12 +3735,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +6점 ≥ 문턱 5 (시장 우호 → 완화)"
+        "desc": "합산 +6점 ≥ 문턱 6 (기본)"
       },
       "buyThreshold": {
-        "buy": 5,
+        "buy": 6,
         "sell": -5,
-        "label": "시장 우호 → 완화",
+        "label": "기본",
         "drivers": [
           {
             "k": "CCI",
@@ -3780,10 +3779,9 @@
         }
       ],
       "macro": {
-        "adj": -0.3,
+        "adj": -0.4,
         "parts": [
-          "스포티파이 -2.21% → -0.4",
-          "나스닥선물 +1.2% → +0.2"
+          "스포티파이 -2.21% → -0.4"
         ]
       },
       "sigReasons": {
