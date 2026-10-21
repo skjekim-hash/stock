@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-22 07:25:13 KST",
-  "updatedTime": "07:25",
+  "updatedAt": "2026-10-22 07:30:28 KST",
+  "updatedTime": "07:30",
   "kospi": {
     "price": 5735.66,
     "change": 182.92,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29897.5,
-      "pct": -0.36
+      "price": 29849.25,
+      "pct": -0.53
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1326.21,
-      "pct": -0.05
+      "price": 1326.43,
+      "pct": -0.03
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -60,18 +60,18 @@
     },
     "oil": {
       "name": "WTI 유가",
-      "price": 97.78,
-      "pct": 0.65
+      "price": 97.86,
+      "pct": 0.73
     },
     "copper": {
       "name": "구리",
-      "price": 6.57,
-      "pct": -0.15
+      "price": 6.56,
+      "pct": -0.24
     },
     "gold": {
       "name": "금",
-      "price": 4155.7,
-      "pct": 0.14
+      "price": 4154.1,
+      "pct": 0.1
     },
     "kospi": {
       "name": "코스피",
@@ -126,7 +126,7 @@
     "summary": {
       "mood": "neutral",
       "label": "중립",
-      "score": 0.7,
+      "score": 0.5,
       "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
       "buyThreshold": 6,
       "thresholdNote": "기본 문턱 6"
@@ -3222,8 +3222,8 @@
       "changePct": 0.73,
       "high52w": 304000,
       "low52w": 171100,
-      "opinion": "매수",
-      "score": 6,
+      "opinion": "중립",
+      "score": 5,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -3251,12 +3251,9 @@
         178000,
         179300
       ],
-      "nuance": "",
+      "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
-        "type": "confirm",
-        "label": "확인 매수",
-        "size": "계획 물량",
-        "desc": "합산 +6점 ≥ 문턱 6 (기본)"
+        "type": "none"
       },
       "buyThreshold": {
         "buy": 6,
@@ -3300,8 +3297,9 @@
         }
       ],
       "macro": {
-        "adj": -0.5,
+        "adj": -0.7,
         "parts": [
+          "나스닥선물 -0.53% → -0.2",
           "알파벳 -1.62% → -0.3",
           "美금리 +0.57% → -0.2"
         ]
@@ -3314,7 +3312,8 @@
         ],
         "sell": [
           "MACD 하락(데드)",
-          "일목 매도"
+          "일목 매도",
+          "매크로 -0.7"
         ]
       },
       "contrarian": "",
@@ -3323,7 +3322,7 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "신호·외국인 수급 모두 매수 우위로 방향이 일치해요. │ 신뢰도 높은 편, 지지구간 분할매수로 접근.",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-10-21",
       "fairValue": 320125,
       "fairValueGap": 78.5,
@@ -3376,11 +3375,11 @@
         -0.75,
         0.2
       ],
-      "suggestedPrice": 179300,
-      "suggestedLabel": "매수 추천가",
-      "targetPrice": 193644,
-      "targetPrice2": 188000,
-      "stopLoss": 175000,
+      "suggestedPrice": 0,
+      "suggestedLabel": "해당없음",
+      "targetPrice": 0,
+      "targetPrice2": 0,
+      "stopLoss": 0,
       "rsi": 37.1,
       "rsiComment": "저점권",
       "macd": -4.106,
@@ -3648,9 +3647,9 @@
       ],
       "risk": [],
       "notes": [
-        "피봇 S1 지지 확인 후 분할 매수",
-        "OBV 수급 지속 확인",
-        "주봉 신호 일치 시 비중 확대"
+        "주봉·일봉 동시 매수 신호 확인 후 진입",
+        "외국인 순매수 전환 시 진입 검토",
+        "공매도 감소 + 거래량 증가 조합 주시"
       ],
       "noChart": false
     },
