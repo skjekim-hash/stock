@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-29 06:45:19 KST",
-  "updatedTime": "06:45",
+  "updatedAt": "2026-10-29 06:50:17 KST",
+  "updatedTime": "06:50",
   "kospi": {
     "price": 6012.44,
     "change": 374.1,
@@ -16,11 +16,11 @@
     "nasdaq": {
       "name": "나스닥 선물",
       "price": 29756.25,
-      "pct": -0.19
+      "pct": -0.74
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1342.42,
+      "price": 1342.37,
       "pct": 1.17
     },
     "vix": {
@@ -61,17 +61,17 @@
     "oil": {
       "name": "WTI 유가",
       "price": 101.94,
-      "pct": 2.04
+      "pct": -0.82
     },
     "copper": {
       "name": "구리",
       "price": 6.68,
-      "pct": 0.45
+      "pct": 0.16
     },
     "gold": {
       "name": "금",
       "price": 4081.2,
-      "pct": 0.16
+      "pct": 0.73
     },
     "kospi": {
       "name": "코스피",
@@ -126,7 +126,7 @@
     "summary": {
       "mood": "neutral",
       "label": "중립",
-      "score": -0.9,
+      "score": -1.5,
       "advice": "미국 시장 보합. 평소 전략대로 지지선·신호 중심으로 대응하세요.",
       "buyThreshold": 6,
       "thresholdNote": "기본 문턱 6",
@@ -139,13 +139,13 @@
     },
     "forecast": {
       "kospi": {
-        "dir": "보합",
+        "dir": "하락",
         "strength": "약",
-        "color": "#9ab",
-        "bias": -0.3,
-        "low": -0.8,
-        "high": 0.2,
-        "text": "보합 경향 약 (대략 -0.3% 안팎)"
+        "color": "#ff5c7a",
+        "bias": -0.4,
+        "low": -0.9,
+        "high": 0.1,
+        "text": "하락 경향 약 (대략 -0.4% 안팎)"
       },
       "semi": {
         "dir": "상승",
@@ -211,7 +211,7 @@
         1341000,
         1508000
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "관찰 — 신호 부족",
       "buyTrack": {
         "type": "early",
         "label": "선취 매수",
@@ -220,9 +220,9 @@
         "stopLoss": 1175200
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "강세 다이버전스",
@@ -670,9 +670,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1117,9 +1117,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1552,9 +1552,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "약세 다이버전스",
@@ -1957,9 +1957,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 7,
+        "buy": 8,
         "sell": -5,
-        "label": "기본 · 종목 신뢰 보정 +1",
+        "label": "시장 비우호 → 강화 · 종목 신뢰 보정 +1",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -1998,10 +1998,9 @@
         }
       ],
       "macro": {
-        "adj": 0.1,
+        "adj": 0.4,
         "parts": [
-          "환율 +1.17% → +0.4",
-          "유가 +2.04% → -0.2"
+          "환율 +1.17% → +0.4"
         ]
       },
       "sigReasons": {
@@ -2395,9 +2394,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -2842,9 +2841,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(하락추세)",
@@ -3277,12 +3276,12 @@
         "type": "confirm",
         "label": "확인 매수",
         "size": "계획 물량",
-        "desc": "합산 +14점 ≥ 문턱 6 (기본)"
+        "desc": "합산 +14점 ≥ 문턱 7 (시장 비우호 → 강화)"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "강세 다이버전스",
@@ -3321,8 +3320,9 @@
         }
       ],
       "macro": {
-        "adj": -0.0,
+        "adj": -0.3,
         "parts": [
+          "나스닥선물 -0.74% → -0.2",
           "알파벳 +1.34% → +0.3",
           "美금리 +1.04% → -0.3"
         ]
@@ -3720,9 +3720,9 @@
         "type": "none"
       },
       "buyThreshold": {
-        "buy": 6,
+        "buy": 7,
         "sell": -5,
-        "label": "기본",
+        "label": "시장 비우호 → 강화",
         "drivers": [
           {
             "k": "레짐 가중(횡보)",
