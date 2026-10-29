@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-30 07:35:12 KST",
-  "updatedTime": "07:35",
+  "updatedAt": "2026-10-30 07:40:19 KST",
+  "updatedTime": "07:40",
   "kospi": {
     "price": 5937.66,
     "change": -74.78,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 29134.0,
-      "pct": -1.45
+      "price": 29096.25,
+      "pct": -1.58
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1338.74,
-      "pct": -0.31
+      "price": 1338.59,
+      "pct": -0.32
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -60,8 +60,8 @@
     },
     "oil": {
       "name": "WTI 유가",
-      "price": 102.89,
-      "pct": 0.87
+      "price": 102.88,
+      "pct": 0.86
     },
     "copper": {
       "name": "구리",
@@ -70,7 +70,7 @@
     },
     "gold": {
       "name": "금",
-      "price": 4029.6,
+      "price": 4029.8,
       "pct": -0.04
     },
     "kospi": {
@@ -126,7 +126,7 @@
     "summary": {
       "mood": "adverse",
       "label": "비우호적",
-      "score": -3.9,
+      "score": -4.0,
       "advice": "미국 기술주 약세. 갭하락 가능성. 한 번에 사지 말고 나눠서 대응하세요.",
       "buyThreshold": 7,
       "thresholdNote": "시장 비우호 — 문턱 7로 강화 (더 보수적)"
@@ -154,9 +154,11 @@
     },
     "crashRisk": {
       "level": "평이",
-      "score": 0,
+      "score": 1,
       "color": "#10b981",
-      "reasons": [],
+      "reasons": [
+        "나스닥 -1.58%"
+      ],
       "advice": "",
       "alert": false
     },
@@ -1155,9 +1157,10 @@
         }
       ],
       "macro": {
-        "adj": 1.1,
+        "adj": 1.0,
         "parts": [
-          "월풀 +7.47% → +1.1"
+          "월풀 +7.47% → +1.1",
+          "나스닥선물 -1.58% → -0.2"
         ]
       },
       "sigReasons": {
@@ -3333,7 +3336,7 @@
       "macro": {
         "adj": -2.0,
         "parts": [
-          "나스닥선물 -1.45% → -0.4",
+          "나스닥선물 -1.58% → -0.5",
           "알파벳 -12.64% → -2.5",
           "美금리 -1.11% → +0.3"
         ]
@@ -3649,6 +3652,13 @@
       "news": [],
       "dart": [
         {
+          "title": "[기재정정]주요사항보고서(유상증자결정)",
+          "date": "20261030",
+          "important": true,
+          "corp": "NAVER",
+          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261030000001"
+        },
+        {
           "title": "특수관계인과의내부거래",
           "date": "20261027",
           "important": false,
@@ -3675,13 +3685,6 @@
           "important": false,
           "corp": "NAVER",
           "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261021000270"
-        },
-        {
-          "title": "임원ㆍ주요주주특정증권등소유상황보고서",
-          "date": "20261021",
-          "important": false,
-          "corp": "NAVER",
-          "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261021000251"
         }
       ],
       "basis": [
@@ -3785,7 +3788,7 @@
         "adj": 0.5,
         "parts": [
           "스포티파이 +3.5% → +0.7",
-          "나스닥선물 -1.45% → -0.2"
+          "나스닥선물 -1.58% → -0.2"
         ]
       },
       "sigReasons": {
