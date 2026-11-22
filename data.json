@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-23 05:25:17 KST",
-  "updatedTime": "05:25",
+  "updatedAt": "2026-11-23 05:30:37 KST",
+  "updatedTime": "05:30",
   "kospi": {
     "price": 4869.96,
     "change": -267.93,
@@ -16,7 +16,7 @@
     "nasdaq": {
       "name": "나스닥 선물",
       "price": 25126.5,
-      "pct": -5.54
+      "pct": 0.0
     },
     "fx": {
       "name": "원/달러 환율",
@@ -61,7 +61,7 @@
     "oil": {
       "name": "WTI 유가",
       "price": 83.41,
-      "pct": 1.18
+      "pct": 0.0
     },
     "copper": {
       "name": "구리",
@@ -126,7 +126,7 @@
     "summary": {
       "mood": "adverse",
       "label": "비우호적",
-      "score": -36.3,
+      "score": -30.7,
       "advice": "공포지수 급등. 변동성이 큰 날이라 급반등·급락이 섞일 수 있어요. 무리한 진입보다 관망, 사더라도 아주 잘게 나누세요.",
       "buyThreshold": 7,
       "thresholdNote": "시장 비우호 — 문턱 7로 강화 (더 보수적)",
@@ -138,10 +138,10 @@
         "dir": "하락",
         "strength": "강",
         "color": "#ff5c7a",
-        "bias": -10.9,
-        "low": -11.4,
-        "high": -10.4,
-        "text": "하락 경향 강 (대략 -10.9% 안팎)"
+        "bias": -9.2,
+        "low": -9.7,
+        "high": -8.7,
+        "text": "하락 경향 강 (대략 -9.2% 안팎)"
       },
       "semi": {
         "dir": "하락",
@@ -156,14 +156,13 @@
     },
     "crashRisk": {
       "level": "위험",
-      "score": 9,
+      "score": 8,
       "color": "#ef4444",
       "reasons": [
         "SOX -10.73% 폭락",
         "TSMC -9.48% 급락",
         "VIX +26.2% 급등",
-        "환율 +0.93% 상승",
-        "나스닥 -5.54%"
+        "환율 +0.93% 상승"
       ],
       "advice": "갭하락 위험 매우 높음. 내일 신규 진입 금지, 보유는 손절선 미리 확인하세요.",
       "alert": true
@@ -1139,11 +1138,10 @@
         }
       ],
       "macro": {
-        "adj": -0.7,
+        "adj": -0.2,
         "parts": [
           "환율 +0.93% → +0.2",
-          "월풀 -2.33% → -0.3",
-          "나스닥선물 -5.54% → -0.6"
+          "월풀 -2.33% → -0.3"
         ]
       },
       "sigReasons": {
@@ -1154,17 +1152,16 @@
         ],
         "sell": [
           "OBV 하락(분산)",
-          "일목 매도",
-          "매크로 -0.7"
+          "일목 매도"
         ]
       },
-      "contrarian": "⚡ 역발상 반등 주목 — RSI 저점 · 볼린저 하단 · Williams %R 과매도",
+      "contrarian": "",
       "profitTaking": "",
       "marginCallRisk": "",
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "매도 우위지만 과매도 신호가 집중돼 단기 반등 가능성이 있어요. │ 소량 분할 진입 고려, 손절선 꼭 확인.",
+      "flowRead": "신호는 중립이나 외국인은 5일째 매집 중이에요. │ 수급은 우호적, 지지구간 확인하며 분할 접근.",
       "tradedAt": "2026-11-20",
       "fairValue": 247188,
       "fairValueGap": 92.1,
@@ -3256,8 +3253,8 @@
       "changePct": -4.46,
       "high52w": 304000,
       "low52w": 160900,
-      "opinion": "중립",
-      "score": 5,
+      "opinion": "매수",
+      "score": 7,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -3285,9 +3282,13 @@
         168300,
         160800
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "",
       "buyTrack": {
-        "type": "none"
+        "type": "early",
+        "label": "선취 매수 (추세 미확인)",
+        "size": "1/3 물량",
+        "desc": "점수는 문턱 도달(+7≥7)이나 5일선 아래+분산 우세 — 추세 확인 전 소량만",
+        "stopLoss": 155976
       },
       "buyThreshold": {
         "buy": 7,
@@ -3331,9 +3332,8 @@
         }
       ],
       "macro": {
-        "adj": -1.4,
+        "adj": 0.3,
         "parts": [
-          "나스닥선물 -5.54% → -1.7",
           "알파벳 -2.7% → -0.5",
           "美금리 -2.77% → +0.8"
         ]
@@ -3354,8 +3354,8 @@
       "marginCallRisk": "",
       "turnover": "",
       "chaseWarning": "",
-      "marketBrake": "시장 비우호적 — 매수 신호 보류",
-      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
+      "marketBrake": "시장 비우호적 — 신중 진입 권장",
+      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-11-20",
       "fairValue": 292048,
       "fairValueGap": 81.6,
@@ -3408,11 +3408,11 @@
         -0.55,
         -0.76
       ],
-      "suggestedPrice": 0,
-      "suggestedLabel": "해당없음",
-      "targetPrice": 0,
-      "targetPrice2": 0,
-      "stopLoss": 0,
+      "suggestedPrice": 160800,
+      "suggestedLabel": "매수 추천가",
+      "targetPrice": 180096,
+      "targetPrice2": 174567,
+      "stopLoss": 166133,
       "rsi": 33.8,
       "rsiComment": "저점권",
       "macd": -2.915,
@@ -3682,9 +3682,9 @@
       ],
       "risk": [],
       "notes": [
-        "주봉·일봉 동시 매수 신호 확인 후 진입",
-        "외국인 순매수 전환 시 진입 검토",
-        "공매도 감소 + 거래량 증가 조합 주시"
+        "피봇 S1 지지 확인 후 분할 매수",
+        "OBV 수급 지속 확인",
+        "주봉 신호 일치 시 비중 확대"
       ],
       "noChart": false
     },
@@ -3696,7 +3696,7 @@
       "high52w": 79800,
       "low52w": 35850,
       "opinion": "중립",
-      "score": 3,
+      "score": 4,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -3774,10 +3774,9 @@
         }
       ],
       "macro": {
-        "adj": -1.1,
+        "adj": -0.2,
         "parts": [
-          "스포티파이 -1.17% → -0.2",
-          "나스닥선물 -5.54% → -0.8"
+          "스포티파이 -1.17% → -0.2"
         ]
       },
       "sigReasons": {
