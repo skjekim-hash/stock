@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-27 16:20:21 KST",
-  "updatedTime": "16:20",
+  "updatedAt": "2026-11-27 16:25:17 KST",
+  "updatedTime": "16:25",
   "kospi": {
     "price": 4915.68,
     "change": 204.47,
@@ -15,13 +15,13 @@
     },
     "nasdaq": {
       "name": "나스닥 선물",
-      "price": 26756.5,
-      "pct": 2.51
+      "price": 26728.25,
+      "pct": 2.41
     },
     "fx": {
       "name": "원/달러 환율",
-      "price": 1336.29,
-      "pct": -0.5
+      "price": 1335.68,
+      "pct": -0.55
     },
     "vix": {
       "name": "공포지수(VIX)",
@@ -35,13 +35,13 @@
     },
     "dxy": {
       "name": "달러인덱스",
-      "price": 103.68,
-      "pct": 0.01
+      "price": 103.69,
+      "pct": 0.02
     },
     "cny": {
       "name": "위안/달러",
       "price": 6.65,
-      "pct": -0.08
+      "pct": -0.09
     },
     "tsmc": {
       "name": "TSMC",
@@ -60,18 +60,18 @@
     },
     "oil": {
       "name": "WTI 유가",
-      "price": 86.26,
-      "pct": 3.08
+      "price": 86.25,
+      "pct": 3.07
     },
     "copper": {
       "name": "구리",
-      "price": 5.7,
-      "pct": 5.14
+      "price": 5.69,
+      "pct": 4.99
     },
     "gold": {
       "name": "금",
-      "price": 3685.5,
-      "pct": 3.39
+      "price": 3687.6,
+      "pct": 3.45
     },
     "kospi": {
       "name": "코스피",
@@ -126,7 +126,7 @@
     "summary": {
       "mood": "favorable",
       "label": "우호적",
-      "score": 3.2,
+      "score": 3.1,
       "advice": "미국 기술주 강세. 갭상승 가능성. 추격매수는 신중히, 눌림목 기다리는 것도 방법이에요.",
       "buyThreshold": 5,
       "thresholdNote": "시장 우호 — 문턱 5로 완화 (반 박자 빠른 진입)"
@@ -136,10 +136,10 @@
         "dir": "상승",
         "strength": "중",
         "color": "#00c896",
-        "bias": 1.0,
-        "low": 0.5,
-        "high": 1.5,
-        "text": "상승 경향 중 (대략 +1.0% 안팎)"
+        "bias": 0.9,
+        "low": 0.4,
+        "high": 1.4,
+        "text": "상승 경향 중 (대략 +0.9% 안팎)"
       },
       "semi": {
         "dir": "하락",
@@ -169,13 +169,13 @@
   "stocks": [
     {
       "code": "000660",
-      "price": 1098000,
-      "change": 45000,
-      "changePct": 4.27,
+      "price": 1097000,
+      "change": 44000,
+      "changePct": 4.18,
       "high52w": 2987000,
       "low52w": 525000,
-      "opinion": "중립",
-      "score": 4,
+      "opinion": "매수",
+      "score": 5,
       "source": "네이버 금융",
       "intradayFlow": null,
       "micro": null,
@@ -201,11 +201,14 @@
         1158000,
         1030000,
         1053000,
-        1098000
+        1097000
       ],
-      "nuance": "관찰 구간 (소량만)",
+      "nuance": "",
       "buyTrack": {
-        "type": "none"
+        "type": "confirm",
+        "label": "확인 매수",
+        "size": "계획 물량",
+        "desc": "합산 +5점 ≥ 문턱 5 (시장 우호 → 완화)"
       },
       "buyThreshold": {
         "buy": 5,
@@ -221,12 +224,12 @@
             "v": -2
           },
           {
-            "k": "매크로",
-            "v": -1.9
+            "k": "이격도",
+            "v": 2
           },
           {
-            "k": "RSI",
-            "v": 1
+            "k": "매크로",
+            "v": -1.9
           }
         ]
       },
@@ -240,12 +243,12 @@
           "v": -2
         },
         {
-          "k": "매크로",
-          "v": -1.9
+          "k": "이격도",
+          "v": 2
         },
         {
-          "k": "RSI",
-          "v": 1
+          "k": "매크로",
+          "v": -1.9
         }
       ],
       "macro": {
@@ -275,15 +278,15 @@
       "turnover": "",
       "chaseWarning": "",
       "marketBrake": "",
-      "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
+      "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-11-27",
       "fairValue": 2929091,
-      "fairValueGap": 166.8,
-      "fairValueComment": "증권사 목표가 대비 166.8% 상승여력",
+      "fairValueGap": 167.0,
+      "fairValueComment": "증권사 목표가 대비 167.0% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 2929091,
-        "current_per": 4.2,
+        "current_per": 4.19,
         "cns_per": 3.1,
         "recomm": 4.0,
         "sector": "반도체",
@@ -301,7 +304,7 @@
         "atr": 90500,
         "pct": 8.15
       },
-      "atrStopLoss": 917000,
+      "atrStopLoss": 916000,
       "cmf": {
         "value": -0.221,
         "comment": "분산 우세 (조용한 이탈)"
@@ -328,11 +331,11 @@
         -0.58,
         1.0
       ],
-      "suggestedPrice": 0,
-      "suggestedLabel": "해당없음",
-      "targetPrice": 0,
-      "targetPrice2": 0,
-      "stopLoss": 0,
+      "suggestedPrice": 1097000,
+      "suggestedLabel": "매수 추천가",
+      "targetPrice": 1184760,
+      "targetPrice2": 1121000,
+      "stopLoss": 1030000,
       "rsi": 42.1,
       "rsiComment": "저점권",
       "macd": -8.355,
@@ -544,7 +547,7 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -0.07,
+        "rs": -0.16,
         "comment": "KOSPI 대비 중립",
         "strong": false,
         "indexLinked": true,
@@ -606,34 +609,27 @@
       ],
       "risk": [],
       "notes": [
-        "주봉·일봉 동시 매수 신호 확인 후 진입",
-        "외국인 순매수 전환 시 진입 검토",
-        "공매도 감소 + 거래량 증가 조합 주시"
+        "피봇 S1 지지 확인 후 분할 매수",
+        "OBV 수급 지속 확인",
+        "주봉 신호 일치 시 비중 확대"
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 1098000,
+        "nxtPrice": 1099000,
         "closePrice": 1099000,
-        "nxtChgPct": -0.09,
+        "nxtChgPct": 0.0,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
       "nxtSignal": {
-        "review": true,
-        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(-0.09%) + 나스닥 선물 +2.5%. 다음 날 상승 이어갈 여지.",
-        "checks": [
-          "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
-          "지지선 아래로 빠질 때 추매할 여력이 있는지",
-          "신고가권 추격은 아닌지"
-        ],
-        "note": "소량 분할로만. NXT는 수급이 적어 다음 날 빗나갈 수 있어요."
+        "review": false
       }
     },
     {
       "code": "005930",
-      "price": 178200,
-      "change": 6800,
-      "changePct": 3.97,
+      "price": 178000,
+      "change": 6700,
+      "changePct": 3.91,
       "high52w": 374500,
       "low52w": 99900,
       "opinion": "매수",
@@ -663,7 +659,7 @@
         189400,
         170700,
         171300,
-        178200
+        178000
       ],
       "nuance": "",
       "buyTrack": {
@@ -743,12 +739,12 @@
       "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-11-27",
       "fairValue": 458182,
-      "fairValueGap": 157.1,
-      "fairValueComment": "증권사 목표가 대비 157.1% 상승여력",
+      "fairValueGap": 157.4,
+      "fairValueComment": "증권사 목표가 대비 157.4% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 458182,
-        "current_per": 5.6,
+        "current_per": 5.59,
         "cns_per": 3.91,
         "recomm": 4.0,
         "sector": "반도체",
@@ -766,7 +762,7 @@
         "atr": 11311,
         "pct": 6.32
       },
-      "atrStopLoss": 155578,
+      "atrStopLoss": 155378,
       "cmf": {
         "value": -0.161,
         "comment": "분산 우세 (조용한 이탈)"
@@ -793,9 +789,9 @@
         -0.8,
         0.85
       ],
-      "suggestedPrice": 178200,
+      "suggestedPrice": 178000,
       "suggestedLabel": "매수 추천가",
-      "targetPrice": 192456,
+      "targetPrice": 192240,
       "targetPrice2": 178900,
       "stopLoss": 169100,
       "rsi": 38.8,
@@ -1014,7 +1010,7 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -0.37,
+        "rs": -0.43,
         "comment": "KOSPI 대비 중립",
         "strong": false,
         "indexLinked": false,
@@ -1023,8 +1019,8 @@
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
-        "position": 29,
-        "comment": "52주 중간 위치 (29%)"
+        "position": 28,
+        "comment": "52주 중간 위치 (28%)"
       },
       "volSurge": {
         "surge": false,
@@ -1072,7 +1068,7 @@
       "basis": [
         "RSI 38.8 · Williams%R -78.5 · MFI 50.3 — 지표 중립권",
         "외국인 -537,801주 · 기관 +1,862,261주 · OBV 상승",
-        "주봉 중립 · 29%"
+        "주봉 중립 · 28%"
       ],
       "risk": [],
       "notes": [
@@ -1082,9 +1078,9 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 178100,
+        "nxtPrice": 177900,
         "closePrice": 178000,
-        "nxtChgPct": 0.06,
+        "nxtChgPct": -0.06,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -1180,8 +1176,8 @@
         "adj": 1.6,
         "parts": [
           "월풀 +5.73% → +0.9",
-          "구리 +5.14% → +0.5",
-          "나스닥선물 +2.51% → +0.3"
+          "구리 +4.99% → +0.5",
+          "나스닥선물 +2.41% → +0.2"
         ]
       },
       "sigReasons": {
@@ -1554,9 +1550,9 @@
     },
     {
       "code": "009150",
-      "price": 811000,
-      "change": 27000,
-      "changePct": 3.44,
+      "price": 813000,
+      "change": 29000,
+      "changePct": 3.7,
       "high52w": 2417000,
       "low52w": 243500,
       "opinion": "매수",
@@ -1586,7 +1582,7 @@
         858000,
         755000,
         784000,
-        811000
+        813000
       ],
       "nuance": "",
       "buyTrack": {
@@ -1663,13 +1659,13 @@
       "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-11-27",
       "fairValue": 2247368,
-      "fairValueGap": 177.1,
-      "fairValueComment": "증권사 목표가 대비 177.1% 상승여력",
+      "fairValueGap": 176.4,
+      "fairValueComment": "증권사 목표가 대비 176.4% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 2247368,
-        "current_per": 50.09,
-        "cns_per": 36.21,
+        "current_per": 50.22,
+        "cns_per": 36.3,
         "recomm": 4.0,
         "sector": "전자부품",
         "sector_per": 18
@@ -1686,7 +1682,7 @@
         "atr": 81429,
         "pct": 9.92
       },
-      "atrStopLoss": 648142,
+      "atrStopLoss": 650142,
       "cmf": {
         "value": -0.121,
         "comment": "분산 우세 (조용한 이탈)"
@@ -1713,9 +1709,9 @@
         -0.36,
         1.0
       ],
-      "suggestedPrice": 811000,
+      "suggestedPrice": 813000,
       "suggestedLabel": "매수 추천가",
-      "targetPrice": 875880,
+      "targetPrice": 878040,
       "targetPrice2": 840000,
       "stopLoss": 762000,
       "rsi": 40.8,
@@ -1928,7 +1924,7 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -0.9,
+        "rs": -0.64,
         "comment": "KOSPI 대비 중립",
         "strong": false,
         "indexLinked": false,
@@ -1960,8 +1956,8 @@
       ],
       "noChart": false,
       "nxt": {
-        "nxtPrice": 811000,
-        "closePrice": 811000,
+        "nxtPrice": 813000,
+        "closePrice": 813000,
         "nxtChgPct": 0.0,
         "status": "OPEN",
         "session": "AFTER_MARKET"
@@ -1972,9 +1968,9 @@
     },
     {
       "code": "005380",
-      "price": 268000,
-      "change": 9000,
-      "changePct": 3.47,
+      "price": 267500,
+      "change": 8500,
+      "changePct": 3.28,
       "high52w": 783000,
       "low52w": 240500,
       "opinion": "중립",
@@ -2004,7 +2000,7 @@
         275000,
         269500,
         259000,
-        268000
+        267500
       ],
       "nuance": "관찰 구간 (소량만)",
       "buyTrack": {
@@ -2052,11 +2048,11 @@
         }
       ],
       "macro": {
-        "adj": -0.0,
+        "adj": -0.1,
         "parts": [
-          "환율 -0.5% → -0.1",
+          "환율 -0.55% → -0.2",
           "토요타 +2.77% → +0.4",
-          "유가 +3.08% → -0.3"
+          "유가 +3.07% → -0.3"
         ]
       },
       "sigReasons": {
@@ -2076,13 +2072,13 @@
       "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-11-27",
       "fairValue": 496400,
-      "fairValueGap": 85.2,
-      "fairValueComment": "증권사 목표가 대비 85.2% 상승여력",
+      "fairValueGap": 85.6,
+      "fairValueComment": "증권사 목표가 대비 85.6% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 496400,
-        "current_per": 9.36,
-        "cns_per": 8.06,
+        "current_per": 9.35,
+        "cns_per": 8.04,
         "recomm": 4.0,
         "sector": "자동차",
         "sector_per": 10
@@ -2099,7 +2095,7 @@
         "atr": 13929,
         "pct": 5.18
       },
-      "atrStopLoss": 240142,
+      "atrStopLoss": 239642,
       "cmf": {
         "value": -0.065,
         "comment": "분산 우세 (조용한 이탈)"
@@ -2347,8 +2343,8 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -0.87,
-        "comment": "KOSPI 대비 중립",
+        "rs": -1.06,
+        "comment": "KOSPI 대비 -1.06%p 약세",
         "strong": false,
         "indexLinked": false,
         "indexNote": ""
@@ -2423,7 +2419,7 @@
       },
       "nxtSignal": {
         "review": true,
-        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.0%) + 나스닥 선물 +2.5%. 다음 날 상승 이어갈 여지.",
+        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.0%) + 나스닥 선물 +2.4%. 다음 날 상승 이어갈 여지.",
         "checks": [
           "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
           "지지선 아래로 빠질 때 추매할 여력이 있는지",
@@ -2434,9 +2430,9 @@
     },
     {
       "code": "105560",
-      "price": 145200,
-      "change": -100,
-      "changePct": -0.07,
+      "price": 145100,
+      "change": -200,
+      "changePct": -0.14,
       "high52w": 194500,
       "low52w": 121400,
       "opinion": "매수",
@@ -2466,7 +2462,7 @@
         151400,
         148100,
         145300,
-        145200
+        145100
       ],
       "nuance": "",
       "buyTrack": {
@@ -2528,7 +2524,7 @@
         "buy": [
           "RSI 40 낮음",
           "MFI 29 낮음",
-          "52주 하단(33%)"
+          "52주 하단(32%)"
         ],
         "sell": [
           "MACD 하락(데드)",
@@ -2545,8 +2541,8 @@
       "flowRead": "기술적으론 매수 신호지만 외국인은 5일째 이탈 중이에요. │ 주가 상승의 지속성이 의심되니 추격 말고 보수적으로.",
       "tradedAt": "2026-11-27",
       "fairValue": 219380,
-      "fairValueGap": 51.1,
-      "fairValueComment": "증권사 목표가 대비 51.1% 상승여력",
+      "fairValueGap": 51.2,
+      "fairValueComment": "증권사 목표가 대비 51.2% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 219380,
@@ -2568,7 +2564,7 @@
         "atr": 6400,
         "pct": 4.41
       },
-      "atrStopLoss": 132400,
+      "atrStopLoss": 132300,
       "cmf": {
         "value": -0.045,
         "comment": "중립"
@@ -2595,9 +2591,9 @@
         -0.17,
         0.74
       ],
-      "suggestedPrice": 145200,
+      "suggestedPrice": 145100,
       "suggestedLabel": "매수 추천가",
-      "targetPrice": 156816,
+      "targetPrice": 156708,
       "targetPrice2": 150167,
       "stopLoss": 143133,
       "rsi": 39.6,
@@ -2811,8 +2807,8 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -4.41,
-        "comment": "KOSPI 대비 -4.41%p 약세",
+        "rs": -4.48,
+        "comment": "KOSPI 대비 -4.48%p 약세",
         "strong": false,
         "indexLinked": false,
         "indexNote": ""
@@ -2820,8 +2816,8 @@
       "breakout": {
         "nearHigh": false,
         "nearLow": false,
-        "position": 33,
-        "comment": "52주 중간 위치 (33%)"
+        "position": 32,
+        "comment": "52주 중간 위치 (32%)"
       },
       "volSurge": {
         "surge": false,
@@ -2869,7 +2865,7 @@
       "basis": [
         "RSI 39.6 · Williams%R -87.4 · MFI 29.1 — 다중 과매도",
         "외국인 -305,653주 · 기관 +216,505주 · OBV 하락",
-        "주봉 중립 · 33%"
+        "주봉 중립 · 32%"
       ],
       "risk": [],
       "notes": [
@@ -2880,8 +2876,8 @@
       "noChart": false,
       "nxt": {
         "nxtPrice": 145200,
-        "closePrice": 145200,
-        "nxtChgPct": 0.0,
+        "closePrice": 145100,
+        "nxtChgPct": 0.07,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
@@ -2891,9 +2887,9 @@
     },
     {
       "code": "017670",
-      "price": 65100,
-      "change": 600,
-      "changePct": 0.93,
+      "price": 65200,
+      "change": 700,
+      "changePct": 1.09,
       "high52w": 139500,
       "low52w": 52400,
       "opinion": "중립",
@@ -2923,7 +2919,7 @@
         67200,
         66500,
         64500,
-        65100
+        65200
       ],
       "nuance": "관찰 — 신호 부족",
       "buyTrack": {
@@ -2996,13 +2992,13 @@
       "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-11-27",
       "fairValue": 123563,
-      "fairValueGap": 89.8,
-      "fairValueComment": "증권사 목표가 대비 89.8% 상승여력",
+      "fairValueGap": 89.5,
+      "fairValueComment": "증권사 목표가 대비 89.5% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 123563,
-        "current_per": 10.6,
-        "cns_per": 9.82,
+        "current_per": 10.62,
+        "cns_per": 9.83,
         "recomm": 4.0,
         "sector": "통신",
         "sector_per": 12
@@ -3019,7 +3015,7 @@
         "atr": 4504,
         "pct": 6.91
       },
-      "atrStopLoss": 56092,
+      "atrStopLoss": 56192,
       "cmf": {
         "value": -0.006,
         "comment": "중립"
@@ -3263,8 +3259,8 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -3.41,
-        "comment": "KOSPI 대비 -3.41%p 약세",
+        "rs": -3.25,
+        "comment": "KOSPI 대비 -3.25%p 약세",
         "strong": false,
         "indexLinked": false,
         "indexNote": ""
@@ -3339,7 +3335,7 @@
       },
       "nxtSignal": {
         "review": true,
-        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.0%) + 나스닥 선물 +2.5%. 다음 날 상승 이어갈 여지.",
+        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.0%) + 나스닥 선물 +2.4%. 다음 날 상승 이어갈 여지.",
         "checks": [
           "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
           "지지선 아래로 빠질 때 추매할 여력이 있는지",
@@ -3350,9 +3346,9 @@
     },
     {
       "code": "035420",
-      "price": 163400,
-      "change": 3200,
-      "changePct": 2.0,
+      "price": 163200,
+      "change": 3000,
+      "changePct": 1.87,
       "high52w": 304000,
       "low52w": 144900,
       "opinion": "중립",
@@ -3382,7 +3378,7 @@
         156100,
         159000,
         160200,
-        163400
+        163200
       ],
       "nuance": "약한 매도 우위",
       "buyTrack": {
@@ -3430,9 +3426,9 @@
         }
       ],
       "macro": {
-        "adj": 0.7,
+        "adj": 0.6,
         "parts": [
-          "나스닥선물 +2.51% → +0.8",
+          "나스닥선물 +2.41% → +0.7",
           "알파벳 -2.13% → -0.4",
           "美금리 -1.14% → +0.3"
         ]
@@ -3457,13 +3453,13 @@
       "flowRead": "신호는 중립이고 외국인은 이탈 중이에요. │ 서두르지 말고 수급 방향 전환을 확인 후 대응.",
       "tradedAt": "2026-11-27",
       "fairValue": 292048,
-      "fairValueGap": 78.7,
-      "fairValueComment": "증권사 목표가 대비 78.7% 상승여력",
+      "fairValueGap": 79.0,
+      "fairValueComment": "증권사 목표가 대비 79.0% 상승여력",
       "fairValueDetail": {
         "basis": "목표주가",
         "target_price": 292048,
-        "current_per": 15.03,
-        "cns_per": 14.18,
+        "current_per": 15.02,
+        "cns_per": 14.16,
         "recomm": 4.0,
         "sector": "인터넷/플랫폼",
         "sector_per": 25
@@ -3480,7 +3476,7 @@
         "atr": 8129,
         "pct": 4.97
       },
-      "atrStopLoss": 147142,
+      "atrStopLoss": 146942,
       "cmf": {
         "value": -0.155,
         "comment": "분산 우세 (조용한 이탈)"
@@ -3717,8 +3713,8 @@
         "timeframe": "월봉"
       },
       "relativeStrength": {
-        "rs": -2.34,
-        "comment": "KOSPI 대비 -2.34%p 약세",
+        "rs": -2.47,
+        "comment": "KOSPI 대비 -2.47%p 약세",
         "strong": false,
         "indexLinked": false,
         "indexNote": ""
@@ -3786,14 +3782,14 @@
       "noChart": false,
       "nxt": {
         "nxtPrice": 163300,
-        "closePrice": 163400,
-        "nxtChgPct": -0.06,
+        "closePrice": 163300,
+        "nxtChgPct": 0.0,
         "status": "OPEN",
         "session": "AFTER_MARKET"
       },
       "nxtSignal": {
         "review": true,
-        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(-0.06%) + 나스닥 선물 +2.5%. 다음 날 상승 이어갈 여지.",
+        "text": "정규장은 중립 신호였으나, NXT에서 버티는 중(+0.0%) + 나스닥 선물 +2.4%. 다음 날 상승 이어갈 여지.",
         "checks": [
           "NXT 거래량이 받쳐주는지 (적은 물량에 버티는 착시 아닌지)",
           "지지선 아래로 빠질 때 추매할 여력이 있는지",
@@ -3890,7 +3886,7 @@
         "adj": 0.9,
         "parts": [
           "스포티파이 +2.79% → +0.6",
-          "나스닥선물 +2.51% → +0.4"
+          "나스닥선물 +2.41% → +0.4"
         ]
       },
       "sigReasons": {
@@ -4033,11 +4029,11 @@
         "strength": "강한 추세"
       },
       "obv": {
-        "obv": 7262952,
+        "obv": 7263291,
         "slope": 30.5,
         "trend": "상승"
       },
-      "vwap": 47434,
+      "vwap": 47435,
       "pivot": {
         "p": 48400,
         "r1": 50200,
